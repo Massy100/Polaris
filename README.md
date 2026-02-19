@@ -9,4 +9,6 @@ docker-compose ps
 docker-compose logs -f backend
 # Aplicar migraciones iniciales
 docker-compose exec backend python manage.py migrate
+# Para acceder al contenedor
+docker-compose exec backend bash
 
