@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,6 +38,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'apps.academic_career',
+    'apps.academic_workload',
+    'apps.accounts',
+    'apps.assessment_360',
+    'apps.integrations',
+    'apps.notifications',
+    'apps.reporting',
+    'apps.security_audit',
 ]
 
 MIDDLEWARE = [
@@ -76,11 +85,11 @@ WSGI_APPLICATION = 'polaris_core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'polaris_db',
-        'USER': 'neondb_owner',
-        'PASSWORD': 'npg_YxFRi0WXHV4U',
-        'HOST': 'ep-royal-leaf-a8xax2zw.eastus2.azure.neon.tech',
-        'PORT': '5432',
+        'NAME': os.getenv('POSTGRES_DB', 'polaris_db'),
+        'USER': os.getenv('POSTGRES_USER', 'polaris_user'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'polaris_password'),
+        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
     }
 }
 

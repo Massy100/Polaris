@@ -7,7 +7,6 @@ class Faculty(models.Model):
     status = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'faculty'
 
 
@@ -18,7 +17,6 @@ class Career(models.Model):
     status = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'career'
         unique_together = (('faculty', 'name'),)
 
@@ -31,7 +29,6 @@ class Course(models.Model):
     status = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'course'
         unique_together = (('career', 'name'),)
 
@@ -43,5 +40,4 @@ class Teacher(models.Model):
     status = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'teacher'

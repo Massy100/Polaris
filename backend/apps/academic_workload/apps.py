@@ -3,4 +3,4 @@ from django.apps import AppConfig
 
 class AcademicWorkloadConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'academic_workload'
+    name = 'apps.academic_workload'

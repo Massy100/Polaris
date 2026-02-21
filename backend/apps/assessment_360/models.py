@@ -8,7 +8,6 @@ class Evaluationcriterion(models.Model):
     display_order = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'evaluationcriterion'
 
 
@@ -20,7 +19,6 @@ class Weightconfig(models.Model):
     status = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'weightconfig'
 
 
@@ -34,6 +32,5 @@ class WeightconfigCriterion(models.Model):
     percentage = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'weightconfig_criterion'
         unique_together = (('weight_config', 'criterion'),)
