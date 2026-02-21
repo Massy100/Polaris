@@ -11,7 +11,6 @@ class Event(models.Model):
     details = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'event'
 
 
@@ -23,7 +22,6 @@ class Eventsubscription(models.Model):
     status = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'eventsubscription'
         unique_together = (('user', 'event_type', 'channel'),)
 
@@ -37,5 +35,4 @@ class Eventdelivery(models.Model):
     result_detail = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'eventdelivery'

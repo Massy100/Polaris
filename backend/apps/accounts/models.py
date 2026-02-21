@@ -9,7 +9,6 @@ class User(models.Model):
     created_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'User'
 
 
@@ -21,7 +20,6 @@ class Coordinator(models.Model):
     user = models.OneToOneField(User, models.DO_NOTHING)
 
     class Meta:
-        managed = False
         db_table = 'coordinator'
 
 
@@ -34,7 +32,6 @@ class CoordinatorCareer(models.Model):
     career = models.ForeignKey('academic_career.Career', models.DO_NOTHING)
 
     class Meta:
-        managed = False
         db_table = 'coordinator_career'
         unique_together = (('coordinator', 'career'),)
 
@@ -48,6 +45,5 @@ class CoordinatorFaculty(models.Model):
     faculty = models.ForeignKey('academic_career.Faculty', models.DO_NOTHING)
 
     class Meta:
-        managed = False
         db_table = 'coordinator_faculty'
         unique_together = (('coordinator', 'faculty'),)

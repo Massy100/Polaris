@@ -9,7 +9,6 @@ class Period(models.Model):
     status = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'period'
 
 
@@ -22,7 +21,6 @@ class Section(models.Model):
     status = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'section'
         unique_together = (('course', 'period', 'section_code'),)
 
@@ -35,7 +33,6 @@ class Academicload(models.Model):
     status = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'academicload'
         unique_together = (('teacher', 'section'),)
 
@@ -50,5 +47,4 @@ class Comment(models.Model):
     tag = models.CharField(max_length=30, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'comment'
