@@ -1,0 +1,141 @@
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(16, 24, 40, 0.55);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 9999;
+}
+
+.modal-card {
+    background: white;
+    border-radius: 14px;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.25),
+        0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+
+    transform: translateY(8px);
+    animation: modalIn 0.18s ease forwards;
+}
+
+@keyframes modalIn {
+    to {
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid #e8eefc;
+}
+
+.modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1b1a21;
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    border: none;
+    color: #1b1a21;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 0;
+}
+
+.modal-close:hover svg {
+    color: #d63535 !important;
+}
+
+.modal-body {
+    padding: 16px;
+}
+
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.modal-text {
+    margin: 0;
+    font-size: 18px;
+    color: #1b1a21;
+    line-height: 1.50;
+}
+
+.modal-highlight {
+    font-weight: 600;
+}
+
+.modal-meta {
+    background: #f6f9ff;
+    border: 1px solid #e8eefc;
+    border-radius: 12px;
+    padding: 10px 12px;
+    color: #1b1a21;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.modal-btn {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.modal-btn:active {
+    transform: scale(0.98);
+}
+
+.modal-btn-ghost {
+    background: #eef4fe;
+    color: #1b1a21;
+}
+
+.modal-btn-ghost:hover {
+    background: #e0e8f8;
+}
+
+.modal-btn-primary {
+    background: #3f7ee2;
+    color: #fff;
+    box-shadow: 0px 5px 9px rgba(0, 0, 0, 0.20);
+}
+
+.modal-btn-primary:hover {
+    background: #1944b8;
+}
+
+.modal-btn-danger {
+    background: rgb(255, 69, 69);
+    color: #fff;
+    box-shadow: 0px 5px 9px rgba(0, 0, 0, 0.20);
+}
+
+.modal-btn-danger:hover {
+    background: #d63535;
+}
