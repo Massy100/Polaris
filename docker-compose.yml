@@ -21,7 +21,7 @@ services:
     networks:
       - polaris_network
 
-  # Backend Django
+  # Backend Django - Conecction
   backend:
     build: ./backend
     container_name: polaris_backend
