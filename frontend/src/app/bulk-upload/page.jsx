@@ -1,11 +1,13 @@
 "use client";
 import React, { useState } from 'react';
 import FileUploader from '../components/FileUploader';
+import Sidebar from '../components/Sidebar';
 import '../styles/BulkUpload.css';
 
 export default function BulkUploadPage() {
   const [activeTab, setActiveTab] = useState('titulos');
   const [files, setFiles] = useState([]);
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   const handleFiles = (newFiles) => {
     setFiles((prev) => [...prev, ...newFiles]);
@@ -69,18 +71,29 @@ export default function BulkUploadPage() {
 
   return (
     <div className="page-wrapper">
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
+
       <div className="top-header">
-        <div className="brand">
-          <div className="brand-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <ellipse cx="12" cy="5" rx="9" ry="3"/>
-              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+        <div className="header-brand-row">
+          <button className="menu-btn-bulk" onClick={() => setSidebarOpen(true)}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
             </svg>
-          </div>
-          <div>
-            <div className="brand-name">Carga Masiva de Datos</div>
-            <div className="brand-sub">Sistema de gestión de profesores</div>
+          </button>
+          <div className="brand">
+            <div className="brand-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+              </svg>
+            </div>
+            <div>
+              <div className="brand-name">Carga Masiva de Datos</div>
+              <div className="brand-sub">Sistema de gestión de profesores</div>
+            </div>
           </div>
         </div>
 
