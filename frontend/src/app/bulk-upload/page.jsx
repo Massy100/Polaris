@@ -8,6 +8,8 @@ export default function BulkUploadPage() {
   const [activeTab, setActiveTab] = useState('titulos');
   const [files, setFiles] = useState([]);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [resultMessage, setResultMessage] = useState('');
 
   const handleFiles = (newFiles) => {
     setFiles((prev) => [...prev, ...newFiles]);
@@ -17,8 +19,37 @@ export default function BulkUploadPage() {
     setFiles(files.filter((f) => f.name !== name));
   };
 
-  const procesarArchivos = () => {
-    console.log("Archivos listos para enviar:", files);
+  const procesarArchivos = async () => {
+    if (!files.length || isProcessing) {
+      return;
+    }
+
+    setIsProcessing(true);
+    setResultMessage('');
+
+    try {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+      const formData = new FormData();
+      formData.append('category', activeTab);
+      files.forEach((file) => formData.append('files', file));
+
+      const response = await fetch(`${apiBase}/integrations/bulk-upload/`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        throw new Error(data.message || 'No se pudo procesar el archivo.');
+      }
+
+      setResultMessage(`OK: ${data.total_files} archivo(s) recibido(s) en ${data.category}.`);
+      setFiles([]);
+    } catch (error) {
+      setResultMessage(`Error: ${error.message}`);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const tabConfig = {
@@ -139,8 +170,13 @@ export default function BulkUploadPage() {
                 </div>
               ))}
               <button className="process-btn" onClick={procesarArchivos}>
-                Procesar Documentos
+                {isProcessing ? 'Procesando...' : 'Procesar Documentos'}
               </button>
+              {resultMessage && (
+                <p style={{ marginTop: '10px', fontSize: '14px', color: '#334155' }}>
+                  {resultMessage}
+                </p>
+              )}
             </div>
           )}
         </div>
