@@ -1,0 +1,69 @@
+.dropzone-area {
+  border: 2px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 52px 24px;
+  text-align: center;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dropzone-area:hover {
+  border-color: #94a3b8;
+  background: #f1f5f9;
+}
+
+.dropzone-area.active {
+  background: #eff6ff;
+  border-color: #3b82f6;
+}
+
+.upload-icon-circle {
+  width: 52px;
+  height: 52px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.drop-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
+
+.drop-format {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.select-file-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  padding: 10px 20px;
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.select-file-btn:hover {
+  background: #1e293b;
+}
