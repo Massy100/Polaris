@@ -247,8 +247,24 @@ def _process_file(category: str, file_obj) -> tuple[BulkUploadBatch, list[dict]]
 
 
 @csrf_exempt
-@require_http_methods(["POST", "OPTIONS"])
+@require_http_methods(["GET", "POST", "OPTIONS"])
 def bulk_upload(request):
+    if request.method == "GET":
+        return _add_cors_headers(
+            JsonResponse(
+                {
+                    "ok": True,
+                    "message": "Bulk upload API ready.",
+                    "endpoint": "/api/integrations/bulk-upload/",
+                    "methods": ["GET", "POST", "OPTIONS"],
+                    "accepted_extensions": sorted(ALLOWED_EXTENSIONS),
+                    "required_fields_by_category": {
+                        key: sorted(value) for key, value in REQUIRED_FIELDS_BY_CATEGORY.items()
+                    },
+                }
+            )
+        )
+
     if request.method == "OPTIONS":
         return _add_cors_headers(JsonResponse({"detail": "ok"}))
 
