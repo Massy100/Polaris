@@ -51,6 +51,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .brand-name {
@@ -68,6 +69,13 @@
 .tab-nav {
   display: flex;
   gap: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.tab-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .tab-btn {
@@ -83,6 +91,8 @@
   color: #64748b;
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .tab-btn:hover {
@@ -217,6 +227,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  width: 100%;
 }
 
 .format-list li {
@@ -238,4 +249,106 @@
   margin-top: auto;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* ─── Tablet (≤ 768px) ─────────────────────────────────── */
+@media (max-width: 768px) {
+  .top-header {
+    padding: 0 16px;
+  }
+
+  .brand-sub {
+    display: none;
+  }
+
+  .brand-name {
+    font-size: 14px;
+  }
+
+  .brand-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .tab-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .content-area {
+    padding: 24px 16px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .upload-card {
+    padding: 18px 16px;
+  }
+
+  .format-card {
+    padding: 16px;
+    align-items: flex-start;
+  }
+}
+
+/* ─── Mobile (≤ 480px) ─────────────────────────────────── */
+@media (max-width: 480px) {
+  .brand-icon {
+    display: none;
+  }
+
+  .brand-name {
+    font-size: 13px;
+  }
+
+  .tab-btn {
+    padding: 10px 10px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .tab-btn svg {
+    display: none;
+  }
+
+  .content-area {
+    padding: 16px 12px;
+  }
+
+  .section-title {
+    font-size: 16px;
+  }
+
+  .section-sub {
+    font-size: 12px;
+  }
+
+  .upload-card {
+    padding: 14px 12px;
+  }
+
+  .upload-card-title {
+    font-size: 14px;
+  }
+
+  .file-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .remove-btn {
+    align-self: flex-end;
+  }
+
+  .format-card {
+    padding: 14px 12px;
+  }
+
+  .page-footer {
+    font-size: 11px;
+    padding: 16px;
+  }
 }

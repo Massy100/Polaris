@@ -16,6 +16,7 @@
   margin-bottom: 20px;
   width: 100%;
   max-width: 1060px;
+  box-sizing: border-box;
 }
 
 .profile-info {
@@ -46,6 +47,7 @@
 
 .text-info {
   flex: 1;
+  min-width: 0;
 }
 
 .profile-name {
@@ -74,6 +76,8 @@
   gap: 8px;
   font-size: 13px;
   color: #475569;
+  min-width: 0;
+  word-break: break-word;
 }
 
 .metrics-grid {
@@ -83,6 +87,7 @@
   margin-bottom: 20px;
   width: 100%;
   max-width: 1060px;
+  box-sizing: border-box;
 }
 
 .metric-card {
@@ -130,6 +135,7 @@
   margin-bottom: 20px;
   width: 100%;
   max-width: 1060px;
+  box-sizing: border-box;
 }
 
 .chart-card {
@@ -137,6 +143,7 @@
   padding: 28px;
   border-radius: 14px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  min-width: 0;
 }
 
 .chart-title {
@@ -171,6 +178,7 @@
   flex: 1;
   position: relative;
   height: 200px;
+  min-width: 0;
 }
 
 .bar-grid-lines {
@@ -234,6 +242,7 @@
   font-size: 12px;
   color: #475569;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .legend-item {
@@ -247,6 +256,7 @@
   height: 12px;
   border-radius: 3px;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .table-card {
@@ -256,6 +266,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   width: 100%;
   max-width: 1060px;
+  box-sizing: border-box;
 }
 
 .table-title {
@@ -362,4 +373,137 @@
 
 .menu-btn-report:hover {
   background: #1e3a8a;
+}
+
+/* ─── Tablet (≤ 1024px) ────────────────────────────────── */
+@media (max-width: 1024px) {
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .charts-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Tablet small (≤ 768px) ───────────────────────────── */
+@media (max-width: 768px) {
+  .report-container {
+    padding: 20px 16px;
+  }
+
+  .header-card {
+    padding: 20px 18px;
+  }
+
+  .profile-info {
+    gap: 16px;
+  }
+
+  .profile-img {
+    width: 70px;
+    height: 70px;
+  }
+
+  .profile-name {
+    font-size: 18px;
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .metric-value {
+    font-size: 22px;
+  }
+
+  .table-card {
+    padding: 18px 16px;
+    overflow-x: auto;
+  }
+
+  .teacher-table {
+    min-width: 500px;
+  }
+
+  .chart-card {
+    padding: 18px 16px;
+  }
+}
+
+/* ─── Mobile (≤ 480px) ─────────────────────────────────── */
+@media (max-width: 480px) {
+  .report-container {
+    padding: 16px 10px;
+  }
+
+  .header-card {
+    padding: 16px 14px;
+  }
+
+  .profile-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .profile-img {
+    width: 64px;
+    height: 64px;
+  }
+
+  .profile-name {
+    font-size: 16px;
+  }
+
+  .profile-dept {
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  .contact-item {
+    font-size: 12px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .metric-card {
+    padding: 16px 14px;
+  }
+
+  .metric-value {
+    font-size: 20px;
+  }
+
+  .metric-title {
+    font-size: 12px;
+  }
+
+  .chart-title {
+    font-size: 15px;
+  }
+
+  .bar-approved,
+  .bar-failed {
+    width: 18px;
+  }
+
+  .table-title {
+    font-size: 15px;
+  }
+
+  .teacher-table th,
+  .teacher-table td {
+    padding: 12px 10px;
+    font-size: 13px;
+  }
 }

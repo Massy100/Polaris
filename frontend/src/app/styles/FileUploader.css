@@ -34,6 +34,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 4px;
+  flex-shrink: 0;
 }
 
 .drop-text {
@@ -46,6 +47,7 @@
 .drop-format {
   font-size: 13px;
   color: #94a3b8;
+  word-break: break-all;
 }
 
 .select-file-btn {
@@ -66,4 +68,27 @@
 
 .select-file-btn:hover {
   background: #1e293b;
+}
+
+/* ─── Mobile (≤ 480px) ─────────────────────────────────── */
+@media (max-width: 480px) {
+  .dropzone-area {
+    padding: 32px 16px;
+    gap: 8px;
+  }
+
+  .drop-text {
+    font-size: 13px;
+  }
+
+  .drop-format {
+    font-size: 12px;
+  }
+
+  .select-file-btn {
+    padding: 9px 16px;
+    font-size: 13px;
+    width: 100%;
+    justify-content: center;
+  }
 }

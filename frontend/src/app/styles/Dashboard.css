@@ -10,6 +10,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .top-bar {
@@ -34,6 +35,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .menu-btn:hover {
@@ -48,6 +50,7 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  white-space: nowrap;
 }
 
 .logo-box {
@@ -57,6 +60,7 @@
   font-size: 13px;
   font-weight: 700;
   border-radius: 6px;
+  flex-shrink: 0;
 }
 
 .cards-grid {
@@ -119,4 +123,89 @@
   font-weight: 600;
   color: #16a34a;
   margin-top: auto;
+}
+
+/* ─── Tablet (≤ 1024px) ────────────────────────────────── */
+@media (max-width: 1024px) {
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 28px;
+  }
+}
+
+/* ─── Tablet small (≤ 768px) ───────────────────────────── */
+@media (max-width: 768px) {
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .top-bar-title {
+    font-size: 20px;
+  }
+
+  .stat-card {
+    padding: 20px 18px 24px;
+    min-height: auto;
+  }
+
+  .card-title {
+    font-size: 15px;
+  }
+
+  .card-description {
+    font-size: 13px;
+  }
+}
+
+/* ─── Mobile (≤ 480px) ─────────────────────────────────── */
+@media (max-width: 480px) {
+  .top-bar {
+    padding: 0 12px;
+    height: 52px;
+  }
+
+  .top-bar-title {
+    font-size: 17px;
+  }
+
+  .logo-box {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .stat-card {
+    padding: 18px 16px 20px;
+  }
+
+  .card-header {
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .icon-container {
+    width: 40px;
+    height: 40px;
+  }
+
+  .card-title {
+    font-size: 14px;
+  }
+
+  .card-description {
+    font-size: 13px;
+  }
+
+  .dashboard-footer {
+    font-size: 12px;
+    padding: 10px 16px;
+  }
 }
