@@ -13,30 +13,49 @@ services:
     networks:
       - polaris_network
 
+
   backend:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: polaris_backend
+    working_dir: /app/backend
     command: >
       sh -c "
+      until nc -z db 5432; do
+        echo 'Waiting for PostgreSQL...'
+        sleep 2
+      done &&
       python manage.py migrate &&
       gunicorn polaris_core.wsgi:application --bind 0.0.0.0:8000
       "
     volumes:
-      - ./backend:/app
+      - ./backend:/app/backend
+    environment:
+      POSTGRES_DB: polaris_db
+      POSTGRES_USER: polaris_user
+      POSTGRES_PASSWORD: polaris_password
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
     depends_on:
       - db
     networks:
       - polaris_network
 
+
   frontend:
-    build: ./frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: polaris_frontend
+    working_dir: /app/frontend
     command: npm run dev
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./frontend:/app/frontend
+      - /app/frontend/node_modules
     networks:
       - polaris_network
+
 
   nginx:
     image: nginx:latest
@@ -51,6 +70,7 @@ services:
     networks:
       - polaris_network
 
+
   adminer:
     image: adminer
     container_name: polaris_adminer
@@ -58,6 +78,7 @@ services:
       - "8080:8080"
     networks:
       - polaris_network
+
 
 networks:
   polaris_network:
