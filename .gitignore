@@ -20,6 +20,7 @@ venv.bak/
 *.egg-info/
 *.egg
 .pytest_cache/
+node_modules/
 
 # IDEs and editors
 .vscode/
