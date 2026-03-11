@@ -15,6 +15,7 @@ COPY backend /app/backend
 WORKDIR /app/backend
 
 RUN pip3 install --upgrade pip
+RUN apt-get update && apt-get install -y netcat-openbsd
 RUN pip3 install -r requirements/development.txt
 
 # -------------------------

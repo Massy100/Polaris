@@ -1,4 +1,6 @@
 module.exports = {
+  outputFileTracingRoot: __dirname,
+
   async rewrites() {
     return [
       {

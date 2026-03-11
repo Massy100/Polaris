@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-mq!ji5la4146#m@x($j60f5n_m*t4wpnybwy3tb7e-2n^awp@@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -46,9 +46,11 @@ INSTALLED_APPS = [
     'apps.notifications',
     'apps.reporting',
     'apps.security_audit',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -58,8 +60,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'polaris_core.urls'
+CORS_ALLOWED_ORIGINS = ["*"]
+CORS_ALLOW_CREDENTIALS = True
 
+ROOT_URLCONF = 'polaris_core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -87,12 +91,13 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('POSTGRES_DB', 'polaris_db'),
         'USER': os.getenv('POSTGRES_USER', 'polaris_user'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'polaris_password'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'db'),
         'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
     }
 }
 
+ALLOWED_HOSTS = ["*"] #arreglar esto antes del deploy
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
