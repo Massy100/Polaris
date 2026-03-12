@@ -13,23 +13,15 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-mq!ji5la4146#m@x($j60f5n_m*t4wpnybwy3tb7e-2n^awp@@'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -47,11 +39,11 @@ INSTALLED_APPS = [
     'apps.reporting',
     'apps.security_audit',
     'rest_framework',
-    'corsheaders',  # ✅ Bien
+    'corsheaders', 
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # ✅ Bien (primer lugar)
+    'corsheaders.middleware.CorsMiddleware',  
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -61,11 +53,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# ============ CONFIGURACIÓN CORS ============
-# ✅ ESTO ES LO QUE FALTABA - Permite todas las origins en desarrollo
-CORS_ALLOW_ALL_ORIGINS = True  # SOLO PARA DESARROLLO
 
-# O si prefieres ser más específico:
+CORS_ALLOW_ALL_ORIGINS = True  
+
 # CORS_ALLOWED_ORIGINS = [
 #     "http://localhost:3000",
 #     "http://127.0.0.1:3000",
@@ -73,7 +63,6 @@ CORS_ALLOW_ALL_ORIGINS = True  # SOLO PARA DESARROLLO
 
 CORS_ALLOW_CREDENTIALS = True
 
-# Métodos permitidos
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -83,7 +72,6 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
-# Headers permitidos
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -116,9 +104,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'polaris_core.wsgi.application'
 
 
-# Database
-# Configuración directa para Neon (Ignora el host 'db' de Docker)
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -130,10 +115,7 @@ DATABASES = {
     }
 }
 
-ALLOWED_HOSTS = ["*"] #arreglar esto antes del deploy
-
-# Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
+ALLOWED_HOSTS = ["*"] 
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -151,9 +133,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.0/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -162,13 +141,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-
 STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
