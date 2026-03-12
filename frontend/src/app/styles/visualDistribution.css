@@ -1,0 +1,68 @@
+.vd-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 22px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.vd-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 2px 0;
+}
+
+.vd-subtitle {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+}
+
+.vd-bar {
+  display: flex;
+  width: 100%;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.vd-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  transition: width 0.3s ease;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.vd-segment span {
+  padding: 0 6px;
+}
+
+.vd-legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px 24px;
+}
+
+.vd-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #333;
+}
+
+.vd-legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
