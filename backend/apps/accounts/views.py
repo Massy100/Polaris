@@ -5,7 +5,6 @@ from django.core import serializers
 import json
 from .models import User, Coordinator
 
-# ============ POSTS ============
 
 @csrf_exempt
 def login_view(request):
@@ -52,7 +51,6 @@ def register_view(request):
     
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-# ============ GETS ============
 
 def users_list(request):
     """GET todos los usuarios"""
@@ -106,8 +104,6 @@ def coordinator_by_user(request, user_id):
         except Coordinator.DoesNotExist:
             return JsonResponse({'error': 'Coordinador no encontrado'}, status=404)
     return JsonResponse({'error': 'Método no permitido'}, status=405)
-
-# ============ HEALTH CHECK ============
 
 def health_check(request):
     """Para probar que la API responde"""
