@@ -46,11 +46,12 @@ INSTALLED_APPS = [
     'apps.notifications',
     'apps.reporting',
     'apps.security_audit',
-    'corsheaders',
+    'rest_framework',
+    'corsheaders',  # ✅ Bien
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # ✅ Bien (primer lugar)
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -60,8 +61,40 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = ["*"]
+# ============ CONFIGURACIÓN CORS ============
+# ✅ ESTO ES LO QUE FALTABA - Permite todas las origins en desarrollo
+CORS_ALLOW_ALL_ORIGINS = True  # SOLO PARA DESARROLLO
+
+# O si prefieres ser más específico:
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",
+#     "http://127.0.0.1:3000",
+# ]
+
 CORS_ALLOW_CREDENTIALS = True
+
+# Métodos permitidos
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# Headers permitidos
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 ROOT_URLCONF = 'polaris_core.urls'
 TEMPLATES = [
