@@ -1,0 +1,195 @@
+.adp-toggle {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1001;
+  background: #1a2fcc;
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(26, 47, 204, 0.5);
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.adp-toggle:hover {
+  background: #1530a0;
+}
+
+.adp-toggle--hidden {
+  display: none;
+}
+
+.adp-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.adp-overlay--visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.adp-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 300px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  background: #1a2fcc;
+  padding: 24px 20px 32px;
+  box-sizing: border-box;
+  font-family: "Nunito", "Segoe UI", sans-serif;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+}
+
+.adp-container--open {
+  transform: translateX(0);
+}
+
+.adp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.adp-header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.adp-icon-btn {
+  background: rgba(255, 255, 255, 0.18);
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.adp-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.adp-username {
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 900;
+  text-align: center;
+  margin: 0 0 32px;
+  letter-spacing: 0.3px;
+}
+
+.adp-quick-access {
+  background: rgba(255, 255, 255, 0.13);
+  border-radius: 20px;
+  padding: 20px 16px;
+  flex: 1;
+}
+
+.adp-section-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 14px;
+}
+
+.adp-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.adp-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 14px;
+  padding: 18px;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.adp-item:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(3px);
+}
+
+.adp-item--active {
+  background: rgba(255, 255, 255, 0.32);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+.adp-item-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.adp-item-label {
+  line-height: 1.3;
+}
+
+.adp-footer {
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+}
+
+.adp-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f5a623;
+  border: none;
+  border-radius: 16px;
+  padding: 18px 40px;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+  width: 100%;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.15s ease;
+  letter-spacing: 0.3px;
+}
+
+.adp-logout-btn:hover {
+  background: #e09510;
+  transform: translateY(-2px);
+}
+
+.adp-logout-btn:active {
+  transform: translateY(0);
+}
