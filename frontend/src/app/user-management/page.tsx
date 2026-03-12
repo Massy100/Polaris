@@ -67,7 +67,7 @@ export default function UserManagementPage() {
             correoInstitucional: 'maria.garcia@universidad.edu',
         },
     ];
-    fetch("/api/accounts")
+    fetch("http://localhost:8000/api/accounts/users/")
 
     const [docentes, setDocentes] = useState<Docente[]>(docentesMock);
 
