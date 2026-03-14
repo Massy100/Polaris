@@ -67,7 +67,7 @@ export default function UserManagementPage() {
             correoInstitucional: 'maria.garcia@universidad.edu',
         },
     ];
-    
+
     const [docentes, setDocentes] = useState<Docente[]>(docentesMock);
 
     const sections = useMemo(() => {
