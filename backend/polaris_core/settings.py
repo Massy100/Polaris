@@ -109,7 +109,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('POSTGRES_DB', 'polaris_db'),
         'USER': os.getenv('POSTGRES_USER', 'polaris_user'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'db'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'polaris_password'),
         'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
     }
