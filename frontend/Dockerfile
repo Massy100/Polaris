@@ -14,5 +14,5 @@ COPY . .
 # Expose port
 EXPOSE 3000
 
-# Start in development mode con host configurado
+# Start in development mode with host configurated
 CMD ["npm", "run", "dev", "--", "-H", "0.0.0.0"]
