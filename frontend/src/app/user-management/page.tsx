@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import SidebarDropDown from '../components/sidebar-drop-down';
 import Modal from '../components/modal';
+import AdminDashboardPanel from '../components/AdminDashboardPanel';
 import './user-management.css'
 
 
@@ -12,7 +13,7 @@ type Docente = {
     id: number;
     nombre: string;
     cursosImpartidos: string;
-    seccion: string;
+    codigo: string;
     correoInstitucional: string;
 };
 
@@ -22,7 +23,7 @@ type ConfirmType = 'delete' | 'edit';
 
 export default function UserManagementPage() {
     const [open, setOpen] = useState(false);
-    const [mode, setMode] = useState<"add" | "edit">("add");
+    const [mode, setMode] = useState<"edit">("edit");
     const [selectedId, setSelectedId] = useState<number | null>(null);
 
     const [confirmOpen, setConfirmOpen] = useState(false);
@@ -32,12 +33,11 @@ export default function UserManagementPage() {
     const [draft, setDraft] = useState<DocenteDraft>({
         nombre: '',
         cursosImpartidos: '',
-        seccion: '',
+        codigo: '',
         correoInstitucional: '',
     });
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [sectionFilter, setSectionFilter] = useState('');
 
     const iconSearch = (
         <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 16 16" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10.442 10.442a1 1 0 011.415 0l3.85 3.85a1 1 0 01-1.414 1.415l-3.85-3.85a1 1 0 010-1.415z" clipRule="evenodd"></path><path fillRule="evenodd" d="M6.5 12a5.5 5.5 0 100-11 5.5 5.5 0 000 11zM13 6.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" clipRule="evenodd"></path></svg>
@@ -49,53 +49,30 @@ export default function UserManagementPage() {
             id: 1,
             nombre: 'Ana Pérez',
             cursosImpartidos: 'HIST-101, LIT-205',
-            seccion: 'Sección A',
+            codigo: '42513',
             correoInstitucional: 'ana.perez@universidad.edu',
         },
         {
             id: 2,
             nombre: 'Juan R. Rodríguez',
             cursosImpartidos: 'MAT-101, FIS-203',
-            seccion: 'Sección B',
+            codigo: '86491',
             correoInstitucional: 'juan.rodriguez@universidad.edu',
         },
         {
             id: 3,
             nombre: 'María García',
             cursosImpartidos: 'ARQ-103, ART-101',
-            seccion: 'Sección D',
+            codigo: '91834',
             correoInstitucional: 'maria.garcia@universidad.edu',
         },
     ];
 
     const [docentes, setDocentes] = useState<Docente[]>(docentesMock);
 
-    const sections = useMemo(() => {
-        const unique = Array.from(new Set(docentes.map((d) => d.seccion.trim()).filter(Boolean)));
-        return unique.sort((a, b) => a.localeCompare(b, 'es'));
-    }, [docentes]);
-
-    const filteredDocentes = useMemo(() => {
-        const q = searchTerm.trim().toLowerCase();
-        return docentes.filter((d) => {
-            const matchesSection = sectionFilter ? d.seccion === sectionFilter : true;
-
-            if (!q) return matchesSection;
-
-            const haystack = [
-                d.nombre,
-                d.cursosImpartidos,
-                d.seccion,
-                d.correoInstitucional,
-            ]
-                .join(' ')
-                .toLowerCase();
-
-            const matchesSearch = haystack.includes(q);
-
-            return matchesSection && matchesSearch;
-        });
-    }, [docentes, searchTerm, sectionFilter]);
+    const filteredDocentes = docentes.filter((docente) =>
+        docente.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const askDelete = (docente: Docente) => {
         setConfirmType('delete');
@@ -128,37 +105,23 @@ export default function UserManagementPage() {
     };
 
     const handleEdit = (c: Docente) => {
-        setMode("edit");
         setSelectedId(c.id);
         setDraft({
             nombre: c.nombre,
             cursosImpartidos: c.cursosImpartidos,
-            seccion: c.seccion,
+            codigo: c.codigo,
             correoInstitucional: c.correoInstitucional,
-        });
-        setOpen(true);
-    };
-
-    const openAdd = () => {
-        setMode("add");
-        setSelectedId(null);
-        setDraft({
-            nombre: '',
-            cursosImpartidos: '',
-            seccion: '',
-            correoInstitucional: '',
         });
         setOpen(true);
     };
 
     const closeDrawer = () => {
         setOpen(false);
-        setMode("add");
         setSelectedId(null);
         setDraft({
             nombre: '',
             cursosImpartidos: '',
-            seccion: '',
+            codigo: '',
             correoInstitucional: '',
         });
     };
@@ -166,46 +129,31 @@ export default function UserManagementPage() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (mode === "add") {
-            const newUser: Docente = { id: Date.now(), ...draft };
-            setDocentes(prev => [...prev, newUser]);
-        } else {
-            // mode === "edit"
-            if (selectedId == null) return;
-            setDocentes(prev =>
-                prev.map(c => (c.id === selectedId ? { id: selectedId, ...draft } : c))
-            );
-        }
+        if (selectedId == null) return;
 
-        setOpen(false);
+        setDocentes((prev) =>
+            prev.map((c) => (c.id === selectedId ? { id: selectedId, ...draft } : c))
+        );
+
+        closeDrawer();
     };
 
     return (
         <>
+
+            <AdminDashboardPanel />
+
             <div className='container-management-general'>
                 <div className='user-management-container'>
 
                     <div className='user-management-header'>
-                        <div className='image-section-management'>
-                            <div className='image-management'>
-                                <img src="https://estudiantes-argentina.unir.net/wp-content/uploads/sites/33/2021/09/tres-diversos-empresarios-trabajando-juntos-colaborando-en-laptop-en-la-oficina-1.jpg_s1024x1024wisk20c1R9DvqdDbQA6pkWbcbB413PtB2FjOaEXvOm3w65Tazo-1.jpg" alt="User Management" />
-                            </div>
-                            <div className='tittle-management'>
-                                <h1>Gestión de Usuarios</h1>
-                                <h2>Coordinadores del Departamento</h2>
-                            </div>
+                        <div className="title-management">
+                            <h1>Gestión de Docentes</h1>
                         </div>
-                        <button
-                            className="btn-add-user"
-                            onClick={openAdd}
-                        >
-                            <svg stroke="currentColor" fill="currentColor" strokeWidth="1" viewBox="0 0 16 16" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M8 3.5a.5.5 0 01.5.5v4a.5.5 0 01-.5.5H4a.5.5 0 010-1h3.5V4a.5.5 0 01.5-.5z" clipRule="evenodd"></path><path fillRule="evenodd" d="M7.5 8a.5.5 0 01.5-.5h4a.5.5 0 010 1H8.5V12a.5.5 0 01-1 0V8z" clipRule="evenodd"></path></svg>
-                            Agregar docente
-                        </button>
                     </div>
 
                     <div className='user-management-content'>
-                        <div className='search-filter-management-section'>
+                        <div className='search-management-section-wrapper'>
                             <div className='search-section-management'>
                                 {iconSearch}
                                 <input
@@ -220,31 +168,13 @@ export default function UserManagementPage() {
                                         type="button"
                                         className="search-clear-btn"
                                         onClick={() => setSearchTerm('')}
-                                        aria-label="Limpiar búsqueda"
                                         title="Limpiar"
                                     >
                                         <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 512 512" height="1.3em" width="1.3em" xmlns="http://www.w3.org/2000/svg"><path d="M405 136.798L375.202 107 256 226.202 136.798 107 107 136.798 226.202 256 107 375.202 136.798 405 256 285.798 375.202 405 405 375.202 285.798 256z"></path></svg>
                                     </button>
                                 )}
                             </div>
-
-                            <div className="filter-section-management">
-                                <select
-                                    id="filter-group"
-                                    value={sectionFilter}
-                                    onChange={(e) => setSectionFilter(e.target.value)}
-                                >
-                                    <option value="">Filtrar por Sección</option>
-                                    {sections.map((sec) => (
-                                        <option key={sec} value={sec}>
-                                            {sec}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
                         </div>
-
-                        <p>Lista de coordinadores</p>
 
                         <div className='user-management-table'>
                             <table>
@@ -252,7 +182,7 @@ export default function UserManagementPage() {
                                     <tr>
                                         <th>Nombre</th>
                                         <th>Cursos impartidos</th>
-                                        <th>Sección</th>
+                                        <th>Código </th>
                                         <th>Correo institucional</th>
                                         <th>Acciones</th>
                                     </tr>
@@ -261,7 +191,7 @@ export default function UserManagementPage() {
                                     {filteredDocentes.length === 0 ? (
                                         <tr>
                                             <td colSpan={5} style={{ padding: 16, textAlign: 'center' }}>
-                                                No hay resultados para la búsqueda/filtro
+                                                No hay resultados para la búsqueda
                                             </td>
                                         </tr>
                                     ) : (
@@ -269,7 +199,7 @@ export default function UserManagementPage() {
                                             <tr key={c.id}>
                                                 <td>{c.nombre}</td>
                                                 <td>{c.cursosImpartidos}</td>
-                                                <td>{c.seccion}</td>
+                                                <td>{c.codigo}</td>
                                                 <td>{c.correoInstitucional}</td>
                                                 <td>
                                                     <div className="action-buttons-table">
@@ -357,11 +287,7 @@ export default function UserManagementPage() {
             <SidebarDropDown
                 open={open}
                 onClose={closeDrawer}
-                title={
-                    mode === "edit"
-                        ? "Editar docente"
-                        : "Agregar docente"
-                }
+                title="Editar docente"
                 width={420}
             >
                 <form className="sdd-form" onSubmit={handleSubmit}>
@@ -381,28 +307,14 @@ export default function UserManagementPage() {
                     </div>
 
                     <div className="sdd-field">
-                        <label className="sdd-label">Cursos impartidos:</label>
+                        <label className="sdd-label">Código :</label>
                         <div className="input-underline">
                             <input
                                 type="text"
                                 className="input-underline-field"
-                                placeholder="Ej: HIST-101, LIT-205"
-                                value={draft.cursosImpartidos}
-                                onChange={(e) => setDraft((prev) => ({ ...prev, cursosImpartidos: e.target.value }))}
-                            />
-                            <span className="input-underline-border"></span>
-                        </div>
-                    </div>
-
-                    <div className="sdd-field">
-                        <label className="sdd-label">Sección:</label>
-                        <div className="input-underline">
-                            <input
-                                type="text"
-                                className="input-underline-field"
-                                placeholder="Ej: Sección A"
-                                value={draft.seccion}
-                                onChange={(e) => setDraft((prev) => ({ ...prev, seccion: e.target.value }))}
+                                placeholder="Ej: Código  A"
+                                value={draft.codigo}
+                                onChange={(e) => setDraft((prev) => ({ ...prev, codigo: e.target.value }))}
                             />
                             <span className="input-underline-border"></span>
                         </div>
@@ -460,7 +372,7 @@ export default function UserManagementPage() {
 
                     {selectedDocente && (
                         <div className="modal-meta">
-                            <div><strong>Sección:</strong> {selectedDocente.seccion}</div>
+                            <div><strong>Código :</strong> {selectedDocente.codigo}</div>
                             <div><strong>Correo:</strong> {selectedDocente.correoInstitucional}</div>
                         </div>
                     )}
