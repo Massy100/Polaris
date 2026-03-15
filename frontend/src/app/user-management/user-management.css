@@ -6,7 +6,8 @@
     height: 100vh;
     width: 100%;
     background-color: #EFF4FE;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .user-management-container {
@@ -34,68 +35,24 @@
     justify-content: space-between;
 }
 
-.user-management-header .image-section-management {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 40px;
-}
-
-.user-management-header .image-management {
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 3px solid #E3EDFA;
-    background-color: white;
-}
-
-.image-management img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.user-management-header .tittle-management {
+.user-management-header .title-management {
     display: flex;
     flex-direction: column;
     align-items: center;
     color: white;
 }
 
-.tittle-management h1 {
+.title-management h1 {
     font-size: 30px;
     font-weight: bold;
     color: #1B1A21;
     letter-spacing: 1.5px;
 }
 
-.tittle-management h2 {
+.title-management h2 {
     font-size: 20px;
     color: #4174EE;
     letter-spacing: 1px;
-}
-
-.btn-add-user {
-    padding: 10px 14px;
-    font-size: 16px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background: #2F73DF;
-    color: white;
-    border: none;
-}
-
-.btn-add-user:hover {
-    background: #1944b8;
 }
 
 .user-management-content {
@@ -112,7 +69,7 @@
     min-height: 0;
 }
 
-.search-filter-management-section {
+.search-management-section-wrapper {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -188,29 +145,6 @@
     transform: scale(0.96);
 }
 
-.filter-section-management {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 12px;
-    border-radius: 12px;
-    background-color: #FFFFFF;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.filter-section-management select {
-    outline: none;
-    color: #B6B9BC;
-}
-
-.user-management-content p {
-    font-size: 22px;
-    font-weight: 600;
-    color: #1B1A21;
-    align-self: flex-start;
-}
-
 .user-management-table {
     width: 100%;
     border-radius: 12px;
@@ -272,7 +206,7 @@
     position: sticky;
     top: 0;
     background-color: #E0E8F8;
-    z-index: 2;
+    z-index: 10;
 }
 
 .user-management-table tbody {
@@ -465,4 +399,111 @@
 
 .edit-pencil-button:hover .edit-writing-line {
     animation: drawLine 0.8s ease forwards;
+}
+
+
+
+@media (max-width: 1024px) {
+    .container-management-general {
+        padding: 24px;
+    }
+
+    .user-management-container {
+        padding: 20px 24px;
+    }
+
+    .title-management h1 {
+        font-size: 26px;
+        text-align: center;
+    }
+
+    .user-management-content {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container-management-general {
+        padding: 16px;
+    }
+
+    .user-management-container {
+        padding: 16px;
+        border-radius: 14px;
+    }
+
+    .user-management-header {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        gap: 12px;
+        padding: 8px 0 12px;
+    }
+
+    .title-management {
+        width: 100%;
+        align-items: flex-start !important;
+    }
+
+    .title-management h1 {
+        font-size: 22px;
+        letter-spacing: 0.5px;
+        text-align: left;
+    }
+
+    .user-management-content {
+        padding: 12px;
+        gap: 16px;
+    }
+
+    .search-management-section-wrapper {
+        width: 100%;
+    }
+
+    .search-section-management {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .search-management-input {
+        font-size: 14px;
+    }
+
+    .action-buttons-table {
+        gap: 8px;
+    }
+
+    .edit-pencil-button,
+    .delete-bin-button {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container-management-general {
+        padding: 10px;
+    }
+
+    .user-management-container {
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    .title-management h1 {
+        font-size: 20px;
+    }
+
+    .user-management-content {
+        padding: 10px;
+    }
+
+    .search-section-management {
+        padding: 9px 10px;
+        border-radius: 10px;
+    }
+
+    .search-management-input {
+        font-size: 13px;
+    }
 }
