@@ -1,0 +1,122 @@
+.pagination {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.pagination-options {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.pagination-info {
+    min-width: 140px;
+    text-align: center;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.pagination-info-text {
+    font-size: 14px;
+    color: #334155;
+}
+
+.pagination-button {
+    border: none;
+    outline: none;
+    cursor: pointer;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.pagination-button {
+    background: #1e3a8a;
+    color: #ffffff;
+}
+
+.pagination-button:hover:not(:disabled) {
+    background: #0c2f8f;
+    transform: translateY(-1px);
+}
+
+.pagination-button:disabled {
+    background: #cbd5e1;
+    color: #64748b;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.pagination-size {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.pagination-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.pagination-input {
+    text-align: center;
+    width: 70px;
+    height: 40px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 0 12px;
+    font-size: 14px;
+    color: #0f172a;
+    background: #ffffff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pagination-input::-webkit-outer-spin-button,
+.pagination-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.pagination-input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+} 
+
+.pagination-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+@media (max-width: 768px) {
+    .pagination {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .pagination-options,
+    .pagination-size {
+        justify-content: center;
+    }
+
+    .pagination-info {
+        width: 100%;
+    }
+
+    .pagination-button{
+        width: 100%;
+    }
+
+    .pagination-input {
+        width: 50%;
+    }
+}
