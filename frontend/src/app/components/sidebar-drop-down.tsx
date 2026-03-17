@@ -52,7 +52,7 @@ export default function SidebarDropDown({
                 role="dialog"
                 aria-modal="true"
                 aria-label={title ?? "Panel"}
-                style={{ width }}
+                style={{ width: `min(${width}px, 100vw)` }}
             >
                 <div className="sdd-header">
                     <h2 className="sdd-title">{title}</h2>
