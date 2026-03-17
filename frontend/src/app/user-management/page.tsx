@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import SidebarDropDown from '../components/sidebar-drop-down';
 import Modal from '../components/modal';
+import Pagination from '../components/pagination';
 import AdminDashboardPanel from '../components/AdminDashboardPanel';
 import './user-management.css'
-
 
 
 
@@ -22,8 +22,11 @@ type DocenteDraft = Omit<Docente, "id">;
 type ConfirmType = 'delete' | 'edit';
 
 export default function UserManagementPage() {
+
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+
     const [open, setOpen] = useState(false);
-    const [mode, setMode] = useState<"edit">("edit");
     const [selectedId, setSelectedId] = useState<number | null>(null);
 
     const [confirmOpen, setConfirmOpen] = useState(false);
@@ -70,9 +73,25 @@ export default function UserManagementPage() {
 
     const [docentes, setDocentes] = useState<Docente[]>(docentesMock);
 
-    const filteredDocentes = docentes.filter((docente) =>
-        docente.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Here filtering and pagination logic is implemented
+    // we need to have the filtered list of docentes to calculate total items and total pages, and then we slice that filtered list to get the docentes to show in the current page
+    const filteredDocentes = useMemo(() => {
+        return docentes.filter((docente) =>
+            docente.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [docentes, searchTerm]);
+
+    const totalItems = filteredDocentes.length;
+
+    const paginatedDocentes = useMemo(() => {
+        const start = (page - 1) * pageSize;
+        const end = start + pageSize;
+        return filteredDocentes.slice(start, end);
+    }, [filteredDocentes, page, pageSize]);
+
+    useEffect(() => {
+        setPage(1);
+    }, [searchTerm]);
 
     const askDelete = (docente: Docente) => {
         setConfirmType('delete');
@@ -195,7 +214,7 @@ export default function UserManagementPage() {
                                             </td>
                                         </tr>
                                     ) : (
-                                        filteredDocentes.map((c) => (
+                                        paginatedDocentes.map((c) => (
                                             <tr key={c.id}>
                                                 <td>{c.nombre}</td>
                                                 <td>{c.cursosImpartidos}</td>
@@ -279,6 +298,23 @@ export default function UserManagementPage() {
                                 </tbody>
                             </table>
                         </div>
+                        {filteredDocentes.length > 0 && (
+                            <Pagination
+                                page={page}
+                                pageSize={pageSize}
+                                totalItems={totalItems}
+                                onPageChange={(newPage) => {
+                                    const totalPages = Math.ceil(totalItems / pageSize) || 1;
+                                    if (newPage < 1 || newPage > totalPages) return;
+                                    setPage(newPage);
+                                }}
+                                onPageSizeChange={(size) => {
+                                    const safeSize = size > 0 ? size : 10;
+                                    setPageSize(safeSize);
+                                    setPage(1);
+                                }}
+                            />
+                        )}
                     </div>
                 </div>
             </div>

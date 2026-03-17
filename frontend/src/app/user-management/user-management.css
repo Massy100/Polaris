@@ -442,7 +442,7 @@
 
     .title-management {
         width: 100%;
-        align-items: flex-start !important;
+        align-items: center !important;
     }
 
     .title-management h1 {
