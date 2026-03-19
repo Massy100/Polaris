@@ -1,17 +1,17 @@
 'use client';
 import AdminDashboardPanel from "../components/AdminDashboardPanel";
 import Pagination from "../components/pagination";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./institutional-ranking.css";
 
 
 
 
 type Docente = {
+    teacherId: number;
     rank: number;
-    initials: string;
     name: string;
-    rating: number;
+    rating: number | null;
     students: number;
     specialties: string[];
 };
@@ -23,9 +23,14 @@ type TrophyIconProps = {
 type SortOrder = "desc" | "asc";
 
 export default function InstitutionalRanking() {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
 
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
+    const [docentes, setDocentes] = useState<Docente[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [scoreNote, setScoreNote] = useState("");
 
     const [ratingSortOrder, setRatingSortOrder] = useState<SortOrder>("desc");
 
@@ -33,113 +38,49 @@ export default function InstitutionalRanking() {
         <svg className={className} stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M12 22c3.859 0 7-3.141 7-7s-3.141-7-7-7c-3.86 0-7 3.141-7 7S8.14 22 12 22zM12 10c2.757 0 5 2.243 5 5s-2.243 5-5 5-5-2.243-5-5S9.243 10 12 10zM11 2H7v5.518c1.169-.782 2.531-1.296 4-1.459V2zM17 2h-4v4.059c1.469.163 2.831.677 4 1.459V2z"></path><path d="M10.019 15.811L9.551 18.537 12 17.25 14.449 18.537 13.981 15.811 15.963 13.879 13.225 13.481 12 11 10.775 13.481 8.037 13.879z"></path></svg>
     );
 
-    // Array of docentes that use in the table
-    const docentes: Docente[] = [
-        {
-            rank: 1,
-            initials: "DM",
-            name: "Dr. María González",
-            rating: 4.92,
-            students: 156,
-            specialties: ["Cálculo", "Álgebra"],
-        },
-        {
-            rank: 2,
-            initials: "DC",
-            name: "Dr. Carlos Ramírez",
-            rating: 4.88,
-            students: 142,
-            specialties: ["Estructuras", "Materiales"],
-        },
-        {
-            rank: 3,
-            initials: "DA",
-            name: "Dra. Ana Martínez",
-            rating: 4.85,
-            students: 134,
-            specialties: ["Literatura", "Filosofía"],
-        },
-        {
-            rank: 4,
-            initials: "DR",
-            name: "Dr. Roberto Silva",
-            rating: 4.82,
-            students: 128,
-            specialties: ["Física", "Química"],
-        },
-        {
-            rank: 5,
-            initials: "DP",
-            name: "Dra. Patricia López",
-            rating: 4.78,
-            students: 165,
-            specialties: ["Marketing", "Finanzas"],
-        },
-        {
-            rank: 6,
-            initials: "JF",
-            name: "Dr. Jorge Fernández",
-            rating: 4.75,
-            students: 145,
-            specialties: ["Estadística", "Datos"],
-        },
-        {
-            rank: 7,
-            initials: "LM",
-            name: "Dra. Laura Méndez",
-            rating: 4.72,
-            students: 139,
-            specialties: ["Biología", "Química"],
-        },
-        {
-            rank: 8,
-            initials: "AS",
-            name: "Dr. Andrés Soto",
-            rating: 4.69,
-            students: 133,
-            specialties: ["Historia", "Política"],
-        },
-        {
-            rank: 9,
-            initials: "CR",
-            name: "Dra. Camila Ruiz",
-            rating: 4.65,
-            students: 121,
-            specialties: ["Diseño", "Arte"],
-        },
-        {
-            rank: 10,
-            initials: "PV",
-            name: "Dr. Pablo Vargas",
-            rating: 4.61,
-            students: 112,
-            specialties: ["Economía", "Finanzas"],
-        },
-        {
-            rank: 11,
-            initials: "MN",
-            name: "Dra. Marta Núñez",
-            rating: 4.58,
-            students: 107,
-            specialties: ["Derecho", "Ética"],
-        },
-        {
-            rank: 12,
-            initials: "PV",
-            name: "Dr. Pablo Vargas",
-            rating: 4.50,
-            students: 112,
-            specialties: ["Economía", "Finanzas"],
-        },
-        {
-            rank: 13,
-            initials: "MN",
-            name: "Dra. Marta Núñez",
-            rating: 4.48,
-            students: 107,
-            specialties: ["Derecho", "Ética"],
-        },
-    ];
+    useEffect(() => {
+        const fetchRanking = async () => {
+            setLoading(true);
+            setError("");
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/reporting/institutional-ranking/`);
+                const payload = await response.json();
+
+                if (!response.ok || !payload.ok) {
+                    throw new Error(payload.error || "No se pudo obtener el ranking institucional.");
+                }
+
+                const mappedDocentes: Docente[] = payload.results.map((item: {
+                    teacher_id: number;
+                    rank_position: number;
+                    name: string;
+                    rating: number | null;
+                    students_count: number;
+                    specialties: string[];
+                }) => ({
+                    teacherId: item.teacher_id,
+                    rank: item.rank_position,
+                    name: item.name,
+                    rating: item.rating,
+                    students: item.students_count,
+                    specialties: item.specialties,
+                }));
+
+                setDocentes(mappedDocentes);
+                setScoreNote(payload.score_note || "");
+            } catch (fetchError) {
+                const message = fetchError instanceof Error
+                    ? fetchError.message
+                    : "No se pudo cargar el ranking institucional.";
+                setError(message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRanking();
+    }, [apiBaseUrl]);
 
     const getMedalClass = (rank: number): string => {
         if (rank === 1) return "gold";
@@ -152,6 +93,11 @@ export default function InstitutionalRanking() {
 
     const sortedDocentes = useMemo(() => {
         return [...docentes].sort((a, b) => {
+            if (a.rating === null && b.rating === null) {
+                return a.name.localeCompare(b.name);
+            }
+            if (a.rating === null) return 1;
+            if (b.rating === null) return -1;
             return ratingSortOrder === "desc"
                 ? b.rating - a.rating
                 : a.rating - b.rating;
@@ -172,7 +118,7 @@ export default function InstitutionalRanking() {
     return (
         <>
 
-            <AdminDashboardPanel />
+            <AdminDashboardPanel activePath="/institutional-ranking" />
 
             <div className="institutional-ranking-container">
 
@@ -185,6 +131,8 @@ export default function InstitutionalRanking() {
                     <div className="i-r-c-description">
                         <h2>Ranking Docente</h2>
                         <p>{docentes.length} docentes evaluados</p>
+                        {scoreNote && <p>{scoreNote}</p>}
+                        {error && <p>{error}</p>}
                     </div>
                     <div className="i-r-table-height">
                         <table className="i-r-table">
@@ -197,9 +145,9 @@ export default function InstitutionalRanking() {
                                             Calificación
                                             <span className="sort-icon">
                                                 {ratingSortOrder === "desc" ?
-                                                    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16" height="2em" width="2em" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.646 7.646a.5.5 0 01.708 0L8 10.293l2.646-2.647a.5.5 0 01.708.708l-3 3a.5.5 0 01-.708 0l-3-3a.5.5 0 010-.708z" clip-rule="evenodd"></path><path fill-rule="evenodd" d="M8 4.5a.5.5 0 01.5.5v5a.5.5 0 01-1 0V5a.5.5 0 01.5-.5z" clip-rule="evenodd"></path></svg>
+                                                    <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 16 16" height="2em" width="2em" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M4.646 7.646a.5.5 0 01.708 0L8 10.293l2.646-2.647a.5.5 0 01.708.708l-3 3a.5.5 0 01-.708 0l-3-3a.5.5 0 010-.708z" clipRule="evenodd"></path><path fillRule="evenodd" d="M8 4.5a.5.5 0 01.5.5v5a.5.5 0 01-1 0V5a.5.5 0 01.5-.5z" clipRule="evenodd"></path></svg>
                                                     :
-                                                    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16" height="2em" width="2em" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 5.5a.5.5 0 01.5.5v5a.5.5 0 01-1 0V6a.5.5 0 01.5-.5z" clip-rule="evenodd"></path><path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 01.708 0l3 3a.5.5 0 01-.708.708L8 5.707 5.354 8.354a.5.5 0 11-.708-.708l3-3z" clip-rule="evenodd"></path></svg>
+                                                    <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 16 16" height="2em" width="2em" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M8 5.5a.5.5 0 01.5.5v5a.5.5 0 01-1 0V6a.5.5 0 01.5-.5z" clipRule="evenodd"></path><path fillRule="evenodd" d="M7.646 4.646a.5.5 0 01.708 0l3 3a.5.5 0 01-.708.708L8 5.707 5.354 8.354a.5.5 0 11-.708-.708l3-3z" clipRule="evenodd"></path></svg>
                                                 }
                                             </span>
                                         </span>
@@ -209,11 +157,16 @@ export default function InstitutionalRanking() {
                                 </tr>
                             </thead>
                             <tbody>
+                                {!loading && paginatedDocentes.length === 0 && (
+                                    <tr>
+                                        <td colSpan={5}>No hay docentes cargados todavía en la base local.</td>
+                                    </tr>
+                                )}
                                 {paginatedDocentes.map((docente, index) => {
-                                    const displayRank = (page - 1) * pageSize + index + 1;
+                                    const displayRank = docente.rank || ((page - 1) * pageSize + index + 1);
 
                                     return (
-                                        <tr key={`${docente.name}-${docente.rating}`}>
+                                        <tr key={docente.teacherId}>
                                             <td>
                                                 <div className="rank-cell">
                                                     {displayRank <= 3 ? (
@@ -233,8 +186,14 @@ export default function InstitutionalRanking() {
                                             </td>
 
                                             <td>
-                                                <span className="rating-value">{docente.rating.toFixed(2)}</span>
-                                                <span className="rating-max"> / 5.0</span>
+                                                {docente.rating !== null ? (
+                                                    <>
+                                                        <span className="rating-value">{docente.rating.toFixed(2)}</span>
+                                                        <span className="rating-max"> / 5.0</span>
+                                                    </>
+                                                ) : (
+                                                    <span className="rating-max">Pendiente</span>
+                                                )}
                                             </td>
 
                                             <td>{docente.students}</td>

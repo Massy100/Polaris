@@ -84,11 +84,11 @@ interface AdminDashboardPanelProps {
 }
 
 const quickAccessItems: QuickAccessItem[] = [
-  { id: 1, label: 'Gestión Docente',      icon: 'Users',      path: '/gestion-docente'   },
-  { id: 2, label: 'Ranking Institucional', icon: 'TrendingUp', path: '/ranking'           },
+  { id: 1, label: 'Gestión Docente',      icon: 'Users',      path: '/user-management'    },
+  { id: 2, label: 'Ranking Institucional', icon: 'TrendingUp', path: '/institutional-ranking' },
   { id: 3, label: 'Alerta de Desempeño',  icon: 'Bell',       path: '/alertas'           },
   { id: 4, label: 'Cursos Históricos',    icon: 'History',    path: '/cursos-historicos' },
-  { id: 5, label: 'Carga Masiva',         icon: 'Upload',     path: '/carga-masiva'      },
+  { id: 5, label: 'Carga Masiva',         icon: 'Upload',     path: '/bulk-upload'       },
 ];
 
 const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
@@ -101,7 +101,11 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
 
   const handleItemClick = (item: QuickAccessItem): void => {
     setOpen(false);
-    onNavigate?.(item.path);
+    if (onNavigate) {
+      onNavigate(item.path);
+      return;
+    }
+    window.location.assign(item.path);
   };
 
   const handleLogout = (): void => {
@@ -147,6 +151,7 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
               const Icon = Icons[item.icon];
               return (
                 <button
+                  type="button"
                   key={item.id}
                   className={`adp-item ${activePath === item.path ? 'adp-item--active' : ''}`}
                   onClick={() => handleItemClick(item)}

@@ -1,13 +1,12 @@
 "use client";
 import React, { useState } from 'react';
 import FileUploader from '../components/FileUploader';
-import Sidebar from '../components/Sidebar';
+import AdminDashboardPanel from '../components/AdminDashboardPanel';
 import '../styles/BulkUpload.css';
 
 export default function BulkUploadPage() {
   const [activeTab, setActiveTab] = useState('titulos');
   const [files, setFiles] = useState([]);
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [responseMessage, setResponseMessage] = useState(null);
 
@@ -34,7 +33,7 @@ export default function BulkUploadPage() {
     setResponseMessage(null);
 
     try {
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
       const response = await fetch(`${apiBaseUrl}/integrations/bulk-upload/`, {
         method: 'POST',
         body: formData,
@@ -114,17 +113,10 @@ export default function BulkUploadPage() {
 
   return (
     <div className="page-wrapper">
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <AdminDashboardPanel activePath="/bulk-upload" />
 
       <div className="top-header">
         <div className="header-brand-row">
-          <button className="menu-btn-bulk" onClick={() => setSidebarOpen(true)}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="3" y1="6" x2="21" y2="6"/>
-              <line x1="3" y1="12" x2="21" y2="12"/>
-              <line x1="3" y1="18" x2="21" y2="18"/>
-            </svg>
-          </button>
           <div className="brand">
             <div className="brand-icon">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
