@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import SidebarDropDown from '../components/sidebar-drop-down';
+import AdminDashboardPanel from '../components/AdminDashboardPanel';
 import DashboardCard from '../components/dashboard-card';
-import styles from '../styles/topOfPage.module.css';
+import '../styles/topOfPage.css';
 
 type IconType = 'teachers' | 'ranking' | 'alerts' | 'history' | 'upload';
 
@@ -14,7 +14,7 @@ const cards: { id: string; icon: IconType; iconColor: 'blue' | 'yellow'; title: 
     iconColor: 'blue',
     title: 'Gestión de Docentes',
     description: 'CRUD (Crear, Leer, Actualizar, Borrar) de Docentes. Crear docentes para tener acceso rápido a sus demás funciones como carga masiva.',
-    href: '/teachers',
+    href: '/user-management',
   },
   {
     id: 'ranking',
@@ -51,31 +51,26 @@ const cards: { id: string; icon: IconType; iconColor: 'blue' | 'yellow'; title: 
 ];
 
 export default function HomePage() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   return (
-    <div className={styles.wrapper}>
-      <button
-        className={styles.menuButton}
-        onClick={() => setSidebarOpen(true)}
-        aria-label="Open menu"
-      >
-        <span className={styles.menuIcon} />
-        <span className={styles.menuIcon} />
-        <span className={styles.menuIcon} />
-      </button>
+    <>
+      <AdminDashboardPanel
+        userName="Usuario Admin"
+        activePath="/"
+        onNavigate={(path: string) => { window.location.href = path; }}
+        onLogout={() => { window.location.href = "/"; }}
+      />
 
-      <SidebarDropDown open={sidebarOpen} onClose={() => setSidebarOpen(false)}>{null}</SidebarDropDown>
+      <div className="wrapper">
+        <main className="main">
+          <div className="grid">
+            {cards.map((card) => (
+              <DashboardCard key={card.id} {...card} />
+            ))}
+          </div>
+        </main>
 
-      <main className={styles.main}>
-        <div className={styles.grid}>
-          {cards.map((card) => (
-            <DashboardCard key={card.id} {...card} />
-          ))}
-        </div>
-      </main>
-
-      <span className={styles.brand}>polaris</span>
-    </div>
+        <span className="brand">polaris</span>
+      </div>
+    </>
   );
 }

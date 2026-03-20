@@ -84,11 +84,11 @@ interface AdminDashboardPanelProps {
 }
 
 const quickAccessItems: QuickAccessItem[] = [
-  { id: 1, label: 'Gestión Docente',      icon: 'Users',      path: '/gestion-docente'   },
+  { id: 1, label: 'Gestión Docente',      icon: 'Users',      path: '/user-management'   },
   { id: 2, label: 'Ranking Institucional', icon: 'TrendingUp', path: '/ranking'           },
-  { id: 3, label: 'Alerta de Desempeño',  icon: 'Bell',       path: '/alertas'           },
-  { id: 4, label: 'Cursos Históricos',    icon: 'History',    path: '/cursos-historicos' },
-  { id: 5, label: 'Carga Masiva',         icon: 'Upload',     path: '/carga-masiva'      },
+  { id: 3, label: 'Alerta de Desempeño',  icon: 'Bell',       path: '/alerts'            },
+  { id: 4, label: 'Cursos Históricos',    icon: 'History',    path: '/history'           },
+  { id: 5, label: 'Carga Masiva',         icon: 'Upload',     path: '/upload'            },
 ];
 
 const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
@@ -109,11 +109,18 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
     onLogout?.();
   };
 
+  const handleSettings = (): void => {
+    setOpen(false);
+    onNavigate?.('/WeightsConfig');
+  };
+
   return (
     <>
+      {/* 👇 Fix: en vez de ocultar el botón, se deshabilita con pointer-events */}
       <button
-        className={`adp-toggle ${open ? 'adp-toggle--hidden' : ''}`}
+        className="adp-toggle"
         onClick={() => setOpen(true)}
+        style={{ pointerEvents: open ? 'none' : 'auto', opacity: open ? 0 : 1 }}
       >
         <Icons.Menu />
       </button>
@@ -132,7 +139,8 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
             <button className="adp-icon-btn">
               <Icons.Bell />
             </button>
-            <button className="adp-icon-btn">
+            {/* 👇 Settings ahora navega a WeightsConfig */}
+            <button className="adp-icon-btn" onClick={handleSettings}>
               <Icons.Settings />
             </button>
           </div>
