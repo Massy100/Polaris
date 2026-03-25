@@ -34,18 +34,15 @@ class TeacherSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at']
     
     def get_full_name(self, obj):
-        """Obtener nombre completo del docente"""
         if obj.first_name and obj.last_name:
             return f"{obj.first_name} {obj.last_name}"
         return obj.first_name or obj.last_name or f"Docente {obj.teacher_id}"
     
     def get_courses_taught(self, obj):
-        """Obtener cursos impartidos como string"""
         courses = obj.courses.all()
         return ", ".join([course.name for course in courses]) if courses.exists() else ""
 
 class TeacherListSerializer(serializers.ModelSerializer):
-    """Serializer más simple para listar docentes (sin relaciones pesadas)"""
     full_name = serializers.SerializerMethodField()
     courses_taught = serializers.SerializerMethodField()
     
