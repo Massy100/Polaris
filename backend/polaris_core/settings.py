@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -40,6 +42,7 @@ INSTALLED_APPS = [
     'apps.security_audit',
     'rest_framework',
     'corsheaders', 
+    'dj_database_url',
 ]
 
 MIDDLEWARE = [
@@ -103,16 +106,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'polaris_core.wsgi.application'
 
+load_dotenv()
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'polaris_db'),
-        'USER': os.getenv('POSTGRES_USER', 'polaris_user'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'polaris_password'),
-        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
-    }
+    'default': dj_database_url.parse(
+        os.getenv("DATABASE_URL"),
+        conn_max_age=600,
+        ssl_require=True
+    )
 }
 
 ALLOWED_HOSTS = ["*"] 
