@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import '../styles/AdminDashboardPanel.css';
+import '../styles/admin-dashboard-panel.css';
 
 type IconProps = React.SVGProps<SVGSVGElement>;
 

@@ -1,5 +1,5 @@
 'use client';
-import AdminDashboardPanel from "../components/AdminDashboardPanel";
+import AdminDashboardPanel from "../components/admin-dashboard-panel";
 import Pagination from "../components/pagination";
 import { useMemo, useState } from "react";
 import "./institutional-ranking.css";

@@ -153,7 +153,7 @@ const WeightsConfig = () => {
       <>
         <AdminDashboardPanel
           userName="Usuario Admin"
-          activePath="/weights-config"
+          activePath="/WeightsConfig"
           onNavigate={(path: string) => { window.location.href = path; }}
           onLogout={() => { window.location.href = "/"; }}
         />
@@ -170,7 +170,7 @@ const WeightsConfig = () => {
     <>
       <AdminDashboardPanel
         userName="Usuario Admin"
-        activePath="/weights-config"
+        activePath="/WeightsConfig"
         onNavigate={(path: string) => { window.location.href = path; }}
         onLogout={() => { window.location.href = "/"; }}
       />

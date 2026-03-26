@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import "../styles/criterionItem.css";
+import "../styles/criterion-item.css";
 
 interface CriterionItemProps {
   id: number;

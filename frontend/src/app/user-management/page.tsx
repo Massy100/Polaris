@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useCallback } from 'react';
 import SidebarDropDown from '../components/sidebar-drop-down';
 import Modal from '../components/modal';
 import Pagination from '../components/pagination';
-import AdminDashboardPanel from '../components/AdminDashboardPanel';
+import AdminDashboardPanel from '../components/admin-dashboard-panel';
 import './user-management.css';
 
 type Docente = {

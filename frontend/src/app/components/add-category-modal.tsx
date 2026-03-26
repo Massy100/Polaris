@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import "../styles/addCategoryModal.css";
+import "../styles/add-category-modal.css";
 
 interface AddCategoryModalProps {
   onClose: () => void;
