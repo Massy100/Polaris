@@ -6,7 +6,7 @@ import AddCategoryModal from "../components/AddCategoryModal";
 import VisualDistribution from "../components/VisualDistribution";
 import CalcExample from "../components/CalcExample";
 import AdminDashboardPanel from "../components/AdminDashboardPanel";
-import "./WeightsConfig.css";
+import "./weights-config.css";
 
 interface Criterion {
   id: number;
@@ -153,7 +153,7 @@ const WeightsConfig = () => {
       <>
         <AdminDashboardPanel
           userName="Usuario Admin"
-          activePath="/WeightsConfig"
+          activePath="/weights-config"
           onNavigate={(path: string) => { window.location.href = path; }}
           onLogout={() => { window.location.href = "/"; }}
         />
@@ -170,7 +170,7 @@ const WeightsConfig = () => {
     <>
       <AdminDashboardPanel
         userName="Usuario Admin"
-        activePath="/WeightsConfig"
+        activePath="/weights-config"
         onNavigate={(path: string) => { window.location.href = path; }}
         onLogout={() => { window.location.href = "/"; }}
       />
