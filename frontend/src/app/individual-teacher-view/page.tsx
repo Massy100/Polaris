@@ -1,6 +1,7 @@
 'use client';
 import { useState } from "react";
 import "./individual-teacher-view.css";
+import SentimentAnalysisChart, { SentimentChartItem } from "../components/sentiment-analysis-chart";
 
 
 
@@ -10,14 +11,24 @@ type CommentGroup = {
     negative: string[];
 };
 
+type SentimentMetrics = {
+    positiveReal: number;
+    negativeReal: number;
+    falsePositive: number;
+    falseNegative: number;
+};
+
 type TeacherClass = {
     id: string;
     name: string;
     comments: CommentGroup;
+    sentiment: SentimentMetrics;
 };
 
 export default function IndividualTeacherView() {
 
+    // Mock data for the teacher's classes, comments, and sentiment metrics
+    // From here generate the sentimentData array that will be passed to the SentimentAnalysisChart component, and also used to display the comments in each class card
     const teacherClasses: TeacherClass[] = [
         {
             id: "matematicas-avanzadas",
@@ -36,6 +47,12 @@ export default function IndividualTeacherView() {
                     "Podría dar más tiempo para las tareas",
                 ],
             },
+            sentiment: {
+                positiveReal: 42,
+                negativeReal: 18,
+                falsePositive: 8,
+                falseNegative: 5,
+            },
         },
         {
             id: "fisica-cuantica",
@@ -48,6 +65,12 @@ export default function IndividualTeacherView() {
                 negative: [
                     "A veces falta más práctica en clase",
                 ],
+            },
+            sentiment: {
+                positiveReal: 38,
+                negativeReal: 22,
+                falsePositive: 6,
+                falseNegative: 7,
             },
         },
         {
@@ -62,11 +85,28 @@ export default function IndividualTeacherView() {
                     "La carga de tareas es algo pesada",
                 ],
             },
+            sentiment: {
+                positiveReal: 30,
+                negativeReal: 12,
+                falsePositive: 4,
+                falseNegative: 3,
+            },
         },
     ];
 
+    // Transform the teacherClasses data into the format needed for the SentimentAnalysisChart component
+    // Each item in the sentimentData array will represent a class and its associated sentiment metrics
+    const sentimentData: SentimentChartItem[] = teacherClasses.map((teacherClass) => ({
+        subject: teacherClass.name,
+        positiveReal: teacherClass.sentiment.positiveReal,
+        negativeReal: teacherClass.sentiment.negativeReal,
+        falsePositive: teacherClass.sentiment.falsePositive,
+        falseNegative: teacherClass.sentiment.falseNegative,
+    }));
+
     const [openClassId, setOpenClassId] = useState<string | null>(null);
 
+    // Helper function to toggle the visibility of comments for a specific class when the "Ver comentarios" button is clicked
     const toggleComments = (classId: string): void => {
         setOpenClassId((prev) => (prev === classId ? null : classId));
     };
@@ -129,7 +169,6 @@ export default function IndividualTeacherView() {
                     </div>
                 </div>
             </div>
-
 
             <div className="individual-teacher-classes-section">
                 <h2 className="individual-teacher-section-title">Clases Asignadas</h2>
@@ -198,8 +237,11 @@ export default function IndividualTeacherView() {
 
             <div className="individual-teacher-sentiment-analysis-section">
                 <h2 className="individual-teacher-section-title">Análisis por Sentimiento</h2>
+                <SentimentAnalysisChart
+                    data={sentimentData}
+                    height={500}
+                />
             </div>
-
         </div >
     );
 }
