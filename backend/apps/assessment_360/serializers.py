@@ -47,7 +47,6 @@ class WeightConfigSerializer(serializers.ModelSerializer):
         return WeightConfigCriterionSerializer(criteria_relations, many=True).data
 
     def get_total_percentage(self, obj):
-        """Util para que el frontend pueda verificar si la config suma 100."""
         relations = WeightconfigCriterion.objects.filter(
             weight_config=obj, is_deleted=False
         )
@@ -96,7 +95,6 @@ class WeightConfigWriteSerializer(serializers.ModelSerializer):
         return value
 
     def _sync_criteria(self, weight_config, criteria_data):
-        """Sincroniza la relación WeightconfigCriterion con soft-delete."""
         incoming = {item['criterion_id']: item['percentage'] for item in criteria_data}
 
         WeightconfigCriterion.objects.filter(
