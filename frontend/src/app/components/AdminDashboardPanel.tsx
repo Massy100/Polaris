@@ -86,9 +86,9 @@ interface AdminDashboardPanelProps {
 const quickAccessItems: QuickAccessItem[] = [
   { id: 1, label: 'Gestión Docente',      icon: 'Users',      path: '/user-management'   },
   { id: 2, label: 'Ranking Institucional', icon: 'TrendingUp', path: '/ranking'           },
-  { id: 3, label: 'Alerta de Desempeño',  icon: 'Bell',       path: '/alerts'            },
-  { id: 4, label: 'Cursos Históricos',    icon: 'History',    path: '/history'           },
-  { id: 5, label: 'Carga Masiva',         icon: 'Upload',     path: '/upload'            },
+  { id: 3, label: 'Alerta de Desempeño',   icon: 'Bell',        path: '/alerts'            },
+  { id: 4, label: 'Cursos Históricos',     icon: 'History',    path: '/history'           },
+  { id: 5, label: 'Carga Masiva',          icon: 'Upload',     path: '/upload'            },
 ];
 
 const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
@@ -114,9 +114,13 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
     onNavigate?.('/WeightsConfig');
   };
 
+  const handleNotifications = (): void => {
+    setOpen(false);
+    onNavigate?.('/notificationCenter');
+  };
+
   return (
     <>
-      {/* 👇 Fix: en vez de ocultar el botón, se deshabilita con pointer-events */}
       <button
         className="adp-toggle"
         onClick={() => setOpen(true)}
@@ -136,11 +140,18 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
             <Icons.X />
           </button>
           <div className="adp-header-actions">
-            <button className="adp-icon-btn">
+            <button 
+              className="adp-icon-btn" 
+              onClick={handleNotifications}
+              title="Centro de Notificaciones"
+            >
               <Icons.Bell />
             </button>
-            {/* 👇 Settings ahora navega a WeightsConfig */}
-            <button className="adp-icon-btn" onClick={handleSettings}>
+            <button 
+              className="adp-icon-btn" 
+              onClick={handleSettings}
+              title="Configuración de Pesos"
+            >
               <Icons.Settings />
             </button>
           </div>
