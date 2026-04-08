@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
 }
- 
+
 .menuButton {
   position: fixed;
   top: 16px;
@@ -14,7 +14,8 @@
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background-color: #2563eb;
+  /* Normalizado al azul del Dashboard */
+  background-color: #1a2fcc; 
   border: none;
   cursor: pointer;
   display: flex;
@@ -24,11 +25,12 @@
   gap: 5px;
   padding: 0;
 }
- 
+
 .menuButton:hover {
-  background-color: #1d4ed8;
+  /* Normalizado al hover del Dashboard */
+  background-color: #1530a0; 
 }
- 
+
 .menuIcon {
   display: block;
   width: 18px;
@@ -36,14 +38,14 @@
   background-color: #ffffff;
   border-radius: 2px;
 }
- 
+
 .sidebarOverlay {
   position: fixed;
   inset: 0;
   z-index: 200;
   background-color: rgba(0, 0, 0, 0.2);
 }
- 
+
 .sidebarContainer {
   position: absolute;
   top: 0;
@@ -53,7 +55,7 @@
   background-color: #ffffff;
   box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1);
 }
- 
+
 .main {
   flex: 1;
   display: flex;
@@ -61,7 +63,7 @@
   justify-content: center;
   padding: 80px 40px 60px;
 }
- 
+
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -69,7 +71,7 @@
   max-width: 1000px;
   width: 100%;
 }
- 
+
 .brand {
   position: fixed;
   bottom: 16px;
@@ -80,13 +82,13 @@
   letter-spacing: 0.03em;
   font-style: italic;
 }
- 
+
 @media (max-width: 900px) {
   .grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
- 
+
 @media (max-width: 580px) {
   .grid {
     grid-template-columns: 1fr;

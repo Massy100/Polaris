@@ -2,7 +2,7 @@
 
 .weights-page {
   min-height: 100vh;
-  background-color: #ddeef8;
+  background-color: #e8edf5; /* Normalizado al fondo general */
   padding: 40px 24px 80px;
   padding-top: 80px;
   font-family: "DM Sans", sans-serif;
@@ -27,21 +27,21 @@
 .weights-title {
   font-size: 28px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #1B1A21; /* Negro normalizado */
   margin: 0;
 }
 
 .weights-subtitle {
   font-size: 14px;
-  color: #666;
+  color: #667085; /* Gris de subtítulos */
   margin: 0;
 }
 
 .weights-card {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 18px; /* Bordes redondeados consistentes */
   padding: 20px 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.05); /* Sombra suave normalizada */
 }
 
 .header-card {
@@ -54,18 +54,19 @@
 .header-card-icon {
   width: 40px;
   height: 40px;
-  background: #eff6ff;
+  background: #f0f4fa; /* Fondo azul clarito de iconos */
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  color: #1a2fcc; /* Icono en azul principal */
 }
 
 .header-card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #1B1A21;
   margin: 0;
 }
 
@@ -122,7 +123,7 @@
 .criteria-title {
   font-size: 16px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #1B1A21;
   margin: 0 0 3px 0;
 }
 
@@ -132,14 +133,15 @@
   margin: 0;
 }
 
+/* Botones normalizados con el azul #1a2fcc */
 .btn-add {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #1a1a1a;
+  background: #1a2fcc;
   color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 10px 18px;
   font-family: "DM Sans", sans-serif;
   font-size: 14px;
@@ -147,11 +149,12 @@
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: background 0.15s;
+  transition: all 0.2s ease;
 }
 
 .btn-add:hover {
-  background: #333;
+  background: #1530a0;
+  transform: translateY(-1px);
 }
 
 .weights-footer {
@@ -168,19 +171,20 @@
   gap: 8px;
   height: 44px;
   padding: 0 22px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 1px solid #e0e8f8;
+  border-radius: 12px;
   background: #fff;
   font-family: "DM Sans", sans-serif;
   font-size: 14px;
   font-weight: 500;
   color: #444;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.2s ease;
 }
 
 .btn-reset:hover {
-  background: #f5f5f5;
+  background: #f8fafc;
+  border-color: #1a2fcc;
 }
 
 .btn-save {
@@ -190,23 +194,24 @@
   height: 44px;
   padding: 0 26px;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   background: #9ca3af;
   font-family: "DM Sans", sans-serif;
   font-size: 14px;
   font-weight: 600;
   color: #fff;
   cursor: not-allowed;
-  transition: background 0.15s;
+  transition: all 0.2s ease;
 }
 
 .btn-save.enabled {
-  background: #1a1a1a;
+  background: #1a2fcc;
   cursor: pointer;
 }
 
 .btn-save.enabled:hover {
-  background: #333;
+  background: #1530a0;
+  box-shadow: 0 4px 12px rgba(26, 47, 204, 0.2);
 }
 
 @media (max-width: 600px) {

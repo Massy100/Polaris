@@ -13,7 +13,8 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(26, 47, 204, 0.5);
+  /* Sombra ajustada al azul principal */
+  box-shadow: 0 4px 14px rgba(26, 47, 204, 0.4); 
   transition: background 0.2s ease, opacity 0.2s ease;
 }
 
@@ -187,9 +188,4 @@
 
 .adp-logout-btn:hover {
   background: #e09510;
-  transform: translateY(-2px);
-}
-
-.adp-logout-btn:active {
-  transform: translateY(0);
 }
