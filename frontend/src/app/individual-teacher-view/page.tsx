@@ -25,6 +25,18 @@ type TeacherClass = {
     sentiment: SentimentMetrics;
 };
 
+type Teacher = {
+    id: string;
+    name: string;
+    department: string;
+    email: string;
+    phone: string;
+    role: string;
+    since: string;
+    finalScore: number;
+    classes: TeacherClass[];
+};
+
 export default function IndividualTeacherView() {
 
     // Mock data for the teacher's classes, comments, and sentiment metrics
@@ -94,6 +106,19 @@ export default function IndividualTeacherView() {
         },
     ];
 
+    // Mock data for the teacher's personal information, score, and assigned classes
+    const teacher: Teacher = {
+        id: "maria-gonzalez",
+        name: "Dr. María Elena González",
+        department: "Departamento de Ciencias Exactas",
+        email: "maria.gonzalez@universidad.edu",
+        phone: "+52 555 765 4321",
+        role: "Profesor Titular",
+        since: "Enero 2015",
+        finalScore: 8.6,
+        classes: teacherClasses,
+    };
+
     // Transform the teacherClasses data into the format needed for the SentimentAnalysisChart component
     // Each item in the sentimentData array will represent a class and its associated sentiment metrics
     const sentimentData: SentimentChartItem[] = teacherClasses.map((teacherClass) => ({
@@ -115,22 +140,22 @@ export default function IndividualTeacherView() {
         <div className="individual-teacher-general-container">
             <div className="individual-teacher-presentation-container">
                 <div className="individual-teacher-personal-info">
-                    <h1 className="individual-teacher-name">Dr. María Elena González</h1>
-                    <h2 className="individual-teacher-department">Departamento de Ciencias Exactas</h2>
+                    <h1 className="individual-teacher-name">{teacher.name}</h1>
+                    <h2 className="individual-teacher-department">{teacher.department}</h2>
 
                     <div className="individual-teacher-meta">
                         <div className="individual-teacher-meta-item">
                             <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M928 160H96c-17.7 0-32 14.3-32 32v640c0 17.7 14.3 32 32 32h832c17.7 0 32-14.3 32-32V192c0-17.7-14.3-32-32-32zm-40 110.8V792H136V270.8l-27.6-21.5 39.3-50.5 42.8 33.3h643.1l42.8-33.3 39.3 50.5-27.7 21.5zM833.6 232L512 482 190.4 232l-42.8-33.3-39.3 50.5 27.6 21.5 341.6 265.6a55.99 55.99 0 0 0 68.7 0L888 270.8l27.6-21.5-39.3-50.5-42.7 33.2z"></path>
                             </svg>
-                            <p>maria.gonzalez@universidad.edu</p>
+                            <p>{teacher.email}</p>
                         </div>
 
                         <div className="individual-teacher-meta-item">
                             <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M17.707,12.293c-0.391-0.391-1.023-0.391-1.414,0l-1.594,1.594c-0.739-0.22-2.118-0.72-2.992-1.594 s-1.374-2.253-1.594-2.992l1.594-1.594c0.391-0.391,0.391-1.023,0-1.414l-4-4c-0.391-0.391-1.023-0.391-1.414,0L3.581,5.005 c-0.38,0.38-0.594,0.902-0.586,1.435c0.023,1.424,0.4,6.37,4.298,10.268s8.844,4.274,10.269,4.298c0.005,0,0.023,0,0.028,0 c0.528,0,1.027-0.208,1.405-0.586l2.712-2.712c0.391-0.391,0.391-1.023,0-1.414L17.707,12.293z M17.58,19.005 c-1.248-0.021-5.518-0.356-8.873-3.712c-3.366-3.366-3.692-7.651-3.712-8.874L7,4.414L9.586,7L8.293,8.293 C8.054,8.531,7.952,8.875,8.021,9.205c0.024,0.115,0.611,2.842,2.271,4.502s4.387,2.247,4.502,2.271 c0.333,0.071,0.674-0.032,0.912-0.271L17,14.414L19.586,17L17.58,19.005z"></path>
                             </svg>
-                            <p>+52 555 123 4567</p>
+                            <p>{teacher.phone}</p>
                         </div>
 
                         <div className="individual-teacher-meta-item">
@@ -140,7 +165,7 @@ export default function IndividualTeacherView() {
                                     <path fillRule="nonzero" d="M12 7a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm0 1.5l1.323 2.68 2.957.43-2.14 2.085.505 2.946L12 17.25l-2.645 1.39.505-2.945-2.14-2.086 2.957-.43L12 10.5zM18 2v3l-1.363 1.138A9.935 9.935 0 0 0 13 5.049L13 2 18 2zm-7-.001v3.05a9.935 9.935 0 0 0-3.636 1.088L6 5V2l5-.001z"></path>
                                 </g>
                             </svg>
-                            <p>Profesor Titular</p>
+                            <p>{teacher.role}</p>
                         </div>
 
                         <div className="individual-teacher-meta-item">
@@ -150,7 +175,7 @@ export default function IndividualTeacherView() {
                                 <line x1="8" y1="2" x2="8" y2="6"></line>
                                 <line x1="3" y1="10" x2="21" y2="10"></line>
                             </svg>
-                            <p>Desde Enero 2015</p>
+                            <p>Desde {teacher.since}</p>
                         </div>
                     </div>
                 </div>
@@ -164,7 +189,7 @@ export default function IndividualTeacherView() {
                         </div>
 
                         <p className="individual-teacher-score-title">Nota Final</p>
-                        <h2 className="individual-teacher-score-value">8.6</h2>
+                        <h2 className="individual-teacher-score-value">{teacher.finalScore}</h2>
                         <p className="individual-teacher-score-subtitle">Promedio ponderado</p>
                     </div>
                 </div>
