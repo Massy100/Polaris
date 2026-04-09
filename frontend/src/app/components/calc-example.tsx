@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import "../styles/calcExample.css";
+import "../styles/calc-example.css";
 
 interface Criterion {
   id: number;

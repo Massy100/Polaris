@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import '../styles/AdminDashboardPanel.css';
+import { useState, useEffect } from 'react';
+import '../styles/admin-dashboard-panel.css';
 
 type IconProps = React.SVGProps<SVGSVGElement>;
 
@@ -98,16 +98,35 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
   onLogout,
 }) => {
   const [open, setOpen] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleItemClick = (item: QuickAccessItem): void => {
-    setOpen(false);
-    onNavigate?.(item.path);
+    try {
+      onNavigate?.(item.path);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setOpen(false);
+    }
   };
 
   const handleLogout = (): void => {
-    setOpen(false);
-    onLogout?.();
+    try {
+      onLogout?.();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setOpen(false);
+    }
   };
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <>

@@ -1,4 +1,4 @@
-import "../styles/visualDistribution.css";
+import "../styles/visual-distribution.css";
 
 interface Criterion {
   id: number;
