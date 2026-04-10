@@ -1,7 +1,7 @@
 # apps/assessment_360/serializers.py
 from rest_framework import serializers
 from .models import Weightconfig, WeightconfigCriterion, Evaluationcriterion
-
+from django.db import connection
 
 class EvaluationCriterionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -84,11 +84,9 @@ class WeightConfigWriteSerializer(serializers.ModelSerializer):
 
         return value
 
+    from django.db import connection
+
     def _sync_criteria(self, weight_config, criteria_data):
-        print('=== CRITERIA DATA RECIBIDA ===')
-        for item in criteria_data:
-            print(item)
-        print('==============================')
         incoming = {
             item['criterion_id']: {
                 'percentage': item['percentage'],
@@ -104,24 +102,50 @@ class WeightConfigWriteSerializer(serializers.ModelSerializer):
             criterion_id__in=incoming.keys()
         ).update(is_deleted=True)
 
+        existing = {
+            c.criterion_id: c
+            for c in Evaluationcriterion.objects.filter(criterion_id__in=incoming.keys())
+        }
+
+        to_update = []
+        to_create = []
         for criterion_id, data in incoming.items():
-            existing = Evaluationcriterion.objects.filter(criterion_id=criterion_id).first()
-            name = data['name'] or (existing.name if existing else f'Criterio {criterion_id}')
-            
-            criterion, _ = Evaluationcriterion.objects.update_or_create(
-                criterion_id=criterion_id,
-                defaults={
-                    'name': name,
-                    'description': data['description'],
-                    'display_order': 0,
-                    'is_deleted': False,
-                }
-            )
-            WeightconfigCriterion.objects.update_or_create(
-                weight_config=weight_config,
-                criterion=criterion,
-                defaults={'percentage': data['percentage'], 'is_deleted': False},
-            )
+            if criterion_id in existing:
+                criterion = existing[criterion_id]
+                if data['name'] and criterion.name != data['name']:
+                    criterion.name = data['name']
+                    criterion.description = data['description']
+                    to_update.append(criterion)
+            else:
+                to_create.append(Evaluationcriterion(
+                    criterion_id=criterion_id,
+                    name=data['name'] or f'Criterio {criterion_id}',
+                    description=data['description'],
+                    display_order=0
+                ))
+
+        if to_update:
+            Evaluationcriterion.objects.bulk_update(to_update, ['name', 'description'])
+        if to_create:
+            Evaluationcriterion.objects.bulk_create(to_create)
+            for c in to_create:
+                existing[c.criterion_id] = c
+
+        from django.utils import timezone
+        now = timezone.now()
+        
+        with connection.cursor() as cursor:
+            for criterion_id, data in incoming.items():
+                cursor.execute("""
+                    INSERT INTO weightconfig_criterion 
+                        (weight_config_id, criterion_id, percentage, is_deleted, created_at, updated_at)
+                    VALUES (%s, %s, %s, false, %s, %s)
+                    ON CONFLICT (weight_config_id, criterion_id) 
+                    DO UPDATE SET 
+                        percentage = EXCLUDED.percentage,
+                        is_deleted = false,
+                        updated_at = EXCLUDED.updated_at
+                """, [weight_config.weight_config_id, criterion_id, data['percentage'], now, now])
 
     def create(self, validated_data):
         criteria_data = validated_data.pop('criteria')
