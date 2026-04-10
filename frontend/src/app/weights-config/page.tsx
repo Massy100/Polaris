@@ -52,7 +52,6 @@ export default function WeightsConfig() {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [toastCounter, setToastCounter] = useState<number>(0);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -106,14 +105,12 @@ export default function WeightsConfig() {
         const maxId = Math.max(...transformed.map((c) => c.criterion_id), 0);
         setNextId(maxId + 1);
       } else {
-        setCriteria(INITIAL_CRITERIA);
-        setNextId(5);
+        setCriteria([]);
+        setNextId(1);
       }
     } catch (err) {
       console.error('Error loading criteria:', err);
       setError(err instanceof Error ? err.message : 'Error al cargar la configuración');
-      setCriteria(INITIAL_CRITERIA);
-      setNextId(5);
       setActiveConfigId(null);
     } finally {
       setIsLoading(false);
