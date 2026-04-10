@@ -56,6 +56,8 @@ class WeightConfigSerializer(serializers.ModelSerializer):
 class WeightConfigCriterionInputSerializer(serializers.Serializer):
     criterion_id = serializers.IntegerField()
     percentage = serializers.DecimalField(max_digits=6, decimal_places=2, min_value=0, max_value=100)
+    name = serializers.CharField(required=False, allow_blank=True, default='')
+    description = serializers.CharField(required=False, allow_blank=True, default='')
 
 
 class WeightConfigWriteSerializer(serializers.ModelSerializer):
@@ -66,23 +68,11 @@ class WeightConfigWriteSerializer(serializers.ModelSerializer):
         fields = ['weight_config_id', 'name', 'description', 'status', 'criteria']
         read_only_fields = ['weight_config_id']
 
-
     def validate_criteria(self, value):
         if not value:
             raise serializers.ValidationError('Debe incluir al menos un criterio.')
 
         ids = [item['criterion_id'] for item in value]
-        existing_ids = set(
-            Evaluationcriterion.objects
-            .filter(criterion_id__in=ids, is_deleted=False)
-            .values_list('criterion_id', flat=True)
-        )
-        missing = set(ids) - existing_ids
-        if missing:
-            raise serializers.ValidationError(
-                f'Los siguientes criterion_id no existen: {sorted(missing)}'
-            )
-
         if len(ids) != len(set(ids)):
             raise serializers.ValidationError('Hay criterion_id duplicados en la lista.')
 
@@ -95,7 +85,18 @@ class WeightConfigWriteSerializer(serializers.ModelSerializer):
         return value
 
     def _sync_criteria(self, weight_config, criteria_data):
-        incoming = {item['criterion_id']: item['percentage'] for item in criteria_data}
+        print('=== CRITERIA DATA RECIBIDA ===')
+        for item in criteria_data:
+            print(item)
+        print('==============================')
+        incoming = {
+            item['criterion_id']: {
+                'percentage': item['percentage'],
+                'name': item.get('name', ''),
+                'description': item.get('description', ''),
+            }
+            for item in criteria_data
+        }
 
         WeightconfigCriterion.objects.filter(
             weight_config=weight_config
@@ -103,11 +104,23 @@ class WeightConfigWriteSerializer(serializers.ModelSerializer):
             criterion_id__in=incoming.keys()
         ).update(is_deleted=True)
 
-        for criterion_id, percentage in incoming.items():
+        for criterion_id, data in incoming.items():
+            existing = Evaluationcriterion.objects.filter(criterion_id=criterion_id).first()
+            name = data['name'] or (existing.name if existing else f'Criterio {criterion_id}')
+            
+            criterion, _ = Evaluationcriterion.objects.update_or_create(
+                criterion_id=criterion_id,
+                defaults={
+                    'name': name,
+                    'description': data['description'],
+                    'display_order': 0,
+                    'is_deleted': False,
+                }
+            )
             WeightconfigCriterion.objects.update_or_create(
                 weight_config=weight_config,
-                criterion_id=criterion_id,
-                defaults={'percentage': percentage, 'is_deleted': False},
+                criterion=criterion,
+                defaults={'percentage': data['percentage'], 'is_deleted': False},
             )
 
     def create(self, validated_data):
