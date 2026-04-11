@@ -182,14 +182,13 @@ export default function WeightsConfig() {
       };
 
       if (!configId) {
-        
         const createResponse = await fetch(`${API_URL}/assessment-360/weight-configs/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name: `Configuración ${new Date().toLocaleDateString()}`,
             description: 'Configuración de pesos de evaluación',
-            status: 'inactive',
+            status: 'active',
             criteria: buildCriteriaPayload(),
           }),
         });
@@ -199,14 +198,9 @@ export default function WeightsConfig() {
         }
 
         const newConfig = await createResponse.json();
-        configId = newConfig.weight_config_id;
-        setActiveConfigId(configId);
-        addToast("Configuración guardada correctamente.", "success");
-
-        const shouldActivate = window.confirm("¿Desea activar esta configuración ahora?");
-        if (shouldActivate && configId) {
-          await activateConfig(configId);
-        }
+        setActiveConfigId(newConfig.weight_config_id);
+        addToast("Configuración guardada y activada correctamente.", "success");
+        await loadCriteria();
       } else {
         
         const updateResponse = await fetch(`${API_URL}/assessment-360/weight-configs/${configId}/`, {
@@ -215,7 +209,7 @@ export default function WeightsConfig() {
           body: JSON.stringify({
             name: `Configuración ${new Date().toLocaleDateString()}`,
             description: 'Configuración de pesos de evaluación',
-            status: 'inactive',
+            status: 'active',
             criteria: buildCriteriaPayload(),
           }),
         });
@@ -225,12 +219,8 @@ export default function WeightsConfig() {
           throw new Error(JSON.stringify(errorData));
         }
 
-        addToast("Configuración guardada correctamente.", "success");
-
-        const shouldActivate = window.confirm("¿Desea activar esta configuración ahora?");
-        if (shouldActivate && configId) {
-          await activateConfig(configId);
-        }
+        addToast("Configuración guardada y activada correctamente.", "success");
+        await loadCriteria();
       }
     } catch (err) {
       console.error('Error saving criteria:', err);
@@ -238,25 +228,6 @@ export default function WeightsConfig() {
       addToast("Error al guardar. Intenta de nuevo.", "error");
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const activateConfig = async (configId: number) => {
-    try {
-      
-      const response = await fetch(`${API_URL}/assessment-360/weight-configs/${configId}/activate/`, {
-        method: 'POST',
-      });
-
-      if (response.ok) {
-        addToast("Configuración activada correctamente.", "success");
-        await loadCriteria();
-      } else {
-        addToast("No se pudo activar la configuración.", "warning");
-      }
-    } catch (err) {
-      console.error('Error activating config:', err);
-      addToast("Error al activar la configuración.", "error");
     }
   };
 
@@ -272,14 +243,13 @@ export default function WeightsConfig() {
     setError(null);
 
     try {
-      
       const response = await fetch(`${API_URL}/assessment-360/weight-configs/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: `Configuración ${new Date().toLocaleDateString()}`,
           description: 'Configuración de pesos de evaluación',
-          status: 'inactive',
+          status: 'active',
           criteria: buildCriteriaPayload(),
         }),
       });
@@ -291,12 +261,8 @@ export default function WeightsConfig() {
 
       const newConfig = await response.json();
       setActiveConfigId(newConfig.weight_config_id);
-      addToast("Nueva configuración creada correctamente.", "success");
-
-      const shouldActivate = window.confirm("¿Desea activar esta nueva configuración?");
-      if (shouldActivate) {
-        await activateConfig(newConfig.weight_config_id);
-      }
+      addToast("Nueva configuración creada y activada correctamente.", "success");
+      await loadCriteria();
     } catch (err) {
       console.error('Error creating config:', err);
       setError(err instanceof Error ? err.message : 'Error al crear la configuración');
