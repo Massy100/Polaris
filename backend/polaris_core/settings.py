@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'apps.security_audit',
     'rest_framework',
     'corsheaders', 
-    'dj_database_url',
+    #'dj_database_url',
 ]
 
 MIDDLEWARE = [

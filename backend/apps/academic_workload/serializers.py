@@ -1,5 +1,7 @@
+
 from rest_framework import serializers
-from .models import Teacher, Section, Comment, TeacherClassMetrics, Course
+from apps.academic_career.models import Teacher, Course
+from apps.academic_workload.models import Section, Comment, TeacherClassMetrics, Academicload
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -50,7 +52,6 @@ class TeacherSerializer(serializers.ModelSerializer):
         ]
     
     def get_final_score(self, obj):
-        """Calcula la nota final ponderada del profesor"""
         sections = obj.sections.all()
         if not sections:
             return 0.0

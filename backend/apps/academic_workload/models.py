@@ -12,19 +12,20 @@ class Period(models.Model):
         db_table = 'period'
 
 
+# apps/academic_workload/models.py
+
 class Section(models.Model):
     section_id = models.BigAutoField(primary_key=True)
     course = models.ForeignKey('academic_career.Course', models.DO_NOTHING)
-    teacher = models.ForeignKey('academic_career.Teacher', models.DO_NOTHING)
+    teacher = models.ForeignKey('academic_career.Teacher', models.DO_NOTHING, related_name='sections')
     name = models.CharField(max_length=200)
-    academic_term = models.CharField(max_length=50)  
-    status = models.CharField(max_length=20, default='active')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    academic_term = models.CharField(max_length=50)
     period = models.ForeignKey(Period, models.DO_NOTHING)
     section_code = models.CharField(max_length=20, blank=True, null=True)
     modality = models.CharField(max_length=20, blank=True, null=True)
-    status = models.CharField(max_length=20, blank=True, null=True)
+    status = models.CharField(max_length=20, default='active') 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'section'
@@ -54,10 +55,10 @@ class Comment(models.Model):
     ]
     
     comment_id = models.BigAutoField(primary_key=True)
-    section = models.ForeignKey(Section, on_delete=models.DO_NOTHING, related_name='comments')
+    section = models.ForeignKey(Section, on_delete=models.DO_NOTHING, related_name='comments')  # ← Este campo
     text = models.TextField()
     sentiment_type = models.CharField(max_length=20, choices=SENTIMENT_TYPES)
-    is_true_sentiment = models.BooleanField(default=True) 
+    is_true_sentiment = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
