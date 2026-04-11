@@ -2,13 +2,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import CriterionItem from "../components/CriterionItem";
-import AddCategoryModal from "../components/AddCategoryModal";
-import VisualDistribution from "../components/VisualDistribution";
-import CalcExample from "../components/CalcExample";
-import AdminDashboardPanel from "../components/AdminDashboardPanel";
+import CriterionItem from "../components/criterion-item";
+import AddCategoryModal from "../components/add-category-modal";
+import VisualDistribution from "../components/visual-distribution";
+import CalcExample from "../components/calc-example";
+import AdminDashboardPanel from "../components/admin-dashboard-panel";
 import Modal from '../components/modal';
-import "./WeightsConfig.css";
+import "./weights-config.css";
 
 interface Criterion {
   id: number;
