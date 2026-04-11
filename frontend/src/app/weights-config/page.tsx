@@ -2,7 +2,7 @@
 'use client';
 
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import CriterionItem from "../components/criterion-item";
 import AddCategoryModal from "../components/add-category-modal";
 import VisualDistribution from "../components/visual-distribution";
