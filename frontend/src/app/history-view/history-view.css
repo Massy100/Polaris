@@ -62,13 +62,15 @@
 }
 
 .hv-content-grid {
-  display: grid;
-  grid-template-columns: 350px 1fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: 24px;
-  align-items: start;
+  align-items: flex-start;
 }
 
 .hv-sidebar {
+  flex: 1 1 350px;
+  max-width: 350px; 
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
@@ -157,6 +159,7 @@
 }
 
 .hv-detail-panel {
+  flex: 999 1 500px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
@@ -198,6 +201,8 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .hv-dh-info h2 {
@@ -242,7 +247,7 @@
 
 .hv-stats-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 16px;
   background: #f8fafc;
   padding: 20px;
@@ -304,6 +309,8 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .hv-hc-title h3 {
@@ -346,6 +353,8 @@
 .hv-hc-stats {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .hv-hc-stat {
