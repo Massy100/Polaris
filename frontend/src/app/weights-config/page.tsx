@@ -1,7 +1,6 @@
 // app/WeightsConfig/page.tsx
 'use client';
 
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import CriterionItem from "../components/criterion-item";
 import AddCategoryModal from "../components/add-category-modal";
