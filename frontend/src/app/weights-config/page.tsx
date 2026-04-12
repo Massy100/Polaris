@@ -109,7 +109,9 @@ export default function WeightsConfig() {
       }
     } catch (err) {
       console.error('Error loading criteria:', err);
-      setError(err instanceof Error ? err.message : 'Error al cargar la configuración');
+      const errMsg = err instanceof Error ? err.message : 'Error al cargar la configuración';
+      setError(errMsg);
+      addToast(errMsg, 'error');
       setCriteria(INITIAL_CRITERIA);
       setNextId(5);
       setActiveConfigId(null);
@@ -363,29 +365,7 @@ export default function WeightsConfig() {
         ))}
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="weights-page">
-          <div className="weights-inner">
-            <div className="error-message" style={{ 
-              backgroundColor: '#fee2e2', 
-              color: '#dc2626', 
-              padding: '1rem', 
-              borderRadius: '8px', 
-              marginBottom: '1rem',
-              border: '1px solid #fecaca'
-            }}>
-              <strong>Error:</strong> {error}
-              <button 
-                onClick={() => setError(null)} 
-                style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer' }}
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Reset Confirmation Modal */}
       {showResetConfirm && (
