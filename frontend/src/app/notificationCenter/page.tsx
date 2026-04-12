@@ -15,7 +15,6 @@ type Notification = {
 };
 
 export default function NotificationCenter() {
-    // Mini BD Local (Simulada)
     const [notifications, setNotifications] = useState<Notification[]>([
         { id: 1, type: 'danger', title: 'Profesor en bajo rendimiento', description: 'El profesor Juan Pérez tiene un rendimiento por debajo del 60%', date: '3 mar 2026', unread: true },
         { id: 2, type: 'warning', title: 'Profesor en peligro de rendimiento', description: 'La profesora María García está cerca del límite de bajo rendimiento', date: '3 mar 2026', unread: true },
@@ -26,8 +25,13 @@ export default function NotificationCenter() {
     ]);
 
     const deleteNotification = (id: number) => {
-        // Aquí iría el fetch(apiUrl, { method: 'DELETE' })
         setNotifications(prev => prev.filter(n => n.id !== id));
+    };
+
+    const markAsRead = (id: number) => {
+        setNotifications(prev =>
+            prev.map(n => n.id === id ? { ...n, unread: false } : n)
+        );
     };
 
     const unreadCount = notifications.filter(n => n.unread).length;
@@ -35,7 +39,7 @@ export default function NotificationCenter() {
     return (
         <div className="notifications-container">
             <div className="notifications-card">
-                
+
                 <header className="notifications-header">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
@@ -56,7 +60,7 @@ export default function NotificationCenter() {
                     ) : (
                         notifications.map((notif) => (
                             <div key={notif.id} className={`notification-item ${notif.unread ? 'unread' : ''}`}>
-                                
+
                                 <div className={`notif-icon-circle ${notif.type === 'danger' ? 'bg-danger' : 'bg-warning'}`}>
                                     {notif.type === 'danger' ? <AlertCircle size={20} /> : <AlertTriangle size={20} />}
                                 </div>
@@ -69,14 +73,22 @@ export default function NotificationCenter() {
                                 <span className="notif-date">{notif.date}</span>
 
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <button 
-                                        className="btn-delete-notif" 
+                                    <button
+                                        className="btn-delete-notif"
                                         onClick={() => deleteNotification(notif.id)}
                                         title="Eliminar notificación"
                                     >
                                         <Trash2 size={18} />
                                     </button>
-                                    {notif.unread && <div className="unread-dot" />}
+
+                                    {notif.unread && (
+                                        <div
+                                            className="unread-dot"
+                                            onClick={() => markAsRead(notif.id)}
+                                            style={{ cursor: 'pointer' }}
+                                            title="Marcar como leído"
+                                        />
+                                    )}
                                 </div>
 
                             </div>
