@@ -48,18 +48,12 @@ class Teacher(models.Model):
     teacher_id = models.BigAutoField(primary_key=True)
     first_name = models.CharField(max_length=120, blank=True, null=True)
     last_name = models.CharField(max_length=120, blank=True, null=True)
-<<<<<<< HEAD
-    email = models.EmailField(max_length=254, blank=True, null=True, unique=True)
-    code = models.CharField(max_length=20, blank=True, null=True, unique=True)
-    role = models.CharField(max_length=50, default='teacher')  # ← agregar
-=======
     email = models.EmailField(max_length=254, blank=True, null=True, unique=True) 
     code = models.CharField(max_length=20, blank=True, null=True, unique=True)    
     department = models.CharField(max_length=200, blank=True, null=True)  # Departamento
     phone = models.CharField(max_length=20, blank=True, null=True)  # Teléfono
     role = models.CharField(max_length=50, choices=ROLES, default='titular')  # Rol
     since = models.DateField(blank=True, null=True)
->>>>>>> 3970900 (commit provisional)
     courses = models.ManyToManyField(Course, blank=True)
     status = models.CharField(max_length=20, blank=True, null=True, default='active')
     created_at = models.DateTimeField(auto_now_add=True)
