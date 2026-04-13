@@ -42,8 +42,9 @@ class Teacher(models.Model):
     teacher_id = models.BigAutoField(primary_key=True)
     first_name = models.CharField(max_length=120, blank=True, null=True)
     last_name = models.CharField(max_length=120, blank=True, null=True)
-    email = models.EmailField(max_length=254, blank=True, null=True, unique=True) 
-    code = models.CharField(max_length=20, blank=True, null=True, unique=True)    
+    email = models.EmailField(max_length=254, blank=True, null=True, unique=True)
+    code = models.CharField(max_length=20, blank=True, null=True, unique=True)
+    role = models.CharField(max_length=50, default='teacher')  # ← agregar
     courses = models.ManyToManyField(Course, blank=True)
     status = models.CharField(max_length=20, blank=True, null=True, default='active')
     created_at = models.DateTimeField(auto_now_add=True)

@@ -3,9 +3,22 @@ from rest_framework import serializers
 from .models import Teacher, Course, Career, Faculty
 
 class CourseSerializer(serializers.ModelSerializer):
+    career_name = serializers.CharField(source='career.name', read_only=True)
     class Meta:
         model = Course
-        fields = ['course_id', 'name', 'credits', 'status']
+        fields = ['course_id', 'career', 'career_name', 'name', 'credits', 'status']
+
+class FacultySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Faculty
+        fields = ['faculty_id', 'name', 'status']
+
+class CareerSerializer(serializers.ModelSerializer):
+    faculty_name = serializers.CharField(source='faculty.name', read_only=True)
+
+    class Meta:
+        model = Career
+        fields = ['career_id', 'faculty', 'faculty_name', 'name', 'status']
 
 class TeacherSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()

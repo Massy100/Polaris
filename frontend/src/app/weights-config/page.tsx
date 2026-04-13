@@ -1,7 +1,7 @@
 // app/WeightsConfig/page.tsx
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import CriterionItem from "../components/criterion-item";
 import AddCategoryModal from "../components/add-category-modal";
 import VisualDistribution from "../components/visual-distribution";
@@ -11,7 +11,7 @@ import Modal from '../components/modal';
 import "./weights-config.css";
 
 interface Criterion {
-  id: number;
+  criterion_id: number;  
   name: string;
   description: string;
   percentage: number;
@@ -36,10 +36,10 @@ interface WeightConfig {
 }
 
 const INITIAL_CRITERIA: Criterion[] = [
-  { id: 1, name: "Evaluación de alumnos", description: "Calificación promedio otorgada por los estudiantes", percentage: 40 },
-  { id: 2, name: "Grados académicos", description: "Doctorado, Maestría, Licenciatura, etc.", percentage: 30 },
-  { id: 3, name: "Autoevaluación del docente", description: "Evaluación realizada por el propio docente", percentage: 20 },
-  { id: 4, name: "Evaluación de pares", description: "Observación y evaluación de otros docentes", percentage: 10 },
+  { criterion_id: 1, name: "Evaluación de alumnos", description: "Calificación promedio otorgada por los estudiantes", percentage: 40 },
+  { criterion_id: 2, name: "Grados académicos", description: "Doctorado, Maestría, Licenciatura, etc.", percentage: 30 },
+  { criterion_id: 3, name: "Autoevaluación del docente", description: "Evaluación realizada por el propio docente", percentage: 20 },
+  { criterion_id: 4, name: "Evaluación de pares", description: "Observación y evaluación de otros docentes", percentage: 10 },
 ];
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
@@ -51,7 +51,6 @@ export default function WeightsConfig() {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [toastCounter, setToastCounter] = useState<number>(0);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -61,26 +60,26 @@ export default function WeightsConfig() {
     setIsMounted(true);
   }, []);
 
+  const toastCounterRef = useRef(0); 
+
   const addToast = useCallback((message: string, type: ToastType = "success") => {
-    const id = toastCounter + 1;
-    setToastCounter(id);
+    toastCounterRef.current += 1;
+    const id = toastCounterRef.current;
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 3500);
-  }, [toastCounter]);
+  }, []);
 
   const loadCriteria = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-      
-      // Intentar obtener la configuración activa
-      const response = await fetch(`${API_URL}/assessment-360/weights-config/active/`);
-      
+
+      const response = await fetch(`${API_URL}/assessment-360/weight-configs/active/`);
+
       if (!response.ok) {
         if (response.status === 404) {
-          // No hay configuración activa, usar criterios iniciales
           setCriteria(INITIAL_CRITERIA);
           setNextId(5);
           setActiveConfigId(null);
@@ -88,30 +87,29 @@ export default function WeightsConfig() {
         }
         throw new Error('Error al cargar la configuración');
       }
-      
+
       const data: WeightConfig = await response.json();
       setActiveConfigId(data.weight_config_id);
-      
+
       if (data.criteria && data.criteria.length > 0) {
         const transformed = data.criteria.map((item) => ({
-          id: item.id,
+          criterion_id: item.criterion_id,  
           name: item.name,
           description: item.description,
-          percentage: item.percentage,
+          percentage: Number(item.percentage),  
           display_order: item.display_order
         }));
+        
         setCriteria(transformed);
-        const maxId = Math.max(...transformed.map((c) => c.id), 0);
+        const maxId = Math.max(...transformed.map((c) => c.criterion_id), 0);
         setNextId(maxId + 1);
       } else {
-        setCriteria(INITIAL_CRITERIA);
-        setNextId(5);
+        setCriteria([]);
+        setNextId(1);
       }
     } catch (err) {
       console.error('Error loading criteria:', err);
       setError(err instanceof Error ? err.message : 'Error al cargar la configuración');
-      setCriteria(INITIAL_CRITERIA);
-      setNextId(5);
       setActiveConfigId(null);
     } finally {
       setIsLoading(false);
@@ -129,15 +127,15 @@ export default function WeightsConfig() {
   const diff = 100 - totalPercentage;
 
   const handlePercentageChange = (id: number, value: number) => {
-    setCriteria((prev) => prev.map((c) => (c.id === id ? { ...c, percentage: value } : c)));
+    setCriteria((prev) => prev.map((c) => (c.criterion_id === id ? { ...c, percentage: value } : c)));
   };
 
   const handleDelete = (id: number) => {
-    setCriteria((prev) => prev.filter((c) => c.id !== id));
+    setCriteria((prev) => prev.filter((c) => c.criterion_id !== id));
   };
 
   const handleAddCategory = (name: string, description: string) => {
-    setCriteria((prev) => [...prev, { id: nextId, name, description, percentage: 0 }]);
+    setCriteria((prev) => [...prev, { criterion_id: nextId, name, description, percentage: 0 }]);
     setNextId((prev) => prev + 1);
   };
 
@@ -152,77 +150,77 @@ export default function WeightsConfig() {
     addToast("Configuración restablecida a los valores predeterminados.", "warning");
   };
 
+  
+  const buildCriteriaPayload = () =>{
+    const payload = criteria.map((c) => ({
+      criterion_id: c.criterion_id,  
+      percentage: c.percentage,
+      name: c.name,
+      description: c.description,
+    }));
+      return payload;
+  }
+
+
+
   const handleSave = async () => {
     if (!isValid || isSaving) return;
-    
+
     setIsSaving(true);
     setError(null);
-    
+
     try {
       let configId = activeConfigId;
-      
-      // Si no hay configuración activa, crear una nueva
+
+      const buildErrorMessage = async (response: Response): Promise<string> => {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          return JSON.stringify(data);
+        }
+        return `Error ${response.status}: ${response.statusText}`;
+      };
+
       if (!configId) {
-        const createResponse = await fetch(`${API_URL}/assessment-360/weights-config/`, {
+        const createResponse = await fetch(`${API_URL}/assessment-360/weight-configs/`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name: `Configuración ${new Date().toLocaleDateString()}`,
             description: 'Configuración de pesos de evaluación',
-            status: 'inactive',
-            criteria: criteria.map(c => ({
-              id: c.id,
-              percentage: c.percentage
-            }))
+            status: 'active',
+            criteria: buildCriteriaPayload(),
           }),
         });
-        
+
         if (!createResponse.ok) {
-          throw new Error('Error al crear la configuración');
+          throw new Error(await buildErrorMessage(createResponse));
         }
-        
+
         const newConfig = await createResponse.json();
-        configId = newConfig.weight_config_id;
-        setActiveConfigId(configId);
-        
-        addToast("Configuración guardada correctamente.", "success");
-        
-        // Preguntar si desea activarla
-        const shouldActivate = window.confirm("¿Desea activar esta configuración ahora?");
-        if (shouldActivate && configId) {
-          await activateConfig(configId);
-        }
+        setActiveConfigId(newConfig.weight_config_id);
+        addToast("Configuración guardada y activada correctamente.", "success");
+        await loadCriteria();
       } else {
-        // Actualizar configuración existente
-        const updateResponse = await fetch(`${API_URL}/assessment-360/weights-config/${configId}/`, {
+        
+        const updateResponse = await fetch(`${API_URL}/assessment-360/weight-configs/${configId}/`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name: `Configuración ${new Date().toLocaleDateString()}`,
             description: 'Configuración de pesos de evaluación',
-            status: 'inactive',
-            criteria: criteria.map(c => ({
-              id: c.id,
-              percentage: c.percentage
-            }))
+            status: 'active',
+            criteria: buildCriteriaPayload(),
           }),
         });
-        
+
         if (!updateResponse.ok) {
-          throw new Error('Error al actualizar la configuración');
+          const errorData = await updateResponse.json();
+          throw new Error(JSON.stringify(errorData));
         }
-        
-        addToast("Configuración guardada correctamente.", "success");
-        
-        // Preguntar si desea activarla
-        const shouldActivate = window.confirm("¿Desea activar esta configuración ahora?");
-        if (shouldActivate && configId) {
-          await activateConfig(configId);
-        }
+
+        addToast("Configuración guardada y activada correctamente.", "success");
+        await loadCriteria();
       }
     } catch (err) {
       console.error('Error saving criteria:', err);
@@ -232,66 +230,39 @@ export default function WeightsConfig() {
       setIsSaving(false);
     }
   };
-  
-  const activateConfig = async (configId: number) => {
-    try {
-      const response = await fetch(`${API_URL}/assessment-360/weights-config/${configId}/activate/`, {
-        method: 'POST',
-      });
-      
-      if (response.ok) {
-        addToast("Configuración activada correctamente.", "success");
-        await loadCriteria(); // Recargar para mostrar la configuración activa
-      } else {
-        addToast("No se pudo activar la configuración.", "warning");
-      }
-    } catch (err) {
-      console.error('Error activating config:', err);
-      addToast("Error al activar la configuración.", "error");
-    }
-  };
 
   const handleCreateNew = async () => {
     if (!isValid) {
       addToast("La suma de porcentajes debe ser 100% antes de crear una nueva configuración.", "warning");
       return;
     }
-    
+
     if (isSaving) return;
-    
+
     setIsSaving(true);
     setError(null);
-    
+
     try {
-      const response = await fetch(`${API_URL}/assessment-360/weights-config/`, {
+      const response = await fetch(`${API_URL}/assessment-360/weight-configs/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: `Configuración ${new Date().toLocaleDateString()}`,
           description: 'Configuración de pesos de evaluación',
-          status: 'inactive',
-          criteria: criteria.map(c => ({
-            id: c.id,
-            percentage: c.percentage
-          }))
+          status: 'active',
+          criteria: buildCriteriaPayload(),
         }),
       });
-      
+
       if (!response.ok) {
-        throw new Error('Error al crear la configuración');
+        const errorData = await response.json();
+        throw new Error(JSON.stringify(errorData));
       }
-      
+
       const newConfig = await response.json();
       setActiveConfigId(newConfig.weight_config_id);
-      addToast("Nueva configuración creada correctamente.", "success");
-      
-      // Preguntar si desea activarla
-      const shouldActivate = window.confirm("¿Desea activar esta nueva configuración?");
-      if (shouldActivate) {
-        await activateConfig(newConfig.weight_config_id);
-      }
+      addToast("Nueva configuración creada y activada correctamente.", "success");
+      await loadCriteria();
     } catch (err) {
       console.error('Error creating config:', err);
       setError(err instanceof Error ? err.message : 'Error al crear la configuración');
@@ -367,17 +338,17 @@ export default function WeightsConfig() {
       {error && (
         <div className="weights-page">
           <div className="weights-inner">
-            <div className="error-message" style={{ 
-              backgroundColor: '#fee2e2', 
-              color: '#dc2626', 
-              padding: '1rem', 
-              borderRadius: '8px', 
+            <div className="error-message" style={{
+              backgroundColor: '#fee2e2',
+              color: '#dc2626',
+              padding: '1rem',
+              borderRadius: '8px',
               marginBottom: '1rem',
               border: '1px solid #fecaca'
             }}>
               <strong>Error:</strong> {error}
-              <button 
-                onClick={() => setError(null)} 
+              <button
+                onClick={() => setError(null)}
                 style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer' }}
               >
                 ✕
@@ -389,28 +360,28 @@ export default function WeightsConfig() {
 
       {/* Reset Confirmation Modal */}
       {showResetConfirm && (
-        <Modal 
-          open={showResetConfirm} 
-          title="Revertir configuración" 
-          onClose={() => setShowResetConfirm(false)} 
+        <Modal
+          open={showResetConfirm}
+          title="Revertir configuración"
+          onClose={() => setShowResetConfirm(false)}
           width={480}
         >
           <div className="modal-content">
             <p className="modal-text">
-              Esta acción restablecerá todos los criterios y porcentajes a sus <strong>valores predeterminados</strong>. 
+              Esta acción restablecerá todos los criterios y porcentajes a sus <strong>valores predeterminados</strong>.
               Los cambios no guardados se perderán.
             </p>
             <div className="modal-actions">
-              <button 
-                className="modal-btn modal-btn-ghost" 
-                type="button" 
+              <button
+                className="modal-btn modal-btn-ghost"
+                type="button"
                 onClick={() => setShowResetConfirm(false)}
               >
                 Cancelar
               </button>
-              <button 
-                className="modal-btn modal-btn-danger" 
-                type="button" 
+              <button
+                className="modal-btn modal-btn-danger"
+                type="button"
                 onClick={handleResetConfirm}
               >
                 Sí, restablecer
@@ -476,12 +447,12 @@ export default function WeightsConfig() {
             ) : (
               criteria.map((criterion) => {
                 const totalOthers = criteria
-                  .filter((c) => c.id !== criterion.id)
+                  .filter((c) => c.criterion_id !== criterion.criterion_id)
                   .reduce((acc, c) => acc + c.percentage, 0);
                 return (
                   <CriterionItem
-                    key={criterion.id}
-                    id={criterion.id}
+                    key={criterion.criterion_id}
+                    id={criterion.criterion_id}        
                     name={criterion.name}
                     description={criterion.description}
                     percentage={criterion.percentage}
@@ -496,8 +467,8 @@ export default function WeightsConfig() {
 
           {criteria.length > 0 && (
             <>
-              <VisualDistribution criteria={criteria} />
-              <CalcExample criteria={criteria} />
+              <VisualDistribution criteria={criteria.map(c => ({ ...c, id: c.criterion_id }))} />
+              <CalcExample criteria={criteria.map(c => ({ ...c, id: c.criterion_id }))} />
             </>
           )}
 
