@@ -25,7 +25,7 @@ class WeightConfigViewSet(viewsets.ModelViewSet):
         return (
             Weightconfig.objects
             .filter(is_deleted=False)
-            .prefetch_related('weightconfigcriterion_set__criterion')
+            .prefetch_related('criteria_weights__criterion')
             .order_by('-created_at')
         )
 
@@ -72,12 +72,14 @@ class WeightConfigViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='active')
     def active(self, request):
-        try:
-            active_config = Weightconfig.objects.get(
-                status='active',
-                is_deleted=False,
-            )
-        except Weightconfig.DoesNotExist:
+        active_config = (
+            Weightconfig.objects
+            .filter(status='active', is_deleted=False)
+            .order_by('-created_at')
+            .first()  
+        )
+
+        if not active_config:
             return Response(
                 {'detail': 'No hay configuración activa.'},
                 status=status.HTTP_404_NOT_FOUND,
