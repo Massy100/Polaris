@@ -24,7 +24,7 @@ interface Teacher {
 }
 
 function getScoreColorClass(score: number): string {
-  if (score <= 51) return "stat-red";
+  if (score <= 50) return "stat-red";
   if (score <= 65) return "stat-yellow";
   return "stat-green";
 }
