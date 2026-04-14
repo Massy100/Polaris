@@ -85,11 +85,11 @@ interface AdminDashboardPanelProps {
 }
 
 const quickAccessItems: QuickAccessItem[] = [
-  { id: 1, label: 'Gestión Docente',      icon: 'Users',      path: '/user-management' },
+  { id: 1, label: 'Gestión Docente', icon: 'Users', path: '/user-management' },
   { id: 2, label: 'Ranking Institucional', icon: 'TrendingUp', path: '/institutional-ranking' },
-  { id: 3, label: 'Alerta de Desempeño',  icon: 'Bell',       path: '/alertas'           },
-  { id: 4, label: 'Cursos Históricos',    icon: 'History',    path: '/history-view' },
-  { id: 5, label: 'Carga Masiva',         icon: 'Upload',     path: '/bulk-upload' },
+  { id: 3, label: 'Alerta de Desempeño', icon: 'Bell', path: '/performance-alert' },
+  { id: 4, label: 'Cursos Históricos', icon: 'History', path: '/history-view' },
+  { id: 5, label: 'Carga Masiva', icon: 'Upload', path: '/bulk-upload' },
 ];
 
 const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
@@ -132,7 +132,25 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
 
   if (!isMounted) {
     return null;
-  }
+  };
+
+  const handleSettings = (): void => {
+    setOpen(false);
+    if (onNavigate) {
+      onNavigate('/notifications');
+    } else {
+      router.push('/notifications');
+    }
+  };
+
+  const handleNotifications = (): void => {
+    setOpen(false);
+    if (onNavigate) {
+      onNavigate('/weights-config');
+    } else {
+      router.push('/weights-config');
+    }
+  };
 
   return (
     <>
@@ -154,10 +172,12 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
             <Icons.X />
           </button>
           <div className="adp-header-actions">
-            <button className="adp-icon-btn">
+            <button className="adp-icon-btn"
+            onClick = {handleSettings}>
               <Icons.Bell />
             </button>
-            <button className="adp-icon-btn">
+            <button className="adp-icon-btn"
+            onClick = {handleNotifications}>
               <Icons.Settings />
             </button>
           </div>
