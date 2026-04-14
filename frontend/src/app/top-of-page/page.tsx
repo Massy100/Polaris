@@ -22,7 +22,7 @@ const cards: { id: string; icon: IconType; iconColor: 'blue' | 'yellow'; title: 
     iconColor: 'blue',
     title: 'Ranking Institucional',
     description: 'Vista para directivos sobre los docentes mejor evaluados.',
-    href: '/ranking',
+    href: '/institutional-ranking',
   },
   {
     id: 'alerts',
@@ -30,7 +30,7 @@ const cards: { id: string; icon: IconType; iconColor: 'blue' | 'yellow'; title: 
     iconColor: 'yellow',
     title: 'Alertas de Desempeño',
     description: 'Notificaciones automáticas cuando un docente baja de cierto puntaje.',
-    href: '/alerts',
+    href: '/performance-alert',
   },
   {
     id: 'history',
