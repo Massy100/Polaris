@@ -46,7 +46,7 @@ export default function NotificationCenter() {
                             <h1>Notificaciones</h1>
                             <span className="notifications-count">{unreadCount} notificaciones no leídas</span>
                         </div>
-                        <Link href="/topOfPage" title="Regresar al inicio" style={{ textDecoration: 'none' }}>
+                        <Link href="/top-of-page" title="Regresar al inicio" style={{ textDecoration: 'none' }}>
                             <div className='home-icon-wrapper' style={{ background: '#f0f4fa', padding: '10px', borderRadius: '12px', display: 'flex' }}>
                                 <Home size={22} color="#1a2fcc" />
                             </div>
