@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import "./history-view.css";
 import AdminDashboardPanel from "../components/admin-dashboard-panel";
 
-// BACKEND REFERENCE: Expected data structures from Django/Neon
 export interface HistoricalRecord {
   id: string;
   term: string;
@@ -44,7 +44,6 @@ export interface CourseData {
   history: HistoricalRecord[];
 }
 
-// BACKEND REFERENCE: Mock data to be replaced with fetch calls
 const MOCK_PROFESSORS: ProfessorData[] = [
   {
     id: "p1",
@@ -154,6 +153,8 @@ const MOCK_COURSES: CourseData[] = [
 ];
 
 export default function HistoryView() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState<"professors" | "courses">("professors");
   const [selectedProfId, setSelectedProfId] = useState<string | null>(null);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
@@ -168,15 +169,15 @@ export default function HistoryView() {
   const selectedCourse = MOCK_COURSES.find((c) => c.id === selectedCourseId);
 
   return (
-    <>
+    <div className="flex min-h-screen">
       <AdminDashboardPanel
         userName="Usuario Admin"
-        activePath="/cursos-historicos"
-        onNavigate={(path: string) => { window.location.href = path; }}
-        onLogout={() => { window.location.href = "/"; }}
+        activePath={pathname}
+        onNavigate={(path: string) => router.push(path)}
+        onLogout={() => router.push("/")}
       />
 
-      <div className="hv-layout">
+      <div className="hv-layout flex-1">
         <div className="hv-header-main">
           <div className="hv-title-row">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -488,6 +489,6 @@ export default function HistoryView() {
           </main>
         </div>
       </div>
-    </>
+    </div>
   );
 }
