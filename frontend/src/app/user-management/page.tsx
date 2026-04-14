@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import SidebarDropDown from '../components/sidebar-drop-down';
 import Modal from '../components/modal';
 import Pagination from '../components/pagination';
@@ -31,6 +32,8 @@ type ConfirmType = 'delete' | 'edit';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 export default function UserManagementPage() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [isMounted, setIsMounted] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -212,37 +215,27 @@ export default function UserManagementPage() {
     }
   };
 
+  const handleNavigation = (path: string) => {
+    router.push(path);
+  };
+
+  const handleLogout = () => {
+    router.push('/');
+  };
+
   if (!isMounted) {
-    return (
-      <>
-        <AdminDashboardPanel />
-        <div className='container-management-general'>
-          <div className='user-management-container'>
-            <div className='user-management-header'>
-              <div className="title-management">
-                <h1>Gestión de Docentes</h1>
-              </div>
-            </div>
-            <div className='user-management-content'>
-              <div className="loading-spinner" style={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                padding: '2rem' 
-              }}>
-                Cargando...
-              </div>
-            </div>
-          </div>
-        </div>
-      </>
-    );
+    return null;
   }
 
   return (
-    <>
-      <AdminDashboardPanel />
-      <div className='container-management-general'>
+    <div className="flex min-h-screen bg-gray-50">
+      <AdminDashboardPanel 
+        userName="Usuario Admin"
+        activePath={pathname}
+        onNavigate={handleNavigation}
+        onLogout={handleLogout}
+      />
+      <div className='container-management-general flex-1'>
         {error && (
           <div className="error-message" style={{ color: 'red', padding: '1rem' }}>
             Error: {error}
@@ -489,6 +482,6 @@ export default function UserManagementPage() {
           </div>
         </div>
       </Modal>
-    </>
+    </div>
   );
 }
