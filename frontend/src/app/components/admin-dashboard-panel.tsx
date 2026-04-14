@@ -88,7 +88,7 @@ const quickAccessItems: QuickAccessItem[] = [
   { id: 2, label: 'Ranking Institucional', icon: 'TrendingUp', path: '/institutional-ranking'},
   { id: 3, label: 'Alerta de Desempeño',  icon: 'Bell',       path: '/performance-alert'},
   { id: 4, label: 'Cursos Históricos',    icon: 'History',    path: '/history-view' },
-  { id: 5, label: 'Carga Masiva',         icon: 'Upload',     path: '/carga-masiva'      },
+  { id: 5, label: 'Carga Masiva',         icon: 'Upload',     path: '/bulk-upload'      },
 ];
 
 const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
