@@ -8,7 +8,7 @@ import VisualDistribution from "../components/visual-distribution";
 import CalcExample from "../components/calc-example";
 import AdminDashboardPanel from "../components/admin-dashboard-panel";
 import Modal from '../components/modal';
-import "./weights-config.css";
+import '../weights-config/weights-config.css';
 
 interface Criterion {
   id: number;

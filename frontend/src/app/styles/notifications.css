@@ -1,0 +1,113 @@
+.notifications-container {
+    min-height: 100vh;
+    background-color: #e8edf5;
+    padding: 80px 24px;
+    display: flex;
+    justify-content: center;
+}
+
+.notifications-card {
+    background: white;
+    width: 100%;
+    max-width: 900px;
+    border-radius: 18px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 32px;
+}
+
+.notifications-header {
+    border-bottom: 1px solid #edf2f7;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+.notifications-header h1 {
+    font-size: 28px;
+    color: #1B1A21;
+    margin: 0;
+}
+
+.notifications-count {
+    color: #667085;
+    font-size: 14px;
+}
+
+.notification-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.notification-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border-radius: 12px;
+    transition: background 0.2s;
+    border-bottom: 1px solid #f8fafc;
+}
+
+.notification-item:hover {
+    background-color: #f8fafc;
+}
+
+.notification-item.unread {
+    background-color: #f0f7ff;
+}
+
+.notif-icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Colores de Alerta */
+.bg-danger { background-color: #fee2e2; color: #ef4444; }
+.bg-warning { background-color: #fef3c7; color: #f59e0b; }
+
+.notif-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.notif-title {
+    font-weight: 600;
+    color: #1B1A21;
+    font-size: 15px;
+}
+
+.notif-desc {
+    color: #667085;
+    font-size: 14px;
+}
+
+.notif-date {
+    color: #94a3b8;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.unread-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #1a2fcc;
+    border-radius: 50%;
+}
+
+.btn-delete-notif {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.btn-delete-notif:hover {
+    background: #fee2e2;
+}
