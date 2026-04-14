@@ -37,12 +37,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: polaris_db
-      POSTGRES_USER: polaris_user
-      POSTGRES_PASSWORD: polaris_password
-      DJANGO_SETTINGS_MODULE: polaris_core.settings
+      DATABASE_URL: postgresql://neondb_owner:npg_w0JPZ2QDIBNA@ep-royal-leaf-a8xax2zw-pooler.eastus2.azure.neon.tech/polaris_db?sslmode=require&channel_binding=require
       CORS_ALLOWED_ORIGINS: http://localhost:3000
       CSRF_TRUSTED_ORIGINS: http://localhost:3000
       DEBUG: 'True'

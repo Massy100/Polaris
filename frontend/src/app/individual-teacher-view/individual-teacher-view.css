@@ -1,0 +1,479 @@
+.individual-teacher-general-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 45px;
+    height: 100vh;
+    width: 100%;
+    background-color: #EEF5FE;
+    overflow-x: hidden;
+    overflow-y: auto;
+    color: black;
+}
+
+.individual-teacher-presentation-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+    padding: 15px 25px;
+    width: 100%;
+    border-radius: 12px;
+    background-color: #FFFFFF;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.individual-teacher-personal-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.individual-teacher-name {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.individual-teacher-department {
+    font-size: 19px;
+    color: #155DFC;
+}
+
+.individual-teacher-meta {
+    margin-top: 22px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
+    column-gap: 80px;
+    row-gap: 16px;
+}
+
+.individual-teacher-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #5f5f5f;
+    font-size: 16px;
+}
+
+.individual-teacher-meta-item p {
+    margin: 0;
+}
+
+.individual-teacher-meta-item svg {
+    width: 20px;
+    height: 20px;
+}
+
+.individual-teacher-score {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.individual-teacher-score-card {
+    border: 2px solid #FFD6A7;
+    border-radius: 14px;
+    background-color: #FFF7ED;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 20px;
+    text-align: center;
+}
+
+.individual-teacher-score-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background-color: #FFEDD4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #F54900;
+    margin-bottom: 14px;
+}
+
+.individual-teacher-score-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.individual-teacher-score-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #4A5577;
+}
+
+.individual-teacher-score-value {
+    margin: 10px 0 6px;
+    font-size: 36px;
+    line-height: 1;
+    font-weight: 600;
+    color: #0F172A;
+}
+
+.individual-teacher-score-subtitle {
+    margin: 0;
+    font-size: 15px;
+    color: #6A7282;
+}
+
+.individual-teacher-classes-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 25px;
+    padding: 15px 25px;
+    width: 100%;
+    border-radius: 12px;
+    background-color: #FFFFFF;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 28px;
+}
+
+.individual-teacher-section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.individual-teacher-class-card {
+    width: 100%;
+    background-color: #ffffff;
+    border: 1px solid #d9e2ef;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.individual-teacher-class-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    background-color: #F9FAFB;
+}
+
+.individual-teacher-class-header:hover {
+    background-color: #F3F4F6;
+}
+
+.individual-teacher-class-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.individual-teacher-class-title h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.individual-teacher-class-icon {
+    color: #155DFC;
+}
+
+.individual-teacher-comments-toggle {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+.individual-teacher-comments-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 1px solid #e2e8f0;
+}
+
+.individual-teacher-comments-column {
+    padding: 18px 16px;
+    min-height: 250px;
+}
+
+.individual-teacher-comments-column.positive {
+    border-right: 1px solid #e2e8f0;
+}
+
+.individual-teacher-comments-title {
+    margin: 0 0 16px;
+    font-size: 18px;
+    font-weight: 550;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    gap: 5px;
+}
+
+.individual-teacher-comments-title.positive {
+    color: #008236;
+}
+
+.individual-teacher-comments-title.positive svg {
+    height: 20px;
+    width: 20px;
+    color: #13AD4C;
+}
+
+.individual-teacher-comments-title.negative {
+    color: #C31C1E;
+}
+
+.individual-teacher-comments-title.negative svg {
+    height: 20px;
+    width: 20px;
+    color: #E7000B;
+}
+
+.individual-teacher-comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.individual-teacher-comments-list.scrollable {
+    max-height: 255px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.individual-teacher-comment {
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.individual-teacher-comment.positive {
+    background-color: #f0fdf4;
+    border: 1px solid #ccebd5;
+}
+
+.individual-teacher-comment.negative {
+    background-color: #fff1f2;
+    border: 1px solid #f3d0d5;
+}
+
+.individual-teacher-sentiment-analysis-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 25px;
+    padding: 15px 25px;
+    width: 100%;
+    border-radius: 12px;
+    background-color: #FFFFFF;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 28px;
+}
+
+@media (max-width: 1100px) {
+    .individual-teacher-general-container {
+        padding: 30px 20px;
+    }
+
+    .individual-teacher-presentation-container {
+        align-items: flex-start;
+        gap: 24px;
+    }
+
+    .individual-teacher-meta {
+        grid-template-columns: repeat(2, minmax(200px, 1fr));
+        column-gap: 32px;
+    }
+
+    .individual-teacher-score-card {
+        min-width: 180px;
+    }
+}
+
+@media (max-width: 900px) {
+    .individual-teacher-presentation-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .individual-teacher-personal-info {
+        width: 100%;
+    }
+
+    .individual-teacher-score {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .individual-teacher-score-card {
+        width: 100%;
+        max-width: 260px;
+    }
+
+    .individual-teacher-meta {
+        grid-template-columns: 1fr 1fr;
+        column-gap: 0;
+        row-gap: 14px;
+    }
+
+    .individual-teacher-class-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .individual-teacher-comments-container {
+        grid-template-columns: 1fr;
+    }
+
+    .individual-teacher-comments-column.positive {
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+    }
+}
+
+@media (max-width: 640px) {
+    .individual-teacher-general-container {
+        padding: 16px;
+    }
+
+    .individual-teacher-presentation-container,
+    .individual-teacher-classes-section {
+        padding: 14px;
+        border-radius: 10px;
+    }
+
+    .individual-teacher-sentiment-analysis-section {
+        padding: 0;
+    }
+
+    .individual-teacher-section-title {
+        padding: 20px 20px 0;
+    }
+
+    .individual-teacher-name {
+        font-size: 22px;
+        line-height: 1.2;
+        margin-bottom: 6px;
+    }
+
+    .individual-teacher-department {
+        font-size: 16px;
+    }
+
+    .individual-teacher-meta {
+        grid-template-columns: 1fr;
+        column-gap: 0;
+        row-gap: 14px;
+        margin-top: 18px;
+    }
+
+    .individual-teacher-meta-item {
+        align-items: flex-start;
+        font-size: 14px;
+        gap: 8px;
+    }
+
+    .individual-teacher-meta-item svg {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .individual-teacher-meta-item p {
+        word-break: break-word;
+    }
+
+    .individual-teacher-section-title {
+        font-size: 18px;
+        line-height: 1.2;
+        margin: 0;
+    }
+
+    .individual-teacher-class-header {
+        padding: 14px;
+    }
+
+    .individual-teacher-class-title {
+        width: 100%;
+        gap: 8px;
+    }
+
+    .individual-teacher-class-title h3 {
+        font-size: 16px;
+        line-height: 1.3;
+    }
+
+    .individual-teacher-comments-toggle {
+        font-size: 14px;
+        padding: 0;
+    }
+
+    .individual-teacher-comments-column {
+        padding: 14px;
+        min-height: auto;
+    }
+
+    .individual-teacher-comments-title {
+        font-size: 16px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .individual-teacher-comment {
+        padding: 12px 14px;
+        font-size: 14px;
+    }
+
+    .individual-teacher-score-card {
+        width: 100%;
+        max-width: none;
+        padding: 18px 16px;
+    }
+
+    .individual-teacher-score-value {
+        font-size: 30px;
+    }
+
+    .individual-teacher-score-title,
+    .individual-teacher-score-subtitle {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 420px) {
+    .individual-teacher-general-container {
+        padding: 12px;
+    }
+
+    .individual-teacher-presentation-container,
+    .individual-teacher-classes-section {
+        padding: 12px;
+    }
+
+    .individual-teacher-name {
+        font-size: 20px;
+    }
+
+    .individual-teacher-department {
+        font-size: 15px;
+    }
+
+    .individual-teacher-class-title h3 {
+        font-size: 15px;
+    }
+
+    .individual-teacher-comments-title {
+        font-size: 15px;
+    }
+
+    .individual-teacher-comment {
+        font-size: 13px;
+    }
+}
