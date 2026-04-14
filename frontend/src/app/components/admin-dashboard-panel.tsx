@@ -130,12 +130,12 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
 
   const handleSettings = (): void => {
     setOpen(false);
-    onNavigate?.('/weights-config');
+    onNavigate?.('/notificacions');
   };
 
   const handleNotifications = (): void => {
     setOpen(false);
-    onNavigate?.('/notifications');
+    onNavigate?.('/nweights-config');
   };
 
   return (
