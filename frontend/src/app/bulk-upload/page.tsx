@@ -1,534 +1,336 @@
-// app/WeightsConfig/page.tsx
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import CriterionItem from "../components/criterion-item";
-import AddCategoryModal from "../components/add-category-modal";
-import VisualDistribution from "../components/visual-distribution";
-import CalcExample from "../components/calc-example";
-import AdminDashboardPanel from "../components/admin-dashboard-panel";
-import Modal from '../components/modal';
-import "./weights-config.css";
+import { useMemo, useState } from 'react';
+import AdminDashboardPanel from '../components/admin-dashboard-panel';
+import './bulk-upload.css';
 
-interface Criterion {
-  id: number;
-  name: string;
-  description: string;
-  percentage: number;
-  display_order?: number;
-}
+type UploadCategory = 'titulos' | 'meritos' | 'opiniones';
 
-type ToastType = "success" | "warning" | "error";
-
-interface Toast {
-  id: number;
-  message: string;
-  type: ToastType;
-}
-
-interface WeightConfig {
-  weight_config_id: number;
-  name: string;
-  description: string;
-  status: string;
-  created_at: string;
-  criteria: Criterion[];
-}
-
-const INITIAL_CRITERIA: Criterion[] = [
-  { id: 1, name: "Evaluación de alumnos", description: "Calificación promedio otorgada por los estudiantes", percentage: 40 },
-  { id: 2, name: "Grados académicos", description: "Doctorado, Maestría, Licenciatura, etc.", percentage: 30 },
-  { id: 3, name: "Autoevaluación del docente", description: "Evaluación realizada por el propio docente", percentage: 20 },
-  { id: 4, name: "Evaluación de pares", description: "Observación y evaluación de otros docentes", percentage: 10 },
-];
+type FormatField = {
+  key: string;
+  desc: string;
+};
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
-export default function WeightsConfig() {
-  const [isMounted, setIsMounted] = useState(false);
-  const [criteria, setCriteria] = useState<Criterion[]>([]);
-  const [nextId, setNextId] = useState<number>(5);
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const [toastCounter, setToastCounter] = useState<number>(0);
-  const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [activeConfigId, setActiveConfigId] = useState<number | null>(null);
+const TAB_CONFIG: Record<
+  UploadCategory,
+  {
+    label: string;
+    sectionTitle: string;
+    sectionSub: string;
+    cardTitle: string;
+    cardDesc: string;
+    formatFields: FormatField[];
+  }
+> = {
+  titulos: {
+    label: 'Títulos',
+    sectionTitle: 'Carga de Títulos Académicos',
+    sectionSub: 'Sube archivos Excel o CSV con los datos de títulos de cada profesor.',
+    cardTitle: 'Subir Archivo de Títulos',
+    cardDesc: 'Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con los datos de títulos.',
+    formatFields: [
+      { key: 'nombre_profesor', desc: 'Nombre completo del profesor' },
+      { key: 'email', desc: 'Correo electrónico' },
+      { key: 'telefono', desc: 'Número de contacto' },
+      { key: 'especialidad', desc: 'Área de especialización' },
+      { key: 'grado_academico', desc: 'Máximo grado académico' },
+      { key: 'experiencia_anos', desc: 'Años de experiencia' },
+      { key: 'institucion_actual', desc: 'Institución donde trabaja' },
+    ],
+  },
+  meritos: {
+    label: 'Méritos',
+    sectionTitle: 'Carga de Méritos de Profesores',
+    sectionSub: 'Sube archivos Excel o CSV con los datos de méritos de cada profesor.',
+    cardTitle: 'Subir Archivo de Méritos',
+    cardDesc: 'Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con los datos de méritos.',
+    formatFields: [
+      { key: 'nombre_profesor', desc: 'Nombre completo del profesor' },
+      { key: 'email', desc: 'Correo electrónico' },
+      { key: 'tipo_merito', desc: 'Tipo de mérito o reconocimiento' },
+      { key: 'descripcion', desc: 'Descripción del mérito' },
+      { key: 'fecha_obtencion', desc: 'Fecha de obtención' },
+      { key: 'institucion_otorgante', desc: 'Institución que otorgó el mérito' },
+    ],
+  },
+  opiniones: {
+    label: 'Opiniones',
+    sectionTitle: 'Carga de Opiniones de Profesores',
+    sectionSub: 'Sube archivos Excel o CSV con las opiniones de cada profesor.',
+    cardTitle: 'Subir Archivo de Opiniones',
+    cardDesc: 'Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con los datos de opiniones.',
+    formatFields: [
+      { key: 'nombre_profesor', desc: 'Nombre completo del profesor' },
+      { key: 'email', desc: 'Correo electrónico' },
+      { key: 'opinion', desc: 'Texto de la opinión' },
+      { key: 'calificacion', desc: 'Puntuación del 1 al 10' },
+      { key: 'fecha_opinion', desc: 'Fecha de la opinión' },
+      { key: 'autor', desc: 'Autor de la opinión' },
+    ],
+  },
+};
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+function formatFileSize(size: number): string {
+  if (size < 1024) {
+    return `${size} B`;
+  }
+  if (size < 1024 * 1024) {
+    return `${(size / 1024).toFixed(1)} KB`;
+  }
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
 
-  const addToast = useCallback((message: string, type: ToastType = "success") => {
-    const id = toastCounter + 1;
-    setToastCounter(id);
-    setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3500);
-  }, [toastCounter]);
+export default function BulkUploadPage() {
+  const [activeTab, setActiveTab] = useState<UploadCategory>('titulos');
+  const [files, setFiles] = useState<File[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [resultMessage, setResultMessage] = useState('');
+  const [resultType, setResultType] = useState<'success' | 'error' | null>(null);
 
-  const loadCriteria = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      // Intentar obtener la configuración activa
-      const response = await fetch(`${API_URL}/assessment-360/weights-config/active/`);
-      
-      if (!response.ok) {
-        if (response.status === 404) {
-          // No hay configuración activa, usar criterios iniciales
-          setCriteria(INITIAL_CRITERIA);
-          setNextId(5);
-          setActiveConfigId(null);
-          return;
-        }
-        throw new Error('Error al cargar la configuración');
-      }
-      
-      const data: WeightConfig = await response.json();
-      setActiveConfigId(data.weight_config_id);
-      
-      if (data.criteria && data.criteria.length > 0) {
-        const transformed = data.criteria.map((item) => ({
-          id: item.id,
-          name: item.name,
-          description: item.description,
-          percentage: item.percentage,
-          display_order: item.display_order
-        }));
-        setCriteria(transformed);
-        const maxId = Math.max(...transformed.map((c) => c.id), 0);
-        setNextId(maxId + 1);
-      } else {
-        setCriteria(INITIAL_CRITERIA);
-        setNextId(5);
-      }
-    } catch (err) {
-      console.error('Error loading criteria:', err);
-      const errMsg = err instanceof Error ? err.message : 'Error al cargar la configuración';
-      setError(errMsg);
-      addToast(errMsg, 'error');
-      setCriteria(INITIAL_CRITERIA);
-      setNextId(5);
-      setActiveConfigId(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const current = TAB_CONFIG[activeTab];
+  const accept = '.xlsx,.xls,.csv';
 
-  useEffect(() => {
-    if (isMounted) {
-      loadCriteria();
-    }
-  }, [loadCriteria, isMounted]);
+  const fileSummary = useMemo(() => {
+    return files.map((file) => ({
+      name: file.name,
+      sizeLabel: formatFileSize(file.size),
+    }));
+  }, [files]);
 
-  const totalPercentage = criteria.reduce((acc, c) => acc + c.percentage, 0);
-  const isValid = totalPercentage === 100;
-  const diff = 100 - totalPercentage;
-
-  const handlePercentageChange = (id: number, value: number) => {
-    setCriteria((prev) => prev.map((c) => (c.id === id ? { ...c, percentage: value } : c)));
+  const resetFiles = () => {
+    setFiles([]);
+    setResultMessage('');
+    setResultType(null);
   };
 
-  const handleDelete = (id: number) => {
-    setCriteria((prev) => prev.filter((c) => c.id !== id));
-  };
-
-  const handleAddCategory = (name: string, description: string) => {
-    setCriteria((prev) => [...prev, { id: nextId, name, description, percentage: 0 }]);
-    setNextId((prev) => prev + 1);
-  };
-
-  const handleResetRequest = () => {
-    setShowResetConfirm(true);
-  };
-
-  const handleResetConfirm = async () => {
-    setShowResetConfirm(false);
-    setCriteria(INITIAL_CRITERIA);
-    setNextId(5);
-    addToast("Configuración restablecida a los valores predeterminados.", "warning");
-  };
-
-  const handleSave = async () => {
-    if (!isValid || isSaving) return;
-    
-    setIsSaving(true);
-    setError(null);
-    
-    try {
-      let configId = activeConfigId;
-      
-      // Si no hay configuración activa, crear una nueva
-      if (!configId) {
-        const createResponse = await fetch(`${API_URL}/assessment-360/weights-config/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: `Configuración ${new Date().toLocaleDateString()}`,
-            description: 'Configuración de pesos de evaluación',
-            status: 'inactive',
-            criteria: criteria.map(c => ({
-              id: c.id,
-              percentage: c.percentage
-            }))
-          }),
-        });
-        
-        if (!createResponse.ok) {
-          throw new Error('Error al crear la configuración');
-        }
-        
-        const newConfig = await createResponse.json();
-        configId = newConfig.weight_config_id;
-        setActiveConfigId(configId);
-        
-        addToast("Configuración guardada correctamente.", "success");
-        
-        // Preguntar si desea activarla
-        const shouldActivate = window.confirm("¿Desea activar esta configuración ahora?");
-        if (shouldActivate && configId) {
-          await activateConfig(configId);
-        }
-      } else {
-        // Actualizar configuración existente
-        const updateResponse = await fetch(`${API_URL}/assessment-360/weights-config/${configId}/`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: `Configuración ${new Date().toLocaleDateString()}`,
-            description: 'Configuración de pesos de evaluación',
-            status: 'inactive',
-            criteria: criteria.map(c => ({
-              id: c.id,
-              percentage: c.percentage
-            }))
-          }),
-        });
-        
-        if (!updateResponse.ok) {
-          throw new Error('Error al actualizar la configuración');
-        }
-        
-        addToast("Configuración guardada correctamente.", "success");
-        
-        // Preguntar si desea activarla
-        const shouldActivate = window.confirm("¿Desea activar esta configuración ahora?");
-        if (shouldActivate && configId) {
-          await activateConfig(configId);
-        }
-      }
-    } catch (err) {
-      console.error('Error saving criteria:', err);
-      setError(err instanceof Error ? err.message : 'Error al guardar la configuración');
-      addToast("Error al guardar. Intenta de nuevo.", "error");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-  
-  const activateConfig = async (configId: number) => {
-    try {
-      const response = await fetch(`${API_URL}/assessment-360/weights-config/${configId}/activate/`, {
-        method: 'POST',
-      });
-      
-      if (response.ok) {
-        addToast("Configuración activada correctamente.", "success");
-        await loadCriteria(); // Recargar para mostrar la configuración activa
-      } else {
-        addToast("No se pudo activar la configuración.", "warning");
-      }
-    } catch (err) {
-      console.error('Error activating config:', err);
-      addToast("Error al activar la configuración.", "error");
-    }
-  };
-
-  const handleCreateNew = async () => {
-    if (!isValid) {
-      addToast("La suma de porcentajes debe ser 100% antes de crear una nueva configuración.", "warning");
+  const appendFiles = (incoming: File[]) => {
+    if (!incoming.length) {
       return;
     }
-    
-    if (isSaving) return;
-    
-    setIsSaving(true);
-    setError(null);
-    
-    try {
-      const response = await fetch(`${API_URL}/assessment-360/weights-config/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: `Configuración ${new Date().toLocaleDateString()}`,
-          description: 'Configuración de pesos de evaluación',
-          status: 'inactive',
-          criteria: criteria.map(c => ({
-            id: c.id,
-            percentage: c.percentage
-          }))
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Error al crear la configuración');
+
+    setFiles((prev) => {
+      const seen = new Set(prev.map((file) => `${file.name}-${file.size}-${file.lastModified}`));
+      const next = [...prev];
+      for (const file of incoming) {
+        const key = `${file.name}-${file.size}-${file.lastModified}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          next.push(file);
+        }
       }
-      
-      const newConfig = await response.json();
-      setActiveConfigId(newConfig.weight_config_id);
-      addToast("Nueva configuración creada correctamente.", "success");
-      
-      // Preguntar si desea activarla
-      const shouldActivate = window.confirm("¿Desea activar esta nueva configuración?");
-      if (shouldActivate) {
-        await activateConfig(newConfig.weight_config_id);
-      }
-    } catch (err) {
-      console.error('Error creating config:', err);
-      setError(err instanceof Error ? err.message : 'Error al crear la configuración');
-      addToast("Error al crear la configuración.", "error");
-    } finally {
-      setIsSaving(false);
-    }
+      return next;
+    });
+    setResultMessage('');
+    setResultType(null);
   };
 
-  if (!isMounted || isLoading) {
-    return (
-      <>
-        <AdminDashboardPanel
-          userName="Usuario Admin"
-          activePath="/WeightsConfig"
-          onNavigate={(path: string) => { window.location.href = path; }}
-          onLogout={() => { window.location.href = "/"; }}
-        />
-        <div className="weights-page">
-          <div className="weights-inner">
-            <div className="weights-loading">Cargando configuración...</div>
-          </div>
-        </div>
-      </>
-    );
-  }
+  const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    appendFiles(Array.from(event.target.files || []));
+    event.target.value = '';
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(false);
+    appendFiles(Array.from(event.dataTransfer.files || []));
+  };
+
+  const handleRemoveFile = (name: string) => {
+    setFiles((prev) => prev.filter((file) => file.name !== name));
+  };
+
+  const handleProcess = async () => {
+    if (!files.length || isProcessing) {
+      return;
+    }
+
+    setIsProcessing(true);
+    setResultMessage('');
+    setResultType(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('category', activeTab);
+      files.forEach((file) => formData.append('files', file));
+
+      const response = await fetch(`${API_URL}/integrations/bulk-upload/`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        throw new Error(data.message || 'No se pudo procesar la carga masiva.');
+      }
+
+      setResultMessage(`Carga procesada: ${data.total_files} archivo(s) en ${data.category}.`);
+      setResultType('success');
+      setFiles([]);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo procesar la carga masiva.';
+      setResultMessage(`Error: ${message}`);
+      setResultType('error');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <>
-      <AdminDashboardPanel
-        userName="Usuario Admin"
-        activePath="/WeightsConfig"
-        onNavigate={(path: string) => { window.location.href = path; }}
-        onLogout={() => { window.location.href = "/"; }}
-      />
+      <AdminDashboardPanel activePath="/bulk-upload" />
 
-      {/* Toast Container */}
-      <div className="toast-container">
-        {toasts.map((t) => (
-          <div key={t.id} className={`toast toast--${t.type}`}>
-            <span className="toast-icon">
-              {t.type === "success" && (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              )}
-              {t.type === "warning" && (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0" />
-                  <path d="M12 8v4" />
-                  <path d="M12 16h.01" />
-                </svg>
-              )}
-              {t.type === "error" && (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              )}
-            </span>
-            <span className="toast-message">{t.message}</span>
-            <button className="toast-close" onClick={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          </div>
-        ))}
-      </div>
-
-
-
-      {/* Reset Confirmation Modal */}
-      {showResetConfirm && (
-        <Modal 
-          open={showResetConfirm} 
-          title="Revertir configuración" 
-          onClose={() => setShowResetConfirm(false)} 
-          width={480}
-        >
-          <div className="modal-content">
-            <p className="modal-text">
-              Esta acción restablecerá todos los criterios y porcentajes a sus <strong>valores predeterminados</strong>. 
-              Los cambios no guardados se perderán.
-            </p>
-            <div className="modal-actions">
-              <button 
-                className="modal-btn modal-btn-ghost" 
-                type="button" 
-                onClick={() => setShowResetConfirm(false)}
-              >
-                Cancelar
-              </button>
-              <button 
-                className="modal-btn modal-btn-danger" 
-                type="button" 
-                onClick={handleResetConfirm}
-              >
-                Sí, restablecer
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
-
-      <div className="weights-page">
-        <div className="weights-inner">
-          <div className="weights-page-header">
-            <h1 className="weights-title">Sistema de Evaluación Docente</h1>
-            <p className="weights-subtitle">Módulo de administración para configurar los criterios de evaluación</p>
-          </div>
-
-          <div className="weights-card header-card">
-            <div className="header-card-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <path d="M3 9h18" />
-                <path d="M9 21V9" />
+      <div className="bu-root">
+        <header className="bu-header">
+          <div className="bu-header-brand">
+            <div className="bu-brand-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <ellipse cx="12" cy="5" rx="9" ry="3" />
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
               </svg>
             </div>
             <div>
-              <p className="header-card-title">Configuración de Pesos y Fórmulas</p>
-              <p className="header-card-desc">Define los porcentajes que componen la evaluación final del docente</p>
-              {activeConfigId && (
-                <p className="config-status" style={{ fontSize: '0.8rem', color: '#10b981', marginTop: '0.5rem' }}>
-                  ✓ Configuración activa cargada
-                </p>
-              )}
+              <p className="bu-brand-title">Carga Masiva de Datos</p>
+              <p className="bu-brand-sub">Sistema de gestión de profesores</p>
             </div>
           </div>
+        </header>
 
-          <div className="weights-card summary-card">
-            <p className="summary-text">La suma de los porcentajes debe ser 100%. Actualmente:</p>
-            <span className={`summary-value ${isValid ? "correct" : "incorrect"}`}>
-              {totalPercentage}%
-            </span>
-            {!isValid && (
-              <p className="summary-hint">
-                {diff > 0 ? `(Falta ${diff}%)` : `(Sobra ${Math.abs(diff)}%)`}
-              </p>
-            )}
-          </div>
-
-          <div className="weights-card criteria-card">
-            <div className="criteria-top">
-              <div>
-                <p className="criteria-title">Criterios de Evaluación</p>
-                <p className="criteria-desc">Ajusta los porcentajes usando los controles deslizantes o ingresando valores directamente</p>
-              </div>
-              <button className="btn-add" onClick={() => setShowModal(true)}>
-                + Agregar Categoría
-              </button>
-            </div>
-
-            {criteria.length === 0 ? (
-              <div className="empty-state" style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
-                No hay criterios de evaluación. Agrega uno para comenzar.
-              </div>
-            ) : (
-              criteria.map((criterion) => {
-                const totalOthers = criteria
-                  .filter((c) => c.id !== criterion.id)
-                  .reduce((acc, c) => acc + c.percentage, 0);
-                return (
-                  <CriterionItem
-                    key={criterion.id}
-                    id={criterion.id}
-                    name={criterion.name}
-                    description={criterion.description}
-                    percentage={criterion.percentage}
-                    totalOthers={totalOthers}
-                    onPercentageChange={handlePercentageChange}
-                    onDelete={handleDelete}
-                  />
-                );
-              })
-            )}
-          </div>
-
-          {criteria.length > 0 && (
-            <>
-              <VisualDistribution criteria={criteria} />
-              <CalcExample criteria={criteria} />
-            </>
-          )}
-
-          <div className="weights-footer">
-            <div className="footer-left">
-              <button className="btn-reset" onClick={handleResetRequest}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                  <path d="M3 3v5h5" />
-                </svg>
-                Restablecer
-              </button>
-              {!activeConfigId && criteria.length > 0 && isValid && (
-                <button className="btn-create" onClick={handleCreateNew} disabled={isSaving}>
-                  {isSaving ? 'Creando...' : 'Crear Nueva Configuración'}
-                </button>
-              )}
-            </div>
+        <nav className="bu-tabs" aria-label="Tipos de carga">
+          {(Object.keys(TAB_CONFIG) as UploadCategory[]).map((category) => (
             <button
-              className={`btn-save ${isValid && !isSaving ? "enabled" : ""}`}
-              onClick={handleSave}
-              disabled={!isValid || isSaving}
+              key={category}
+              type="button"
+              className={`bu-tab ${activeTab === category ? 'bu-tab--active' : ''}`}
+              onClick={() => {
+                setActiveTab(category);
+                resetFiles();
+              }}
             >
-              {isSaving ? (
-                <>
-                  <svg className="spin" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                  </svg>
-                  Guardando...
-                </>
-              ) : (
-                <>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                    <polyline points="17 21 17 13 7 13 7 21" />
-                    <polyline points="7 3 7 8 15 8" />
-                  </svg>
-                  Guardar Configuración
-                </>
-              )}
+              {TAB_CONFIG[category].label}
             </button>
-          </div>
-        </div>
-      </div>
+          ))}
+        </nav>
 
-      {showModal && (
-        <AddCategoryModal
-          onClose={() => setShowModal(false)}
-          onAdd={handleAddCategory}
-        />
-      )}
+        <main className="bu-main">
+          <section className="bu-section-title">
+            <h1 className="bu-h1">{current.sectionTitle}</h1>
+            <p className="bu-h1-sub">{current.sectionSub}</p>
+          </section>
+
+          <section className="bu-card">
+            <h2 className="bu-card-title">{current.cardTitle}</h2>
+            <p className="bu-card-sub">{current.cardDesc}</p>
+
+            <label
+              className={`bu-dropzone ${isDragging ? 'bu-dropzone--active' : ''}`}
+              onDragEnter={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                setIsDragging(true);
+              }}
+              onDragOver={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                setIsDragging(true);
+              }}
+              onDragLeave={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                setIsDragging(false);
+              }}
+              onDrop={handleDrop}
+            >
+              <input className="bu-hidden-input" type="file" multiple accept={accept} onChange={onInputChange} />
+              <div className="bu-dropzone-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="16 16 12 12 8 16" />
+                  <line x1="12" y1="12" x2="12" y2="21" />
+                  <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
+                </svg>
+              </div>
+              <p className="bu-dropzone-main">Arrastra tu archivo aquí o haz clic para seleccionar</p>
+              <p className="bu-dropzone-sub">Formatos soportados: {accept}</p>
+              <span className="bu-select-btn">Seleccionar Archivo</span>
+            </label>
+
+            {fileSummary.length > 0 && (
+              <div className="bu-preview-card">
+                <div className="bu-preview-header">
+                  <div>
+                    <p className="bu-preview-title">Archivos seleccionados</p>
+                    <p className="bu-preview-file">{fileSummary.length} archivo(s) listos para procesar</p>
+                  </div>
+                  <div className="bu-preview-meta">
+                    <span className="bu-meta-badge">{current.label}</span>
+                  </div>
+                </div>
+
+                <div className="bu-table-scroll">
+                  <table className="bu-table">
+                    <thead>
+                      <tr>
+                        <th className="bu-th bu-th-num">#</th>
+                        <th className="bu-th">Archivo</th>
+                        <th className="bu-th">Tamaño</th>
+                        <th className="bu-th">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {fileSummary.map((file, index) => (
+                        <tr key={file.name} className="bu-tr">
+                          <td className="bu-td bu-td-num">{index + 1}</td>
+                          <td className="bu-td">{file.name}</td>
+                          <td className="bu-td">{file.sizeLabel}</td>
+                          <td className="bu-td">
+                            <button type="button" className="bu-file-tag-remove" onClick={() => handleRemoveFile(file.name)}>
+                              Quitar
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="bu-preview-footer">
+                  <span className="bu-preview-msg">Revisa los archivos antes de enviarlos al backend.</span>
+                </div>
+              </div>
+            )}
+
+            <div className="bu-save-row">
+              <button type="button" className="bu-save-btn" onClick={handleProcess} disabled={!files.length || isProcessing}>
+                {isProcessing ? 'Procesando...' : 'Procesar Documentos'}
+              </button>
+            </div>
+
+            {resultMessage && (
+              <div className={`bu-toast ${resultType === 'error' ? 'bu-toast--error' : 'bu-toast--success'}`}>
+                {resultMessage}
+              </div>
+            )}
+          </section>
+
+          <section className="bu-card">
+            <h2 className="bu-card-title">Formato esperado del archivo</h2>
+            <p className="bu-card-sub">El backend valida estos campos por categoría.</p>
+            <ul>
+              {current.formatFields.map((field) => (
+                <li key={field.key}>
+                  <strong>{field.key}</strong>: {field.desc}
+                </li>
+              ))}
+            </ul>
+          </section>
+        </main>
+
+        <footer className="bu-footer">Sistema de Carga Masiva de Datos - Gestión de Profesores</footer>
+      </div>
     </>
   );
 }
