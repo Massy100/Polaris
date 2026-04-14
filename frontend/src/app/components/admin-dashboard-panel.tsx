@@ -84,11 +84,11 @@ interface AdminDashboardPanelProps {
 }
 
 const quickAccessItems: QuickAccessItem[] = [
-  { id: 1, label: 'Gestión Docente',      icon: 'Users',      path: '/user-management'   },
-  { id: 2, label: 'Ranking Institucional', icon: 'TrendingUp', path: '/institutional-ranking'},
-  { id: 3, label: 'Alerta de Desempeño',  icon: 'Bell',       path: '/performance-alert'},
-  { id: 4, label: 'Cursos Históricos',    icon: 'History',    path: '/history-view' },
-  { id: 5, label: 'Carga Masiva',         icon: 'Upload',     path: '/bulk-upload'      },
+  { id: 1, label: 'Gestion Docente',       icon: 'Users',      path: '/user-management'      },
+  { id: 2, label: 'Ranking Institucional',  icon: 'TrendingUp', path: '/institutional-ranking'},
+  { id: 3, label: 'Alerta de Desempeno',    icon: 'Bell',       path: '/performance-alert'    },
+  { id: 4, label: 'Cursos Historicos',      icon: 'History',    path: '/history-view'         },
+  { id: 5, label: 'Carga de Pensum',        icon: 'Upload',     path: '/pensum-upload'        },
 ];
 
 const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
@@ -99,9 +99,17 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
 }) => {
   const [open, setOpen] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [pensumLoaded, setPensumLoaded] = useState<boolean>(true);
 
   useEffect(() => {
     setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/pensum/status/')
+      .then(res => res.json())
+      .then(data => setPensumLoaded(data.is_loaded))
+      .catch(() => setPensumLoaded(true));
   }, []);
 
   const handleItemClick = (item: QuickAccessItem): void => {
@@ -126,7 +134,7 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
 
   if (!isMounted) {
     return null;
-  };
+  }
 
   const handleSettings = (): void => {
     setOpen(false);
@@ -158,12 +166,10 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
             <Icons.X />
           </button>
           <div className="adp-header-actions">
-            <button className="adp-icon-btn"
-            onClick = {handleSettings}>
+            <button className="adp-icon-btn" onClick={handleSettings}>
               <Icons.Bell />
             </button>
-            <button className="adp-icon-btn"
-            onClick = {handleNotifications}>
+            <button className="adp-icon-btn" onClick={handleNotifications}>
               <Icons.Settings />
             </button>
           </div>
@@ -172,28 +178,30 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
         <h1 className="adp-username">{userName}</h1>
 
         <div className="adp-quick-access">
-          <span className="adp-section-label">Acceso Rápido</span>
+          <span className="adp-section-label">Acceso Rapido</span>
           <div className="adp-items-list">
-            {quickAccessItems.map((item) => {
-              const Icon = Icons[item.icon];
-              return (
-                <button
-                  key={item.id}
-                  className={`adp-item ${activePath === item.path ? 'adp-item--active' : ''}`}
-                  onClick={() => handleItemClick(item)}
-                >
-                  <span className="adp-item-icon"><Icon /></span>
-                  <span className="adp-item-label">{item.label}</span>
-                </button>
-              );
-            })}
+            {quickAccessItems
+              .filter(item => item.path !== '/pensum-upload' || !pensumLoaded)
+              .map((item) => {
+                const Icon = Icons[item.icon];
+                return (
+                  <button
+                    key={item.id}
+                    className={`adp-item ${activePath === item.path ? 'adp-item--active' : ''}`}
+                    onClick={() => handleItemClick(item)}
+                  >
+                    <span className="adp-item-icon"><Icon /></span>
+                    <span className="adp-item-label">{item.label}</span>
+                  </button>
+                );
+              })}
           </div>
         </div>
 
         <div className="adp-footer">
           <button className="adp-logout-btn" onClick={handleLogout}>
             <Icons.LogOut />
-            <span>Cerrar Sesión</span>
+            <span>Cerrar Sesion</span>
           </button>
         </div>
       </div>
