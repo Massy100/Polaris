@@ -35,7 +35,12 @@ const PensumUploadCard: React.FC<PensumUploadCardProps> = ({ onSuccess }) => {
 
       if (res.ok) {
         setMessage({ text: data.message || 'Pensum cargado exitosamente', type: 'success' });
-        onSuccess?.();
+        
+        // Redirección automática tras 2 segundos
+        setTimeout(() => {
+          onSuccess?.();
+        }, 2000);
+
       } else {
         setMessage({ text: data.error || 'Ocurrio un error al procesar el archivo.', type: 'error' });
       }
@@ -56,9 +61,7 @@ const PensumUploadCard: React.FC<PensumUploadCardProps> = ({ onSuccess }) => {
   return (
     <div className="puc-card">
       <h2 className="puc-title">Carga de Pensum</h2>
-      <p className="puc-subtitle">
-        Sube el archivo Excel oficial con los cursos de la carrera. Esta accion solo puede realizarse una vez.
-      </p>
+      <p className="puc-subtitle">Sube el archivo Excel oficial con los cursos.</p>
 
       <div
         className={`puc-dropzone ${dragging ? 'puc-dropzone--dragging' : ''}`}
@@ -67,9 +70,9 @@ const PensumUploadCard: React.FC<PensumUploadCardProps> = ({ onSuccess }) => {
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
       >
-        <div className="puc-dropzone-icon">[ ]</div>
+        <div className="puc-dropzone-icon">📄</div>
         <p className="puc-dropzone-title">
-          {loading ? 'Procesando...' : 'Arrastra tu archivo aqui'}
+          {loading ? 'Procesando...' : 'Arrastra tu archivo aquí'}
         </p>
         <p className="puc-dropzone-hint">o haz clic para seleccionarlo</p>
         <input

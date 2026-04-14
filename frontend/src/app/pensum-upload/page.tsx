@@ -28,9 +28,9 @@ export default function PensumUploadPage() {
     return (
       <div className="pup-already-loaded">
         <h2>El pensum ya fue cargado</h2>
-        <p>Esta accion ya no esta disponible.</p>
-        <button onClick={() => router.push('/admin-dashboard')}>
-          Volver al Dashboard
+        <p>Redirigiendo al panel principal...</p>
+        <button onClick={() => router.push('/top-of-page')}>
+          Ir ahora
         </button>
       </div>
     );
@@ -38,7 +38,7 @@ export default function PensumUploadPage() {
 
   return (
     <div className="pup-wrapper">
-      <PensumUploadCard onSuccess={() => router.push('/admin-dashboard')} />
+      <PensumUploadCard onSuccess={() => router.push('/top-of-page')} />
     </div>
   );
 }
