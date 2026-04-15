@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import AdminDashboardPanel from '../components/admin-dashboard-panel';
 import DashboardCard from '../components/dashboard-card';
 import '../styles/top-of-page.css';
@@ -51,16 +51,27 @@ const cards: { id: string; icon: IconType; iconColor: 'blue' | 'yellow'; title: 
 ];
 
 export default function HomePage() {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleNavigation = (path: string) => {
+    router.push(path);
+  };
+
+  const handleLogout = () => {
+    router.push('/');
+  };
+
   return (
-    <>
+    <div className="flex min-h-screen bg-gray-50">
       <AdminDashboardPanel
         userName="Usuario Admin"
-        activePath="/"
-        onNavigate={(path) => { window.location.href = path; }}
-        onLogout={() => { window.location.href = "/"; }}
+        activePath={pathname}
+        onNavigate={handleNavigation}
+        onLogout={handleLogout}
       />
 
-      <div className="wrapper">
+      <div className="wrapper flex-1">
         <main className="main">
           <div className="grid">
             {cards.map((card) => (
@@ -78,6 +89,6 @@ export default function HomePage() {
         </main>
         <span className="brand">polaris</span>
       </div>
-    </>
+    </div>
   );
 }

@@ -27,7 +27,7 @@ class StandardResultsSetPagination(PageNumberPagination):
     max_page_size = 100
 
 class TeacherViewSet(viewsets.ModelViewSet):
-    queryset = Teacher.objects.all().order_by('-created_at')
+    queryset = Teacher.objects.all().prefetch_related('courses').order_by('-created_at')
     pagination_class = StandardResultsSetPagination
     
     def get_serializer_class(self):

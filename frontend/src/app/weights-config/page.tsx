@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import CriterionItem from "../components/criterion-item";
 import AddCategoryModal from "../components/add-category-modal";
 import VisualDistribution from "../components/visual-distribution";
@@ -45,6 +46,7 @@ const INITIAL_CRITERIA: Criterion[] = [
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 export default function WeightsConfig() {
+  const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const [criteria, setCriteria] = useState<Criterion[]>([]);
   const [nextId, setNextId] = useState<number>(5);
@@ -150,18 +152,14 @@ export default function WeightsConfig() {
     addToast("Configuración restablecida a los valores predeterminados.", "warning");
   };
 
-  
   const buildCriteriaPayload = () =>{
-    const payload = criteria.map((c) => ({
+    return criteria.map((c) => ({
       criterion_id: c.criterion_id,  
       percentage: c.percentage,
       name: c.name,
       description: c.description,
     }));
-      return payload;
   }
-
-
 
   const handleSave = async () => {
     if (!isValid || isSaving) return;
@@ -202,7 +200,6 @@ export default function WeightsConfig() {
         addToast("Configuración guardada y activada correctamente.", "success");
         await loadCriteria();
       } else {
-        
         const updateResponse = await fetch(`${API_URL}/assessment-360/weight-configs/${configId}/`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -278,8 +275,8 @@ export default function WeightsConfig() {
         <AdminDashboardPanel
           userName="Usuario Admin"
           activePath="/WeightsConfig"
-          onNavigate={(path: string) => { window.location.href = path; }}
-          onLogout={() => { window.location.href = "/"; }}
+          onNavigate={(path) => router.push(path)}
+          onLogout={() => router.push("/")}
         />
         <div className="weights-page">
           <div className="weights-inner">
@@ -295,11 +292,10 @@ export default function WeightsConfig() {
       <AdminDashboardPanel
         userName="Usuario Admin"
         activePath="/WeightsConfig"
-        onNavigate={(path: string) => { window.location.href = path; }}
-        onLogout={() => { window.location.href = "/"; }}
+        onNavigate={(path) => router.push(path)}
+        onLogout={() => router.push("/")}
       />
 
-      {/* Toast Container */}
       <div className="toast-container">
         {toasts.map((t) => (
           <div key={t.id} className={`toast toast--${t.type}`}>
@@ -334,7 +330,6 @@ export default function WeightsConfig() {
         ))}
       </div>
 
-      {/* Error Message */}
       {error && (
         <div className="weights-page">
           <div className="weights-inner">
@@ -358,7 +353,6 @@ export default function WeightsConfig() {
         </div>
       )}
 
-      {/* Reset Confirmation Modal */}
       {showResetConfirm && (
         <Modal
           open={showResetConfirm}
