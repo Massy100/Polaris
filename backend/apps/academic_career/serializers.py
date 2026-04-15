@@ -20,25 +20,35 @@ class CareerSerializer(serializers.ModelSerializer):
         model = Career
         fields = ['career_id', 'faculty', 'faculty_name', 'name', 'status']
 
+
 class TeacherSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     courses_taught = serializers.SerializerMethodField()
+
     courses = serializers.PrimaryKeyRelatedField(
-        many=True, 
+        many=True,
         queryset=Course.objects.all(),
+        write_only=True,
         required=False
     )
-    
+
+    courses_detail = CourseSerializer(source='courses', many=True, read_only=True)
+
     class Meta:
         model = Teacher
         fields = [
             'teacher_id',
-            'first_name', 
+            'first_name',
             'last_name',
             'full_name',
             'code',
             'email',
-            'courses',
+            'phone',
+            'department',
+            'since',
+            'role',
+            'courses',          
+            'courses_detail',   
             'courses_taught',
             'status',
             'created_at',
@@ -58,7 +68,7 @@ class TeacherSerializer(serializers.ModelSerializer):
 class TeacherListSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     courses_taught = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Teacher
         fields = [
@@ -71,12 +81,12 @@ class TeacherListSerializer(serializers.ModelSerializer):
             'courses_taught',
             'status'
         ]
-    
+
     def get_full_name(self, obj):
         if obj.first_name and obj.last_name:
             return f"{obj.first_name} {obj.last_name}"
         return obj.first_name or obj.last_name or f"Docente {obj.teacher_id}"
-    
+
     def get_courses_taught(self, obj):
         courses = obj.courses.all()
         return ", ".join([course.name for course in courses]) if courses.exists() else ""
