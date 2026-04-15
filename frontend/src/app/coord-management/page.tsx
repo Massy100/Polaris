@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Search, Plus, Trash2, Edit3, Info, AlertTriangle, RotateCcw, Eye, Lock } from 'lucide-react';
 import SidebarDropDown from '../components/sidebar-drop-down';
 import Modal from '../components/modal';
+import Pagination from '../components/pagination';
 import AdminDashboardPanel from '../components/admin-dashboard-panel';
 import '../styles/coord-management.css';
 
@@ -29,6 +30,9 @@ export default function CoordManagementPage() {
     const pathname = usePathname();
     const [isMounted, setIsMounted] = useState(false);
     const [showPasswords, setShowPasswords] = useState<{ [key: number]: boolean }>({});
+    
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
     
     const [coordinadores, setCoordinadores] = useState<Coordinador[]>([
         {
@@ -68,6 +72,20 @@ export default function CoordManagementPage() {
             c.teacher_id === coord.teacher_id ? { ...c, status: newStatus } : c
         ));
     };
+
+    // Lógica de Paginación Local
+    const filteredCoords = useMemo(() => {
+        return coordinadores.filter(c => 
+            `${c.first_name} ${c.last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [coordinadores, searchTerm]);
+
+    const paginatedCoords = useMemo(() => {
+        const start = (page - 1) * pageSize;
+        return filteredCoords.slice(start, start + pageSize);
+    }, [filteredCoords, page, pageSize]);
+
+    const totalItems = filteredCoords.length;
 
     const handleOpenAdd = () => {
         setIsEditing(false);
@@ -143,7 +161,7 @@ export default function CoordManagementPage() {
                                     placeholder="Buscar por nombre..." 
                                     className='search-management-input'
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
                                 />
                             </div>
                         </div>
@@ -152,55 +170,65 @@ export default function CoordManagementPage() {
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Nombre Completo</th>
-                                        <th>Contraseña</th>
-                                        <th>Código</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
+                                        <th className="text-center">ID</th>
+                                        <th className="text-center">Nombre Completo</th>
+                                        <th className="text-center">Contraseña</th>
+                                        <th className="text-center">Código</th>
+                                        <th className="text-center">Estado</th>
+                                        <th className="text-center">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {coordinadores
-                                    .filter(c => `${c.first_name} ${c.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()))
-                                    .map((c) => (
-                                    <tr key={c.teacher_id}>
-                                        <td>#{c.teacher_id}</td>
-                                        <td>{c.first_name} {c.last_name}</td>
-                                        <td>
-                                            <div className="password-box">
-                                                <span style={{ fontFamily: 'monospace', letterSpacing: '2px' }}>
-                                                    {showPasswords[c.teacher_id] ? c.password : '••••••••'}
-                                                </span>
+                                    {paginatedCoords.map((c) => (
+                                        <tr key={c.teacher_id}>
+                                            <td className="text-center">#{c.teacher_id}</td>
+                                            <td className="text-center">{c.first_name} {c.last_name}</td>
+                                            <td className="text-center">
+                                                <div className="flex justify-center items-center py-2">
+                                                    <div className="password-box">
+                                                        <span style={{ fontFamily: 'monospace', letterSpacing: '2px' }}>
+                                                            {showPasswords[c.teacher_id] ? c.password : '••••••••'}
+                                                        </span>
+                                                        <button 
+                                                            onClick={() => togglePasswordVisibility(c.teacher_id)} 
+                                                            style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: '#2F73DF', padding: 0 }}
+                                                        >
+                                                            {showPasswords[c.teacher_id] ? <Lock size={16}/> : <Eye size={16}/>}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="text-center">{c.code}</td>
+                                            <td className="text-center">
                                                 <button 
-                                                    onClick={() => togglePasswordVisibility(c.teacher_id)} 
-                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: 0, color: '#2F73DF' }}
+                                                    className={`status-toggle-btn ${c.status === 'active' ? 'status-active-btn' : 'status-inactive-btn'}`}
+                                                    onClick={() => toggleStatus(c)}
                                                 >
-                                                    {showPasswords[c.teacher_id] ? <Lock size={16}/> : <Eye size={16}/>}
+                                                    {c.status === 'active' ? 'Activo' : 'Inactivo'}
                                                 </button>
-                                            </div>
-                                        </td>
-                                        <td>{c.code}</td>
-                                        <td>
-                                            <button 
-                                                className={`status-toggle-btn ${c.status === 'active' ? 'status-active-btn' : 'status-inactive-btn'}`}
-                                                onClick={() => toggleStatus(c)}
-                                            >
-                                                {c.status === 'active' ? 'Activo' : 'Inactivo'}
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <div className="action-buttons-table">
-                                                <button className="action-btn-circle" title="Info" onClick={() => handleViewDetails(c)}><Info size={18}/></button>
-                                                <button className="action-btn-circle" title="Editar" onClick={() => handleOpenEdit(c)}><Edit3 size={18}/></button>
-                                                <button className="action-btn-circle delete" title="Eliminar" onClick={() => { setSelectedCoord(c); setConfirmOpen(true); }}><Trash2 size={18}/></button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                            </td>
+                                            <td className="text-center">
+                                                <div className="action-buttons-table justify-center">
+                                                    <button className="action-btn-circle" title="Info" onClick={() => handleViewDetails(c)}><Info size={18}/></button>
+                                                    <button className="action-btn-circle" title="Editar" onClick={() => handleOpenEdit(c)}><Edit3 size={18}/></button>
+                                                    <button className="action-btn-circle delete" title="Eliminar" onClick={() => { setSelectedCoord(c); setConfirmOpen(true); }}><Trash2 size={18}/></button>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
+
+                        {totalItems > 0 && (
+                            <Pagination 
+                                page={page} 
+                                pageSize={pageSize} 
+                                totalItems={totalItems} 
+                                onPageChange={setPage} 
+                                onPageSizeChange={(s) => { setPageSize(s); setPage(1); }} 
+                            />
+                        )}
                     </div>
                 </div>
             </div>
@@ -213,8 +241,8 @@ export default function CoordManagementPage() {
                         <div className="detail-item"><span className="detail-label">Departamento</span><span className="detail-value">{draft.department}</span></div>
                         <div className="detail-item"><span className="detail-label">Teléfono</span><span className="detail-value">{draft.phone}</span></div>
                         <div className="detail-item"><span className="detail-label">Email</span><span className="detail-value">{draft.email}</span></div>
-                        <div className="detail-item"><span className="detail-label">Último Update</span><span className="detail-value">{draft.updated_at}</span></div>
-                        <button onClick={() => setOpen(false)} className="btn-modal-secondary" style={{marginTop:'20px'}}>Cerrar</button>
+                        <div className="detail-item"><span className="detail-label">Rol</span><span className="detail-value">{draft.role}</span></div>
+                        <button onClick={() => setOpen(false)} className="btn-modal-secondary w-full mt-5">Cerrar</button>
                     </div>
                 ) : (
                     <form className="sdd-form-container" onSubmit={handleSubmit}>
@@ -243,6 +271,10 @@ export default function CoordManagementPage() {
                                 <label className="sdd-label">Departamento</label>
                                 <input type="text" className="sdd-input-underline" value={draft.department} onChange={(e) => setDraft({...draft, department: e.target.value})} />
                             </div>
+                            <div className="sdd-field-group full-width">
+                                <label className="sdd-label">Rol</label>
+                                <input type="text" className="sdd-input-underline" value={draft.role} onChange={(e) => setDraft({...draft, role: e.target.value})} />
+                            </div>
                         </div>
                         {isEditing && (
                             <div className="security-box-draft" style={{marginTop:'20px'}}>
@@ -252,19 +284,19 @@ export default function CoordManagementPage() {
                                 </button>
                             </div>
                         )}
-                        <div className="modal-btn-group" style={{marginTop:'30px'}}>
+                        <div className="modal-btn-group mt-5">
                             <button type="button" onClick={() => setOpen(false)} className="btn-modal-secondary">Cancelar</button>
-                            <button type="submit" className="add-button-management" style={{flex:1, justifyContent:'center'}}>Guardar</button>
+                            <button type="submit" className="add-button-management flex-1 justify-center">Guardar</button>
                         </div>
                     </form>
                 )}
             </SidebarDropDown>
 
             <Modal open={confirmOpen} title="Eliminar" onClose={() => setConfirmOpen(false)} width={400}>
-                <div className="modal-confirm-body">
-                    <div className="modal-warning-icon"><AlertTriangle size={32} /></div>
+                <div className="modal-confirm-body text-center p-5">
+                    <div className="modal-warning-icon mx-auto mb-4"><AlertTriangle size={40} /></div>
                     <p>¿Eliminar a <strong>{selectedCoord?.first_name}</strong>?</p>
-                    <div className="modal-btn-group">
+                    <div className="modal-btn-group mt-5">
                         <button onClick={() => setConfirmOpen(false)} className="btn-modal-secondary">No</button>
                         <button onClick={() => { setCoordinadores(coordinadores.filter(c => c.teacher_id !== selectedCoord?.teacher_id)); setConfirmOpen(false); }} className="btn-modal-danger">Sí, eliminar</button>
                     </div>
