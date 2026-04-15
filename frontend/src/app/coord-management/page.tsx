@@ -145,7 +145,6 @@ export default function CoordManagementPage() {
                     <div className='user-management-header'>
                         <div className="title-management">
                             <h1>Gestión de Coordinadores</h1>
-                            <h2>Administración de Usuarios</h2>
                         </div>
                         <button className="add-button-management" onClick={handleOpenAdd}>
                             <Plus size={20} /> Añadir Coordinador
