@@ -123,9 +123,16 @@ export default function InstitutionalRanking() {
                             </thead>
                             <tbody>
                                 {paginatedDocentes.map((docente, index) => {
-                                    const displayRank = (page - 1) * pageSize + index + 1;
+                                    const displayRank = (page - 1) * pageSize + index + 1
+                                    const teacherId = docente.name.toLowerCase().replace(/ /g, "-");
+
                                     return (
-                                        <tr key={`${docente.name}-${docente.rating}`}>
+                                        <tr 
+                                            key={`${docente.name}-${docente.rating}`}
+                                            onClick={() => router.push(`/individual-teacher-view/${teacherId}`)}
+                                            style={{ cursor: 'pointer' }}
+                                            className="ranking-row-hover"
+                                        >
                                             <td>
                                                 <div className="rank-cell">
                                                     {displayRank <= 3 ? (
