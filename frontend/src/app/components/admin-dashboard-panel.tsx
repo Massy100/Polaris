@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
 import '../styles/admin-dashboard-panel.css';
 
 type IconProps = React.SVGProps<SVGSVGElement>;
@@ -97,6 +99,9 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
   onNavigate,
   onLogout,
 }) => {
+  const { signOut } = useAuth();
+  const router = useRouter();
+  
   const [open, setOpen] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
   const [pensumLoaded, setPensumLoaded] = useState<boolean>(true);
@@ -122,8 +127,11 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
     }
   };
 
-  const handleLogout = (): void => {
+
+  const handleLogout = async (): Promise<void> => {
     try {
+      await signOut();
+      router.push('/sign-in');
       onLogout?.();
     } catch (error) {
       console.error(error);
