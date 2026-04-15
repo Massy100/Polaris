@@ -1,7 +1,5 @@
 'use client';
 
-import { useRouter, usePathname } from 'next/navigation';
-import AdminDashboardPanel from '../components/admin-dashboard-panel';
 import DashboardCard from '../components/dashboard-card';
 import '../styles/top-of-page.css';
 
@@ -37,7 +35,7 @@ const cards: { id: string; icon: IconType; iconColor: 'blue' | 'yellow'; title: 
     icon: 'history',
     iconColor: 'blue',
     title: 'Cursos Históricos',
-    description: 'Acceso completo al historial académico de cada docente. Consulta cursos impartidos, evaluaciones previas, evolución del desempeño y trayectoria completa a lo largo de los años.',
+    description: 'Acceso completo al historial académico de cada docente. Consulta cursos impartidos, evaluaciones previas y trayectoria completa.',
     href: '/history-view',
   },
   {
@@ -51,44 +49,33 @@ const cards: { id: string; icon: IconType; iconColor: 'blue' | 'yellow'; title: 
 ];
 
 export default function HomePage() {
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const handleNavigation = (path: string) => {
-    router.push(path);
-  };
-
-  const handleLogout = () => {
-    router.push('/');
-  };
-
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <AdminDashboardPanel
-        userName="Usuario Admin"
-        activePath={pathname}
-        onNavigate={handleNavigation}
-        onLogout={handleLogout}
-      />
+    <div className="url-page-bg flex-1">
+      <main className="url-container" style={{ paddingTop: '80px', paddingBottom: '60px' }}>
+        
+        <header style={{ marginBottom: '48px' }}>
+          <h1 style={{ fontSize: '32px', color: 'var(--url-navy)', marginBottom: '8px' }}>
+            Sistema de Gestión Académica - Polaris
+          </h1>
+          <p style={{ fontSize: '16px', color: 'var(--url-text-sec)' }}>
+            Bienvenido al sistema de gestión y evaluación docente. Seleccione un módulo para comenzar.
+          </p>
+        </header>
 
-      <div className="wrapper flex-1">
-        <main className="main">
-          <div className="grid">
-            {cards.map((card) => (
-              <DashboardCard 
-                key={card.id} 
-                icon={card.icon}
-                iconColor={card.iconColor}
-                title={card.title}
-                description={card.description}
-                href={card.href}
-                id={card.id}
-              />
-            ))}
-          </div>
-        </main>
-        <span className="brand">polaris</span>
-      </div>
+        <div className="grid">
+          {cards.map((card) => (
+            <DashboardCard 
+              key={card.id} 
+              icon={card.icon}
+              iconColor={card.iconColor}
+              title={card.title}
+              description={card.description}
+              href={card.href}
+              id={card.id}
+            />
+          ))}
+        </div>
+      </main>
     </div>
   );
 }

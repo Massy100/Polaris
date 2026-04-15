@@ -10,7 +10,6 @@ import {
   Filter,
 } from "lucide-react";
 import "../styles/add-category.css";
-import AdminDashboardPanel from "../components/admin-dashboard-panel";
 
 type Status = "danger" | "warning" | "good";
 
@@ -156,65 +155,56 @@ export default function PerformanceAlertPage() {
   }), [teachers]);
 
   return (
-    <>
-      <AdminDashboardPanel
-        userName="Usuario Admin"
-        activePath="/performance-alert"
-        onNavigate={(path: string) => { window.location.href = path; }}
-        onLogout={() => { window.location.href = "/"; }}
-      />
+    <div className="pa-wrapper">
+      <main className="pa-main">
+        <div className="pa-page-header">
+          <h1 className="pa-page-title">Alertas de Desempeño de Docentes</h1>
+          <p className="pa-page-subtitle">Monitoreo y seguimiento del rendimiento académico</p>
+        </div>
 
-      <div className="pa-wrapper">
-        <main className="pa-main">
-          <div className="pa-page-header">
-            <h1 className="pa-page-title">Alertas de Desempeño de Docentes</h1>
-            <p className="pa-page-subtitle">Monitoreo y seguimiento del rendimiento académico</p>
+        <div className="pa-summary-row">
+          <SummaryCard label="Total Docentes" value={counts.total}   colorClass="icon-blue"   icon={Users}         />
+          <SummaryCard label="En Peligro"     value={counts.danger}  colorClass="icon-red"    icon={TrendingDown}  />
+          <SummaryCard label="En Advertencia" value={counts.warning} colorClass="icon-yellow" icon={AlertTriangle} />
+          <SummaryCard label="Buen Desempeño" value={counts.good}    colorClass="icon-green"  icon={CheckCircle}   />
+        </div>
+
+        <div className="pa-filter-bar">
+          <div className="pa-search-wrapper">
+            <Search size={16} className="pa-search-icon" />
+            <input
+              type="text"
+              placeholder="Buscar por nombre o materia..."
+              className="pa-search-input"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
+          <Filter size={18} style={{ color: "#64748b", flexShrink: 0 }} />
+          <select
+            className="pa-filter-select"
+            value={filterStatus}
+            onChange={(e) => setFilter(e.target.value as "all" | Status)}
+          >
+            <option value="all">Todos los estados</option>
+            <option value="danger">En Peligro</option>
+            <option value="warning">Advertencia</option>
+            <option value="good">Buen Desempeño</option>
+          </select>
+        </div>
 
-          <div className="pa-summary-row">
-            <SummaryCard label="Total Docentes" value={counts.total}   colorClass="icon-blue"   icon={Users}         />
-            <SummaryCard label="En Peligro"     value={counts.danger}  colorClass="icon-red"    icon={TrendingDown}  />
-            <SummaryCard label="En Advertencia" value={counts.warning} colorClass="icon-yellow" icon={AlertTriangle} />
-            <SummaryCard label="Buen Desempeño" value={counts.good}    colorClass="icon-green"  icon={CheckCircle}   />
-          </div>
+        <div className="pa-grid">
+          {filtered.map((teacher) => (
+            <TeacherCard
+              key={teacher.id}
+              teacher={teacher}
+              onStatusChange={handleStatusChange}
+            />
+          ))}
+        </div>
+      </main>
 
-          <div className="pa-filter-bar">
-            <div className="pa-search-wrapper">
-              <Search size={16} className="pa-search-icon" />
-              <input
-                type="text"
-                placeholder="Buscar por nombre o materia..."
-                className="pa-search-input"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-            <Filter size={18} style={{ color: "#64748b", flexShrink: 0 }} />
-            <select
-              className="pa-filter-select"
-              value={filterStatus}
-              onChange={(e) => setFilter(e.target.value as "all" | Status)}
-            >
-              <option value="all">Todos los estados</option>
-              <option value="danger">En Peligro</option>
-              <option value="warning">Advertencia</option>
-              <option value="good">Buen Desempeño</option>
-            </select>
-          </div>
-
-          <div className="pa-grid">
-            {filtered.map((teacher) => (
-              <TeacherCard
-                key={teacher.id}
-                teacher={teacher}
-                onStatusChange={handleStatusChange}
-              />
-            ))}
-          </div>
-        </main>
-
-        <span className="pa-brand">Polaris</span>
-      </div>
-    </>
+      <span className="pa-brand">Polaris</span>
+    </div>
   );
 }

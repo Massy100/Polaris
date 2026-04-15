@@ -3,7 +3,7 @@
     inset: 0;
     z-index: 9999;
     pointer-events: none;
-    color: #1C1C1C
+    color: var(--url-text-pri);
 }
 
 .sdd-general.sdd-open {
@@ -13,9 +13,10 @@
 .sdd-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(13, 31, 78, 0.4);
+    backdrop-filter: blur(2px);
     opacity: 0;
-    transition: opacity 250ms ease;
+    transition: opacity 0.3s ease;
 }
 
 .sdd-general.sdd-open .sdd-overlay {
@@ -27,10 +28,10 @@
     top: 0;
     right: 0;
     height: 100%;
-    background: #fff;
-    box-shadow: -12px 0 30px rgba(0, 0, 0, 0.2);
+    background: var(--url-white);
+    box-shadow: -12px 0 32px rgba(13, 31, 78, 0.15);
     transform: translateX(100%);
-    transition: transform 250ms ease;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
 }
@@ -44,34 +45,42 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 14px 16px;
-    border-bottom: 1px solid #eaeaea;
+    padding: 20px 24px;
+    background: var(--url-surface-2);
+    border-bottom: 1px solid var(--url-border);
 }
 
 .sdd-title {
     margin: 0;
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--url-navy);
 }
 
 .sdd-close {
-    border: none;
-    background: transparent;
+    border: 1px solid var(--url-border);
+    background: var(--url-white);
     cursor: pointer;
     font-size: 18px;
     line-height: 1;
     padding: 8px;
-    border-radius: 8px;
+    border-radius: var(--url-radius-sm);
+    color: var(--url-text-muted);
+    transition: all var(--url-transition);
 }
 
 .sdd-close:hover {
-    background: #f3f3f3;
+    background: var(--url-danger-bg);
+    color: var(--url-danger);
+    border-color: var(--url-danger-bd);
+    transform: rotate(90deg);
 }
 
 .sdd-body {
-    padding: 16px;
+    padding: 24px;
     overflow: auto;
     flex: 1;
+    background: var(--url-white);
 }
 
 .sdd-data-container {
@@ -84,14 +93,14 @@
 .sdd-field {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     margin-bottom: 30px;
 }
 
 .sdd-label {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 600;
-    color: #333;
+    color: var(--url-text-sec);
     letter-spacing: 0.2px;
 }
 
@@ -102,18 +111,19 @@
 
 .input-underline-field {
     width: 100%;
-    font-size: 1rem;
-    padding: 0.2em 0.3em;
-    color: #333;
+    font-size: 16px;
+    padding: 8px 12px;
+    color: var(--url-text-pri);
     border: none;
-    border-bottom: 1.5px solid #d1d5db;
-    border-radius: 6px 6px 0 0;
+    border-bottom: 2px solid var(--url-border);
+    border-radius: var(--url-radius-sm) var(--url-radius-sm) 0 0;
+    background: var(--url-surface);
     outline: none;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition: background var(--url-transition), border-color var(--url-transition);
 }
 
 .input-underline-field::placeholder {
-    color: #9ca3af;
+    color: var(--url-text-muted);
 }
 
 .input-underline-border {
@@ -122,8 +132,12 @@
     left: 0;
     width: 0%;
     height: 2px;
-    background: #2563eb;
-    transition: width 0.3s ease;
+    background: var(--url-navy-light);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-underline-field:focus {
+    background: var(--url-surface-2);
 }
 
 .input-underline-field:focus~.input-underline-border {
@@ -137,20 +151,21 @@
 
 .sdd-actions {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     justify-content: flex-end;
-    margin-top: 18px;
-    padding-top: 14px;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--url-border-soft);
 }
 
 .sdd-btn {
-    border: 1px solid rgba(0, 0, 0, 0.10);
-    border-radius: 10px;
-    padding: 10px 12px;
-    font-weight: 700;
+    border: 1px solid transparent;
+    border-radius: var(--url-radius-sm);
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 14px;
     cursor: pointer;
-    transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    transition: all var(--url-transition);
 }
 
 .sdd-btn:active {
@@ -158,19 +173,23 @@
 }
 
 .sdd-btn-ghost {
-    background: #ffffff;
+    background: var(--url-white);
+    border-color: var(--url-border);
+    color: var(--url-text-sec);
 }
 
 .sdd-btn-ghost:hover {
-    background: #f9fafb;
+    background: var(--url-surface);
+    color: var(--url-text-pri);
 }
 
 .sdd-btn-primary {
-    background: #2563eb;
-    color: #ffffff;
-    border-color: rgba(37, 99, 235, 0.55);
+    background: var(--url-navy);
+    color: var(--url-white);
 }
 
 .sdd-btn-primary:hover {
-    background: #1c52c5;
+    background: var(--url-navy-dark);
+    box-shadow: var(--url-shadow-sm);
+    transform: translateY(-1px);
 }

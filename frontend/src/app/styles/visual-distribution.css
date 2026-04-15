@@ -1,23 +1,31 @@
 .vd-card {
-  background: #fff;
-  border-radius: 12px;
+  background: var(--url-white);
+  border: 1px solid var(--url-border-soft);
+  border-radius: var(--url-radius-md);
   padding: 22px 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--url-shadow-xs);
   display: flex;
   flex-direction: column;
   gap: 18px;
+  transition: all var(--url-transition);
+}
+
+.vd-card:hover {
+  box-shadow: var(--url-shadow-sm);
+  border-color: var(--url-border);
+  transform: translateY(-2px);
 }
 
 .vd-title {
   font-size: 16px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--url-navy);
   margin: 0 0 2px 0;
 }
 
 .vd-subtitle {
   font-size: 13px;
-  color: #888;
+  color: var(--url-text-sec);
   margin: 0;
 }
 
@@ -25,8 +33,9 @@
   display: flex;
   width: 100%;
   height: 48px;
-  border-radius: 8px;
+  border-radius: var(--url-radius-sm);
   overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(13, 31, 78, 0.05);
 }
 
 .vd-segment {
@@ -35,11 +44,15 @@
   justify-content: center;
   font-size: 13px;
   font-weight: 700;
-  color: #fff;
-  transition: width 0.3s ease;
+  color: var(--url-white);
+  transition: width var(--url-transition), filter var(--url-transition);
   min-width: 0;
   overflow: hidden;
   white-space: nowrap;
+}
+
+.vd-segment:hover {
+  filter: brightness(1.1);
 }
 
 .vd-segment span {
@@ -49,7 +62,7 @@
 .vd-legend {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 8px 24px;
+  gap: 12px 24px;
 }
 
 .vd-legend-item {
@@ -57,12 +70,14 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #333;
+  font-weight: 500;
+  color: var(--url-text-pri);
 }
 
 .vd-legend-dot {
   width: 14px;
   height: 14px;
-  border-radius: 3px;
+  border-radius: 4px;
   flex-shrink: 0;
+  box-shadow: var(--url-shadow-xs);
 }

@@ -46,9 +46,9 @@ export default function NotificationCenter() {
                             <h1>Notificaciones</h1>
                             <span className="notifications-count">{unreadCount} notificaciones no leídas</span>
                         </div>
-                        <Link href="/top-of-page" title="Regresar al inicio" style={{ textDecoration: 'none' }}>
-                            <div className='home-icon-wrapper' style={{ background: '#f0f4fa', padding: '10px', borderRadius: '12px', display: 'flex' }}>
-                                <Home size={22} color="#1a2fcc" />
+                        <Link href="/" title="Regresar al inicio" style={{ textDecoration: 'none' }}>
+                            <div className='home-icon-wrapper' style={{ background: 'var(--url-surface-2)', padding: '10px', borderRadius: 'var(--url-radius-md)', display: 'flex' }}>
+                                <Home size={22} color="var(--url-navy)" />
                             </div>
                         </Link>
                     </div>
@@ -56,7 +56,7 @@ export default function NotificationCenter() {
 
                 <div className="notification-list">
                     {notifications.length === 0 ? (
-                        <p style={{ textAlign: 'center', color: '#667085', padding: '40px' }}>No tienes notificaciones pendientes.</p>
+                        <p style={{ textAlign: 'center', color: 'var(--url-text-sec)', padding: '40px' }}>No tienes notificaciones pendientes.</p>
                     ) : (
                         notifications.map((notif) => (
                             <div key={notif.id} className={`notification-item ${notif.unread ? 'unread' : ''}`}>

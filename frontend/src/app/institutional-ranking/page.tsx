@@ -1,8 +1,6 @@
 'use client';
 
 import { useMemo, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import AdminDashboardPanel from "../components/admin-dashboard-panel";
 import Pagination from "../components/pagination";
 import "./institutional-ranking.css";
 
@@ -22,8 +20,6 @@ type TrophyIconProps = {
 type SortOrder = "desc" | "asc";
 
 export default function InstitutionalRanking() {
-    const router = useRouter();
-    const pathname = usePathname();
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [ratingSortOrder, setRatingSortOrder] = useState<SortOrder>("desc");
@@ -80,104 +76,95 @@ export default function InstitutionalRanking() {
     };
 
     return (
-        <div className="flex min-h-screen bg-gray-50">
-            <AdminDashboardPanel
-                userName="Usuario Admin"
-                activePath={pathname}
-                onNavigate={(path) => router.push(path)}
-                onLogout={() => router.push("/")}
-            />
+        <div className="institutional-ranking-container bg-gray-50 min-h-screen">
+            <div className="i-r-header">
+                <h1>Ranking institucional</h1>
+                <p>Docentes mejor evaluados</p>
+            </div>
 
-            <div className="flex-1 institutional-ranking-container">
-                <div className="i-r-header">
-                    <h1>Ranking institucional</h1>
-                    <p>Docentes mejor evaluados</p>
+            <div className="i-r-content">
+                <div className="i-r-c-description">
+                    <h2>Ranking Docente</h2>
+                    <p>{docentes.length} docentes evaluados</p>
                 </div>
-
-                <div className="i-r-content">
-                    <div className="i-r-c-description">
-                        <h2>Ranking Docente</h2>
-                        <p>{docentes.length} docentes evaluados</p>
-                    </div>
-                    <div className="i-r-table-height">
-                        <table className="i-r-table">
-                            <thead>
-                                <tr>
-                                    <th>Posición</th>
-                                    <th>Docente</th>
-                                    <th className="sortable-header" onClick={handleRatingSort}>
-                                        <span className="sortable-header-content">
-                                            Calificación
-                                            <span className="sort-icon">
-                                                {ratingSortOrder === "desc" ?
-                                                    <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 16 16" height="2em" width="2em" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M4.646 7.646a.5.5 0 01.708 0L8 10.293l2.646-2.647a.5.5 0 01.708.708l-3 3a.5.5 0 01-.708 0l-3-3a.5.5 0 010-.708z" clipRule="evenodd"></path><path fillRule="evenodd" d="M8 4.5a.5.5 0 01.5.5v5a.5.5 0 01-1 0V5a.5.5 0 01.5-.5z" clipRule="evenodd"></path></svg>
-                                                    :
-                                                    <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 16 16" height="2em" width="2em" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M8 5.5a.5.5 0 01.5.5v5a.5.5 0 01-1 0V6a.5.5 0 01.5-.5z" clipRule="evenodd"></path><path fillRule="evenodd" d="M7.646 4.646a.5.5 0 01.708 0l3 3a.5.5 0 01-.708.708L8 5.707 5.354 8.354a.5.11-.708-.708l3-3z" clipRule="evenodd"></path></svg>
-                                                }
-                                            </span>
+                <div className="i-r-table-height">
+                    <table className="i-r-table">
+                        <thead>
+                            <tr>
+                                <th>Posición</th>
+                                <th>Docente</th>
+                                <th className="sortable-header" onClick={handleRatingSort}>
+                                    <span className="sortable-header-content">
+                                        Calificación
+                                        <span className="sort-icon">
+                                            {ratingSortOrder === "desc" ?
+                                                <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 16 16" height="2em" width="2em" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M4.646 7.646a.5.5 0 01.708 0L8 10.293l2.646-2.647a.5.5 0 01.708.708l-3 3a.5.5 0 01-.708 0l-3-3a.5.5 0 010-.708z" clipRule="evenodd"></path><path fillRule="evenodd" d="M8 4.5a.5.5 0 01.5.5v5a.5.5 0 01-1 0V5a.5.5 0 01.5-.5z" clipRule="evenodd"></path></svg>
+                                                :
+                                                <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 16 16" height="2em" width="2em" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M8 5.5a.5.5 0 01.5.5v5a.5.5 0 01-1 0V6a.5.5 0 01.5-.5z" clipRule="evenodd"></path><path fillRule="evenodd" d="M7.646 4.646a.5.5 0 01.708 0l3 3a.5.5 0 01-.708.708L8 5.707 5.354 8.354a.5.11-.708-.708l3-3z" clipRule="evenodd"></path></svg>
+                                            }
                                         </span>
-                                    </th>
-                                    <th>Estudiantes</th>
-                                    <th>Especialidades</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {paginatedDocentes.map((docente, index) => {
-                                    const displayRank = (page - 1) * pageSize + index + 1;
-                                    return (
-                                        <tr key={`${docente.name}-${docente.rating}`}>
-                                            <td>
-                                                <div className="rank-cell">
-                                                    {displayRank <= 3 ? (
-                                                        <span className={`rank-medal ${getMedalClass(displayRank)}`}>
-                                                            <TrophyIcon />
-                                                        </span>
-                                                    ) : (
-                                                        <span className="rank-number">{displayRank}</span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div className="teacher-cell">
-                                                    <span className="teacher-name">{docente.name}</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span className="rating-value">{docente.rating.toFixed(2)}</span>
-                                                <span className="rating-max"> / 5.0</span>
-                                            </td>
-                                            <td>{docente.students}</td>
-                                            <td>
-                                                <div className="specialties-cell">
-                                                    {docente.specialties.map((item) => (
-                                                        <span key={item} className="specialty-badge">
-                                                            {item}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                    <Pagination
-                        page={page}
-                        pageSize={pageSize}
-                        totalItems={totalItems}
-                        onPageChange={(newPage) => {
-                            const totalPages = Math.ceil(totalItems / pageSize) || 1;
-                            if (newPage < 1 || newPage > totalPages) return;
-                            setPage(newPage);
-                        }}
-                        onPageSizeChange={(size) => {
-                            const safeSize = size > 0 ? size : 10;
-                            setPageSize(safeSize);
-                            setPage(1);
-                        }}
-                    />
+                                    </span>
+                                </th>
+                                <th>Estudiantes</th>
+                                <th>Especialidades</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {paginatedDocentes.map((docente, index) => {
+                                const displayRank = (page - 1) * pageSize + index + 1;
+                                return (
+                                    <tr key={`${docente.name}-${docente.rating}`}>
+                                        <td>
+                                            <div className="rank-cell">
+                                                {displayRank <= 3 ? (
+                                                    <span className={`rank-medal ${getMedalClass(displayRank)}`}>
+                                                        <TrophyIcon />
+                                                    </span>
+                                                ) : (
+                                                    <span className="rank-number">{displayRank}</span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="teacher-cell">
+                                                <span className="teacher-name">{docente.name}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span className="rating-value">{docente.rating.toFixed(2)}</span>
+                                            <span className="rating-max"> / 5.0</span>
+                                        </td>
+                                        <td>{docente.students}</td>
+                                        <td>
+                                            <div className="specialties-cell">
+                                                {docente.specialties.map((item) => (
+                                                    <span key={item} className="specialty-badge">
+                                                        {item}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
                 </div>
+                <Pagination
+                    page={page}
+                    pageSize={pageSize}
+                    totalItems={totalItems}
+                    onPageChange={(newPage) => {
+                        const totalPages = Math.ceil(totalItems / pageSize) || 1;
+                        if (newPage < 1 || newPage > totalPages) return;
+                        setPage(newPage);
+                    }}
+                    onPageSizeChange={(size) => {
+                        const safeSize = size > 0 ? size : 10;
+                        setPageSize(safeSize);
+                        setPage(1);
+                    }}
+                />
             </div>
         </div>
     );

@@ -1,16 +1,18 @@
 .sentiment-chart-card {
     width: 100%;
-    background-color: #ffffff;
-    border-radius: 14px;
-    padding: 22px 0 22px;
+    background-color: var(--url-white);
+    border: 1px solid var(--url-border-soft);
+    border-radius: var(--url-radius-lg);
+    padding: 24px 0;
+    box-shadow: var(--url-shadow-sm);
     min-width: 0;
 }
 
 .sentiment-chart-title {
-    margin: 0 0 12px;
+    margin: 0 0 16px 24px;
     font-size: 20px;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--url-navy);
 }
 
 .sentiment-chart-wrapper {
@@ -18,47 +20,55 @@
 }
 
 .sentiment-chart-tooltip {
-    background-color: #ffffff;
-    border: 1px solid #d1d5db;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
-    padding: 14px 16px;
+    background-color: var(--url-white);
+    border: 1px solid var(--url-border);
+    border-radius: var(--url-radius-sm);
+    box-shadow: var(--url-shadow-md);
+    padding: 16px;
     min-width: 220px;
 }
 
 .sentiment-chart-tooltip-title {
-    margin: 0 0 10px;
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--url-border-soft);
     font-size: 15px;
-    font-weight: 600;
-    color: #0f172a;
+    font-weight: 700;
+    color: var(--url-navy);
 }
 
 .sentiment-chart-tooltip-item {
     margin: 0 0 8px;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+.sentiment-chart-tooltip-item::before {
+    content: '';
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
 }
 
 .sentiment-chart-tooltip-item:last-child {
     margin-bottom: 0;
 }
 
-.sentiment-chart-tooltip-item.positive-real {
-    color: #2563eb;
-}
+.sentiment-chart-tooltip-item.positive-real { color: var(--url-text-sec); }
+.sentiment-chart-tooltip-item.positive-real::before { background-color: var(--url-info); }
 
-.sentiment-chart-tooltip-item.negative-real {
-    color: #f59e0b;
-}
+.sentiment-chart-tooltip-item.negative-real { color: var(--url-text-sec); }
+.sentiment-chart-tooltip-item.negative-real::before { background-color: var(--url-warn); }
 
-.sentiment-chart-tooltip-item.false-positive {
-    color: #3b82f6;
-    opacity: 0.8;
-}
+.sentiment-chart-tooltip-item.false-positive { color: var(--url-text-sec); }
+.sentiment-chart-tooltip-item.false-positive::before { background-color: var(--url-info-bd); }
 
-.sentiment-chart-tooltip-item.false-negative {
-    color: #eab308;
-    opacity: 0.9;
-}
+.sentiment-chart-tooltip-item.false-negative { color: var(--url-text-sec); }
+.sentiment-chart-tooltip-item.false-negative::before { background-color: var(--url-warn-bd); }
 
 .sentiment-chart-card :focus,
 .sentiment-chart-card :focus-visible,
@@ -69,11 +79,14 @@
     outline: none;
 }
 
-@media (max-width: 600px) {
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+    stroke: var(--url-border-soft);
+}
 
+@media (max-width: 600px) {
     .sentiment-chart-wrapper {
         height: 320px !important;
         padding: 0;
     }
-
 }

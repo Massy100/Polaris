@@ -1,479 +1,383 @@
 .individual-teacher-general-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 45px;
-    height: 100vh;
-    width: 100%;
-    background-color: #EEF5FE;
-    overflow-x: hidden;
-    overflow-y: auto;
-    color: black;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(20px, 4vw, 48px);
+  min-height: 100vh;
+  width: 100%;
+  background: var(--url-surface);
+  overflow-x: hidden;
+  overflow-y: auto;
+  color: var(--url-text-pri);
 }
 
 .individual-teacher-presentation-container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 30px;
-    padding: 15px 25px;
-    width: 100%;
-    border-radius: 12px;
-    background-color: #FFFFFF;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: clamp(18px, 2.8vw, 26px) clamp(20px, 3vw, 32px);
+  width: 100%;
+  border-radius: var(--url-radius-lg);
+  background: var(--url-white);
+  border: 1px solid var(--url-border-soft);
+  box-shadow: var(--url-shadow-sm);
 }
 
 .individual-teacher-personal-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  flex: 1;
 }
 
 .individual-teacher-name {
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 10px;
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--url-navy);
+  line-height: 1.2;
 }
 
 .individual-teacher-department {
-    font-size: 19px;
-    color: #155DFC;
+  font-size: clamp(15px, 1.8vw, 18px);
+  color: var(--url-navy-light);
+  font-weight: 500;
 }
 
 .individual-teacher-meta {
-    margin-top: 22px;
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(240px, 1fr));
-    column-gap: 80px;
-    row-gap: 16px;
+  margin-top: 22px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(200px, 1fr));
+  column-gap: clamp(24px, 5vw, 80px);
+  row-gap: 14px;
 }
 
 .individual-teacher-meta-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #5f5f5f;
-    font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--url-text-sec);
+  font-size: clamp(13px, 1.5vw, 15px);
 }
 
 .individual-teacher-meta-item p {
-    margin: 0;
+  margin: 0;
 }
 
 .individual-teacher-meta-item svg {
-    width: 20px;
-    height: 20px;
+  width: 18px;
+  height: 18px;
+  color: var(--url-navy-light);
+  flex-shrink: 0;
 }
 
 .individual-teacher-score {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .individual-teacher-score-card {
-    border: 2px solid #FFD6A7;
-    border-radius: 14px;
-    background-color: #FFF7ED;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px 20px;
-    text-align: center;
+  border: 1.5px solid var(--url-warn-bd);
+  border-radius: var(--url-radius-md);
+  background: var(--url-warn-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(18px, 2.5vw, 26px) clamp(20px, 3vw, 28px);
+  text-align: center;
+  min-width: 180px;
 }
 
 .individual-teacher-score-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background-color: #FFEDD4;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #F54900;
-    margin-bottom: 14px;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--url-radius-sm);
+  background: rgba(184, 146, 10, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--url-gold);
+  margin-bottom: 14px;
 }
 
 .individual-teacher-score-icon svg {
-    width: 24px;
-    height: 24px;
+  width: 24px;
+  height: 24px;
 }
 
 .individual-teacher-score-title {
-    margin: 0;
-    font-size: 15px;
-    font-weight: 600;
-    color: #4A5577;
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--url-text-sec);
 }
 
 .individual-teacher-score-value {
-    margin: 10px 0 6px;
-    font-size: 36px;
-    line-height: 1;
-    font-weight: 600;
-    color: #0F172A;
+  margin: 10px 0 5px;
+  font-size: clamp(30px, 4vw, 38px);
+  line-height: 1;
+  font-weight: 700;
+  color: var(--url-navy);
 }
 
 .individual-teacher-score-subtitle {
-    margin: 0;
-    font-size: 15px;
-    color: #6A7282;
+  margin: 0;
+  font-size: 13px;
+  color: var(--url-text-muted);
 }
 
 .individual-teacher-classes-section {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 25px;
-    padding: 15px 25px;
-    width: 100%;
-    border-radius: 12px;
-    background-color: #FFFFFF;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  padding: clamp(18px, 2.8vw, 26px) clamp(20px, 3vw, 32px);
+  width: 100%;
+  border-radius: var(--url-radius-lg);
+  background: var(--url-white);
+  border: 1px solid var(--url-border-soft);
+  box-shadow: var(--url-shadow-sm);
+  margin-top: 24px;
 }
 
 .individual-teacher-section-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #0f172a;
+  font-size: clamp(16px, 2vw, 20px);
+  font-weight: 700;
+  color: var(--url-navy);
 }
 
 .individual-teacher-class-card {
-    width: 100%;
-    background-color: #ffffff;
-    border: 1px solid #d9e2ef;
-    border-radius: 14px;
-    overflow: hidden;
+  width: 100%;
+  background: var(--url-white);
+  border: 1px solid var(--url-border);
+  border-radius: var(--url-radius-md);
+  overflow: hidden;
+  transition: box-shadow var(--url-transition);
+}
+
+.individual-teacher-class-card:hover {
+  box-shadow: var(--url-shadow-sm);
 }
 
 .individual-teacher-class-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 20px;
-    background-color: #F9FAFB;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(14px, 2vw, 20px) clamp(16px, 2.5vw, 22px);
+  background: var(--url-surface);
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--url-transition);
 }
 
 .individual-teacher-class-header:hover {
-    background-color: #F3F4F6;
+  background: var(--url-surface-2);
 }
 
 .individual-teacher-class-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .individual-teacher-class-title h3 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #0f172a;
+  margin: 0;
+  font-size: clamp(15px, 1.8vw, 17px);
+  font-weight: 600;
+  color: var(--url-navy);
 }
 
 .individual-teacher-class-icon {
-    color: #155DFC;
+  color: var(--url-navy-light);
 }
 
 .individual-teacher-comments-toggle {
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-size: 15px;
-    font-weight: 500;
-    color: #64748b;
+  border: 1px solid var(--url-border);
+  background: var(--url-white);
+  border-radius: var(--url-radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--url-text-sec);
+  padding: 6px 14px;
+  font-family: var(--url-font-sans);
+  transition: background var(--url-transition), border-color var(--url-transition), color var(--url-transition);
+}
+
+.individual-teacher-comments-toggle:hover {
+  background: var(--url-info-bg);
+  border-color: var(--url-navy-light);
+  color: var(--url-navy);
 }
 
 .individual-teacher-comments-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    border-top: 1px solid #e2e8f0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--url-border-soft);
 }
 
 .individual-teacher-comments-column {
-    padding: 18px 16px;
-    min-height: 250px;
+  padding: clamp(14px, 2vw, 20px) clamp(14px, 2.2vw, 18px);
+  min-height: 220px;
 }
 
 .individual-teacher-comments-column.positive {
-    border-right: 1px solid #e2e8f0;
+  border-right: 1px solid var(--url-border-soft);
 }
 
 .individual-teacher-comments-title {
-    margin: 0 0 16px;
-    font-size: 18px;
-    font-weight: 550;
-    display: flex;
-    align-items: center;
-    text-align: center;
-    gap: 5px;
+  margin: 0 0 14px;
+  font-size: clamp(14px, 1.6vw, 16px);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .individual-teacher-comments-title.positive {
-    color: #008236;
+  color: var(--url-success);
 }
 
 .individual-teacher-comments-title.positive svg {
-    height: 20px;
-    width: 20px;
-    color: #13AD4C;
+  height: 18px;
+  width: 18px;
 }
 
 .individual-teacher-comments-title.negative {
-    color: #C31C1E;
+  color: var(--url-danger);
 }
 
 .individual-teacher-comments-title.negative svg {
-    height: 20px;
-    width: 20px;
-    color: #E7000B;
+  height: 18px;
+  width: 18px;
 }
 
 .individual-teacher-comments-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .individual-teacher-comments-list.scrollable {
-    max-height: 255px;
-    overflow-y: auto;
-    padding-right: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .individual-teacher-comment {
-    padding: 14px 16px;
-    border-radius: 12px;
-    font-size: 15px;
-    line-height: 1.4;
+  padding: 12px 15px;
+  border-radius: var(--url-radius-sm);
+  font-size: clamp(13px, 1.4vw, 14px);
+  line-height: 1.55;
+  color: var(--url-text-pri);
 }
 
 .individual-teacher-comment.positive {
-    background-color: #f0fdf4;
-    border: 1px solid #ccebd5;
+  background: var(--url-success-bg);
+  border: 1px solid var(--url-success-bd);
 }
 
 .individual-teacher-comment.negative {
-    background-color: #fff1f2;
-    border: 1px solid #f3d0d5;
+  background: var(--url-danger-bg);
+  border: 1px solid var(--url-danger-bd);
 }
 
 .individual-teacher-sentiment-analysis-section {
-    display: flex;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  padding: clamp(18px, 2.8vw, 26px) clamp(20px, 3vw, 32px);
+  width: 100%;
+  border-radius: var(--url-radius-lg);
+  background: var(--url-white);
+  border: 1px solid var(--url-border-soft);
+  box-shadow: var(--url-shadow-sm);
+  margin-top: 24px;
+}
+
+@media (max-width: 960px) {
+  .individual-teacher-meta {
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+    column-gap: 24px;
+  }
+}
+
+@media (max-width: 840px) {
+  .individual-teacher-presentation-container {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 25px;
-    padding: 15px 25px;
+    align-items: stretch;
+    gap: 22px;
+  }
+
+  .individual-teacher-personal-info {
     width: 100%;
-    border-radius: 12px;
-    background-color: #FFFFFF;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    margin-top: 28px;
+  }
+
+  .individual-teacher-score {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .individual-teacher-score-card {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .individual-teacher-class-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .individual-teacher-comments-container {
+    grid-template-columns: 1fr;
+  }
+
+  .individual-teacher-comments-column.positive {
+    border-right: none;
+    border-bottom: 1px solid var(--url-border-soft);
+  }
 }
 
-@media (max-width: 1100px) {
-    .individual-teacher-general-container {
-        padding: 30px 20px;
-    }
+@media (max-width: 600px) {
+  .individual-teacher-general-container {
+    padding: 14px;
+  }
 
-    .individual-teacher-presentation-container {
-        align-items: flex-start;
-        gap: 24px;
-    }
+  .individual-teacher-presentation-container,
+  .individual-teacher-classes-section,
+  .individual-teacher-sentiment-analysis-section {
+    padding: 16px;
+  }
 
-    .individual-teacher-meta {
-        grid-template-columns: repeat(2, minmax(200px, 1fr));
-        column-gap: 32px;
-    }
+  .individual-teacher-meta {
+    grid-template-columns: 1fr;
+    row-gap: 12px;
+    margin-top: 16px;
+  }
 
-    .individual-teacher-score-card {
-        min-width: 180px;
-    }
+  .individual-teacher-score-card {
+    max-width: 100%;
+  }
+
+  .individual-teacher-comments-column {
+    min-height: auto;
+  }
 }
 
-@media (max-width: 900px) {
-    .individual-teacher-presentation-container {
-        flex-direction: column;
-        align-items: stretch;
-    }
+@media (max-width: 400px) {
+  .individual-teacher-general-container {
+    padding: 10px;
+  }
 
-    .individual-teacher-personal-info {
-        width: 100%;
-    }
-
-    .individual-teacher-score {
-        width: 100%;
-        justify-content: flex-start;
-    }
-
-    .individual-teacher-score-card {
-        width: 100%;
-        max-width: 260px;
-    }
-
-    .individual-teacher-meta {
-        grid-template-columns: 1fr 1fr;
-        column-gap: 0;
-        row-gap: 14px;
-    }
-
-    .individual-teacher-class-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-
-    .individual-teacher-comments-container {
-        grid-template-columns: 1fr;
-    }
-
-    .individual-teacher-comments-column.positive {
-        border-right: none;
-        border-bottom: 1px solid #e2e8f0;
-    }
-}
-
-@media (max-width: 640px) {
-    .individual-teacher-general-container {
-        padding: 16px;
-    }
-
-    .individual-teacher-presentation-container,
-    .individual-teacher-classes-section {
-        padding: 14px;
-        border-radius: 10px;
-    }
-
-    .individual-teacher-sentiment-analysis-section {
-        padding: 0;
-    }
-
-    .individual-teacher-section-title {
-        padding: 20px 20px 0;
-    }
-
-    .individual-teacher-name {
-        font-size: 22px;
-        line-height: 1.2;
-        margin-bottom: 6px;
-    }
-
-    .individual-teacher-department {
-        font-size: 16px;
-    }
-
-    .individual-teacher-meta {
-        grid-template-columns: 1fr;
-        column-gap: 0;
-        row-gap: 14px;
-        margin-top: 18px;
-    }
-
-    .individual-teacher-meta-item {
-        align-items: flex-start;
-        font-size: 14px;
-        gap: 8px;
-    }
-
-    .individual-teacher-meta-item svg {
-        width: 18px;
-        height: 18px;
-        flex-shrink: 0;
-        margin-top: 2px;
-    }
-
-    .individual-teacher-meta-item p {
-        word-break: break-word;
-    }
-
-    .individual-teacher-section-title {
-        font-size: 18px;
-        line-height: 1.2;
-        margin: 0;
-    }
-
-    .individual-teacher-class-header {
-        padding: 14px;
-    }
-
-    .individual-teacher-class-title {
-        width: 100%;
-        gap: 8px;
-    }
-
-    .individual-teacher-class-title h3 {
-        font-size: 16px;
-        line-height: 1.3;
-    }
-
-    .individual-teacher-comments-toggle {
-        font-size: 14px;
-        padding: 0;
-    }
-
-    .individual-teacher-comments-column {
-        padding: 14px;
-        min-height: auto;
-    }
-
-    .individual-teacher-comments-title {
-        font-size: 16px;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-
-    .individual-teacher-comment {
-        padding: 12px 14px;
-        font-size: 14px;
-    }
-
-    .individual-teacher-score-card {
-        width: 100%;
-        max-width: none;
-        padding: 18px 16px;
-    }
-
-    .individual-teacher-score-value {
-        font-size: 30px;
-    }
-
-    .individual-teacher-score-title,
-    .individual-teacher-score-subtitle {
-        font-size: 14px;
-    }
-}
-
-@media (max-width: 420px) {
-    .individual-teacher-general-container {
-        padding: 12px;
-    }
-
-    .individual-teacher-presentation-container,
-    .individual-teacher-classes-section {
-        padding: 12px;
-    }
-
-    .individual-teacher-name {
-        font-size: 20px;
-    }
-
-    .individual-teacher-department {
-        font-size: 15px;
-    }
-
-    .individual-teacher-class-title h3 {
-        font-size: 15px;
-    }
-
-    .individual-teacher-comments-title {
-        font-size: 15px;
-    }
-
-    .individual-teacher-comment {
-        font-size: 13px;
-    }
+  .individual-teacher-name {
+    font-size: 19px;
+  }
 }
