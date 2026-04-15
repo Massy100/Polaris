@@ -19,8 +19,6 @@ type ToastState = {
 };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-const SUPPORTED_CATEGORIES: TabKey[] = ['titulos', 'meritos', 'opiniones'];
-
 const TABS: {
   key: TabKey;
   label: string;
@@ -51,27 +49,28 @@ const TABS: {
   {
     key: 'opiniones',
     label: 'Opiniones',
-    title: 'Carga de Opiniones de Profesores',
-    subtitle: 'Sube archivos Excel o CSV con las opiniones y evaluaciones de estudiantes',
+    title: 'Carga de Opiniones de Coordinacion',
+    subtitle: 'Sube archivos Excel o CSV con las opiniones del coordinador hacia cada docente',
     cardTitle: 'Subir Archivo de Opiniones',
-    cardSub: 'Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con las opiniones de estudiantes',
-    saveLabel: 'Guardar Opiniones',
+    cardSub: 'Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con las opiniones del coordinador',
+    saveLabel: 'Guardar Opiniones de Coordinacion',
   },
   {
     key: 'encuestas',
     label: 'Encuestas',
-    title: 'Carga de Encuestas',
-    subtitle: 'Sube archivos Excel o CSV con las encuestas que nos proporciona directamente',
+    title: 'Carga de Encuestas de Estudiantes',
+    subtitle: 'Sube archivos Excel o CSV con las encuestas de estudiantes hacia su docente',
     cardTitle: 'Subir Archivo de Encuestas',
-    cardSub: 'Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con las encuestas',
-    saveLabel: 'Guardar Encuestas',
+    cardSub: 'Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con las encuestas de estudiantes',
+    saveLabel: 'Guardar Encuestas de Estudiantes',
   },
 ];
 
-const REQUIRED_FIELDS: Record<Exclude<TabKey, 'encuestas'>, string[]> = {
+const REQUIRED_FIELDS: Record<TabKey, string[]> = {
   titulos: ['nombre_profesor', 'email', 'telefono', 'especialidad', 'grado_academico', 'experiencia_anos', 'institucion_actual'],
   meritos: ['nombre_profesor', 'email', 'tipo_merito', 'descripcion', 'fecha_obtencion', 'institucion_otorgante'],
   opiniones: ['nombre_profesor', 'email', 'opinion', 'calificacion', 'fecha_opinion', 'autor'],
+  encuestas: ['nombre_profesor', 'email', 'opinion', 'calificacion', 'fecha_opinion', 'autor'],
 };
 
 const IconTitulos = () => (
@@ -174,7 +173,7 @@ function parseCSVPreview(text: string): { rows: Record<string, string>[]; column
   return { rows, columns };
 }
 
-function buildTemplateCSV(category: Exclude<TabKey, 'encuestas'>): string {
+function buildTemplateCSV(category: TabKey): string {
   const columns = REQUIRED_FIELDS[category];
   return `${columns.join(',')}\n`;
 }
@@ -397,11 +396,6 @@ export default function BulkUploadPage() {
       return;
     }
 
-    if (!SUPPORTED_CATEGORIES.includes(activeTab)) {
-      showToast('La categoria encuestas aun no tiene backend conectado.', false);
-      return;
-    }
-
     setIsSaving(true);
 
     try {
@@ -430,11 +424,6 @@ export default function BulkUploadPage() {
   };
 
   const handleDownload = () => {
-    if (!SUPPORTED_CATEGORIES.includes(activeTab)) {
-      showToast('No hay plantilla disponible para encuestas por ahora.', false);
-      return;
-    }
-
     const csv = buildTemplateCSV(activeTab);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);

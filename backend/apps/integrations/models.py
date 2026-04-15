@@ -6,6 +6,7 @@ class BulkUploadBatch(models.Model):
         ("titulos", "Titulos"),
         ("meritos", "Meritos"),
         ("opiniones", "Opiniones"),
+        ("encuestas", "Encuestas"),
     )
     STATUS_CHOICES = (
         ("processed", "Processed"),

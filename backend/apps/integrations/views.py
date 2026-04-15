@@ -9,6 +9,14 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
+from apps.academic_career.models import (
+    Teacher,
+    TeacherCoordinatorOpinion,
+    TeacherMerit,
+    TeacherStudentSurvey,
+    TeacherTitle,
+)
+
 from .models import BulkUploadBatch, BulkUploadRecord
 
 try:
@@ -22,7 +30,7 @@ except Exception:
     xlrd = None
 
 
-ALLOWED_CATEGORIES = {"titulos", "meritos", "opiniones"}
+ALLOWED_CATEGORIES = {"titulos", "meritos", "opiniones", "encuestas"}
 ALLOWED_EXTENSIONS = {".csv", ".xlsx", ".xls"}
 MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024
 REQUIRED_FIELDS_BY_CATEGORY = {
@@ -51,6 +59,14 @@ REQUIRED_FIELDS_BY_CATEGORY = {
         "fecha_opinion",
         "autor",
     },
+    "encuestas": {
+        "nombre_profesor",
+        "email",
+        "opinion",
+        "calificacion",
+        "fecha_opinion",
+        "autor",
+    },
 }
 
 
@@ -65,6 +81,104 @@ def _normalize_row(row: dict) -> dict:
         _normalize_key(str(key)): ("" if value is None else str(value).strip())
         for key, value in row.items()
     }
+
+
+def _split_full_name(full_name: str) -> tuple[str, str]:
+    clean_name = (full_name or "").strip()
+    if not clean_name:
+        return "", ""
+
+    parts = clean_name.split()
+    if len(parts) == 1:
+        return parts[0], ""
+    return parts[0], " ".join(parts[1:])
+
+
+def _get_or_create_teacher(row: dict) -> Teacher:
+    email = row.get("email", "").strip().lower()
+    first_name, last_name = _split_full_name(row.get("nombre_profesor", ""))
+
+    if email:
+        teacher, created = Teacher.objects.get_or_create(
+            email=email,
+            defaults={
+                "first_name": first_name,
+                "last_name": last_name,
+                "status": "ACTIVE",
+                "role": "teacher",
+            },
+        )
+        updated_fields = []
+        if first_name and not teacher.first_name:
+            teacher.first_name = first_name
+            updated_fields.append("first_name")
+        if last_name and not teacher.last_name:
+            teacher.last_name = last_name
+            updated_fields.append("last_name")
+        if updated_fields:
+            teacher.save(update_fields=updated_fields)
+        return teacher
+
+    teacher = Teacher.objects.filter(first_name__iexact=first_name, last_name__iexact=last_name).first()
+    if teacher:
+        return teacher
+
+    return Teacher.objects.create(
+        first_name=first_name,
+        last_name=last_name,
+        status="ACTIVE",
+        role="teacher",
+    )
+
+
+def _persist_domain_row(category: str, row: dict) -> Teacher:
+    teacher = _get_or_create_teacher(row)
+
+    if category == "titulos":
+        TeacherTitle.objects.update_or_create(
+            teacher=teacher,
+            specialty=row["especialidad"],
+            academic_degree=row["grado_academico"],
+            current_institution=row["institucion_actual"],
+            defaults={
+                "phone": row.get("telefono", ""),
+                "experience_years": row["experiencia_anos"],
+                "status": "active",
+            },
+        )
+    elif category == "meritos":
+        TeacherMerit.objects.update_or_create(
+            teacher=teacher,
+            merit_type=row["tipo_merito"],
+            description=row["descripcion"],
+            obtained_at=row.get("fecha_obtencion") or None,
+            granting_institution=row["institucion_otorgante"],
+            defaults={"status": "active"},
+        )
+    elif category == "opiniones":
+        TeacherCoordinatorOpinion.objects.update_or_create(
+            teacher=teacher,
+            author=row["autor"],
+            opinion=row["opinion"],
+            opinion_date=row.get("fecha_opinion") or None,
+            defaults={
+                "rating": row["calificacion"],
+                "status": "active",
+            },
+        )
+    elif category == "encuestas":
+        TeacherStudentSurvey.objects.update_or_create(
+            teacher=teacher,
+            author=row["autor"],
+            opinion=row["opinion"],
+            opinion_date=row.get("fecha_opinion") or None,
+            defaults={
+                "rating": row["calificacion"],
+                "status": "active",
+            },
+        )
+
+    return teacher
 
 
 def _parse_csv(file_obj) -> list[dict]:
@@ -147,7 +261,7 @@ def _validate_row(category: str, row: dict) -> tuple[bool, str, dict]:
         except Exception:
             return False, "experiencia_anos debe ser un numero >= 0.", {}
 
-    if category == "opiniones":
+    if category in {"opiniones", "encuestas"}:
         try:
             normalized["calificacion"] = int(float(row.get("calificacion", "0")))
             if normalized["calificacion"] < 1 or normalized["calificacion"] > 10:
@@ -155,7 +269,7 @@ def _validate_row(category: str, row: dict) -> tuple[bool, str, dict]:
         except Exception:
             return False, "calificacion debe estar entre 1 y 10.", {}
 
-    if category in {"meritos", "opiniones"}:
+    if category in {"meritos", "opiniones", "encuestas"}:
         date_key = "fecha_obtencion" if category == "meritos" else "fecha_opinion"
         date_value = row.get(date_key, "")
         if date_value:
@@ -219,15 +333,25 @@ def _process_file(category: str, file_obj) -> tuple[BulkUploadBatch, dict]:
     valid_rows = 0
     invalid_rows = 0
     errors = []
+    teacher_ids = set()
 
     for row_number, raw_row in enumerate(raw_rows, start=2):
         normalized_row = _normalize_row(raw_row)
         is_valid, error_message, clean_row = _validate_row(category, normalized_row)
         if is_valid:
-            valid_rows += 1
-            status = "valid"
-            normalized_data = clean_row
-            error_to_save = ""
+            try:
+                teacher = _persist_domain_row(category, clean_row)
+                teacher_ids.add(teacher.teacher_id)
+                valid_rows += 1
+                status = "valid"
+                normalized_data = clean_row
+                error_to_save = ""
+            except Exception as exc:
+                invalid_rows += 1
+                status = "invalid"
+                normalized_data = {}
+                error_to_save = f"No se pudo persistir en tablas de dominio: {str(exc)}"
+                errors.append({"row_number": row_number, "error": error_to_save})
         else:
             invalid_rows += 1
             status = "invalid"
@@ -248,7 +372,11 @@ def _process_file(category: str, file_obj) -> tuple[BulkUploadBatch, dict]:
     batch.invalid_rows = invalid_rows
     if invalid_rows > 0:
         batch.status = "processed_with_errors"
-    batch.summary = {"errors": errors[:50]}
+    batch.summary = {
+        "errors": errors[:50],
+        "teachers_affected": sorted(teacher_ids),
+        "teachers_count": len(teacher_ids),
+    }
     batch.processed_at = timezone.now()
     batch.save(update_fields=["valid_rows", "invalid_rows", "status", "summary", "processed_at"])
 
@@ -286,7 +414,7 @@ def bulk_upload(request):
     category = request.POST.get("category", "").strip().lower()
     if category not in ALLOWED_CATEGORIES:
         return JsonResponse(
-            {"ok": False, "message": "Categoria invalida. Usa: titulos, meritos u opiniones."},
+            {"ok": False, "message": "Categoria invalida. Usa: titulos, meritos, opiniones o encuestas."},
             status=400,
         )
 

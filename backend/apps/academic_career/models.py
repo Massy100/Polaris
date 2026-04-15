@@ -66,3 +66,84 @@ class Teacher(models.Model):
 
     def __str__(self):
         return self.full_name
+
+
+class TeacherTitle(models.Model):
+    title_id = models.BigAutoField(primary_key=True)
+    teacher = models.ForeignKey(Teacher, models.CASCADE, related_name='titles')
+    phone = models.CharField(max_length=30, blank=True, null=True)
+    specialty = models.CharField(max_length=140)
+    academic_degree = models.CharField(max_length=140)
+    experience_years = models.IntegerField(default=0)
+    current_institution = models.CharField(max_length=180)
+    status = models.CharField(max_length=20, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'teacher_title'
+        ordering = ['teacher_id', '-created_at']
+        unique_together = (('teacher', 'specialty', 'academic_degree', 'current_institution'),)
+
+    def __str__(self):
+        return f"{self.teacher.full_name} - {self.academic_degree}"
+
+
+class TeacherMerit(models.Model):
+    merit_id = models.BigAutoField(primary_key=True)
+    teacher = models.ForeignKey(Teacher, models.CASCADE, related_name='merits')
+    merit_type = models.CharField(max_length=140)
+    description = models.TextField()
+    obtained_at = models.DateField(blank=True, null=True)
+    granting_institution = models.CharField(max_length=180)
+    status = models.CharField(max_length=20, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'teacher_merit'
+        ordering = ['teacher_id', '-obtained_at', '-created_at']
+        unique_together = (('teacher', 'merit_type', 'description', 'obtained_at', 'granting_institution'),)
+
+    def __str__(self):
+        return f"{self.teacher.full_name} - {self.merit_type}"
+
+
+class TeacherCoordinatorOpinion(models.Model):
+    coordinator_opinion_id = models.BigAutoField(primary_key=True)
+    teacher = models.ForeignKey(Teacher, models.CASCADE, related_name='coordinator_opinions')
+    author = models.CharField(max_length=140)
+    opinion = models.TextField()
+    rating = models.IntegerField()
+    opinion_date = models.DateField(blank=True, null=True)
+    status = models.CharField(max_length=20, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'teacher_coordinator_opinion'
+        ordering = ['teacher_id', '-opinion_date', '-created_at']
+        unique_together = (('teacher', 'author', 'opinion', 'opinion_date'),)
+
+    def __str__(self):
+        return f"{self.teacher.full_name} - Opinion coordinador"
+
+
+class TeacherStudentSurvey(models.Model):
+    survey_id = models.BigAutoField(primary_key=True)
+    teacher = models.ForeignKey(Teacher, models.CASCADE, related_name='student_surveys')
+    author = models.CharField(max_length=140)
+    opinion = models.TextField()
+    rating = models.IntegerField()
+    opinion_date = models.DateField(blank=True, null=True)
+    status = models.CharField(max_length=20, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'teacher_student_survey'
+        ordering = ['teacher_id', '-opinion_date', '-created_at']
+        unique_together = (('teacher', 'author', 'opinion', 'opinion_date'),)
+
+    def __str__(self):
+        return f"{self.teacher.full_name} - Encuesta estudiante"
