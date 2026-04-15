@@ -1,6 +1,92 @@
 # academic-career/serializers.py
 from rest_framework import serializers
-from .models import Teacher, Course, Career, Faculty
+from .models import (
+    Teacher,
+    Course,
+    Career,
+    Faculty,
+    TeacherTitle,
+    TeacherMerit,
+    TeacherCoordinatorOpinion,
+    TeacherStudentSurvey,
+)
+
+
+class TeacherTitleSerializer(serializers.ModelSerializer):
+    teacher_name = serializers.CharField(source='teacher.full_name', read_only=True)
+
+    class Meta:
+        model = TeacherTitle
+        fields = [
+            'title_id',
+            'teacher',
+            'teacher_name',
+            'phone',
+            'specialty',
+            'academic_degree',
+            'experience_years',
+            'current_institution',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
+
+
+class TeacherMeritSerializer(serializers.ModelSerializer):
+    teacher_name = serializers.CharField(source='teacher.full_name', read_only=True)
+
+    class Meta:
+        model = TeacherMerit
+        fields = [
+            'merit_id',
+            'teacher',
+            'teacher_name',
+            'merit_type',
+            'description',
+            'obtained_at',
+            'granting_institution',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
+
+
+class TeacherCoordinatorOpinionSerializer(serializers.ModelSerializer):
+    teacher_name = serializers.CharField(source='teacher.full_name', read_only=True)
+
+    class Meta:
+        model = TeacherCoordinatorOpinion
+        fields = [
+            'coordinator_opinion_id',
+            'teacher',
+            'teacher_name',
+            'author',
+            'opinion',
+            'rating',
+            'opinion_date',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
+
+
+class TeacherStudentSurveySerializer(serializers.ModelSerializer):
+    teacher_name = serializers.CharField(source='teacher.full_name', read_only=True)
+
+    class Meta:
+        model = TeacherStudentSurvey
+        fields = [
+            'survey_id',
+            'teacher',
+            'teacher_name',
+            'author',
+            'opinion',
+            'rating',
+            'opinion_date',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
 
 class CourseSerializer(serializers.ModelSerializer):
     career_name = serializers.CharField(source='career.name', read_only=True)
@@ -24,7 +110,10 @@ class CareerSerializer(serializers.ModelSerializer):
 class TeacherSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     courses_taught = serializers.SerializerMethodField()
-
+    titles = TeacherTitleSerializer(many=True, read_only=True)
+    merits = TeacherMeritSerializer(many=True, read_only=True)
+    coordinator_opinions = TeacherCoordinatorOpinionSerializer(many=True, read_only=True)
+    student_surveys = TeacherStudentSurveySerializer(many=True, read_only=True)
     courses = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Course.objects.all(),
@@ -50,6 +139,10 @@ class TeacherSerializer(serializers.ModelSerializer):
             'courses',          
             'courses_detail',   
             'courses_taught',
+            'titles',
+            'merits',
+            'coordinator_opinions',
+            'student_surveys',
             'status',
             'created_at',
             'updated_at'

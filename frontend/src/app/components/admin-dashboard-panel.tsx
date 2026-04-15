@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import '../styles/admin-dashboard-panel.css';
 
@@ -97,6 +98,7 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
   onNavigate,
   onLogout,
 }) => {
+  const router = useRouter();
   const [open, setOpen] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
   const [pensumLoaded, setPensumLoaded] = useState<boolean>(true);
@@ -114,7 +116,11 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
 
   const handleItemClick = (item: QuickAccessItem): void => {
     try {
-      onNavigate?.(item.path);
+      if (onNavigate) {
+        onNavigate(item.path);
+      } else {
+        router.push(item.path);
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -138,12 +144,20 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
 
   const handleSettings = (): void => {
     setOpen(false);
-    onNavigate?.('/notifications');
+    if (onNavigate) {
+      onNavigate('/notifications');
+    } else {
+      router.push('/notifications');
+    }
   };
 
   const handleNotifications = (): void => {
     setOpen(false);
-    onNavigate?.('/weights-config');
+    if (onNavigate) {
+      onNavigate('/weights-config');
+    } else {
+      router.push('/weights-config');
+    }
   };
 
   return (
