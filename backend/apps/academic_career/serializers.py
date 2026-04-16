@@ -110,6 +110,7 @@ class CareerSerializer(serializers.ModelSerializer):
 class TeacherSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     courses_taught = serializers.SerializerMethodField()
+    specialties = serializers.SerializerMethodField()
     titles = TeacherTitleSerializer(many=True, read_only=True)
     merits = TeacherMeritSerializer(many=True, read_only=True)
     coordinator_opinions = TeacherCoordinatorOpinionSerializer(many=True, read_only=True)
@@ -139,6 +140,7 @@ class TeacherSerializer(serializers.ModelSerializer):
             'courses',          
             'courses_detail',   
             'courses_taught',
+            'specialties',
             'titles',
             'merits',
             'coordinator_opinions',
@@ -158,9 +160,14 @@ class TeacherSerializer(serializers.ModelSerializer):
         courses = obj.courses.all()
         return ", ".join([course.name for course in courses]) if courses.exists() else ""
 
+    def get_specialties(self, obj):
+        specialties = obj.titles.filter(status='active').values_list('specialty', flat=True).distinct()
+        return list(specialties) if specialties else []
+    
 class TeacherListSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     courses_taught = serializers.SerializerMethodField()
+    specialties = serializers.SerializerMethodField()
 
     class Meta:
         model = Teacher
@@ -172,6 +179,7 @@ class TeacherListSerializer(serializers.ModelSerializer):
             'code',
             'email',
             'courses_taught',
+            'specialties',
             'status'
         ]
 
@@ -183,3 +191,7 @@ class TeacherListSerializer(serializers.ModelSerializer):
     def get_courses_taught(self, obj):
         courses = obj.courses.all()
         return ", ".join([course.name for course in courses]) if courses.exists() else ""
+    
+    def get_specialties(self, obj):
+        specialties = obj.titles.filter(status='active').values_list('specialty', flat=True)
+        return list(specialties)

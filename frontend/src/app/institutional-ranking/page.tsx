@@ -78,9 +78,7 @@ export default function InstitutionalRanking() {
                 initials: getInitials(teacher.full_name || `${teacher.first_name} ${teacher.last_name}`),
                 name: teacher.full_name || `${teacher.first_name} ${teacher.last_name}`,
                 rating: teacher.rating ?? 0,// Rating will default to 0 until the evaluation system is implemented
-                specialties: teacher.courses_taught
-                    ? teacher.courses_taught.split(',').map((s: string) => s.trim()).filter(Boolean)
-                    : [],
+                specialties: teacher.specialties || [],
             }));
 
             setDocentes(transformed);
