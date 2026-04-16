@@ -296,23 +296,63 @@
 }
 
 @media (max-width: 768px) {
-  .adp-layout-spacer { display: none; }
-  .adp-pill-container {
-    top: auto;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    flex-direction: row;
-    width: 94%;
-    max-width: 450px;
+  .adp-layout-spacer {
+    display: none !important;
+  }
+  
+  .adp-pill-container,
+  .adp-pill--expanded,
+  .adp-pill--collapsed {
+    top: auto !important;
+    bottom: 16px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    flex-direction: row !important;
+    width: 94% !important;
+    max-width: 450px !important;
     height: 64px !important;
     border-radius: 32px !important;
     padding: 0 16px !important;
-    align-items: center;
+    align-items: center !important;
   }
-  .adp-header, .adp-logo-wrapper, .adp-text, .adp-divider { display: none !important; }
-  .adp-hide-mobile { display: none !important; }
-  .adp-actions-bottom { background: transparent; padding: 0; margin: 0; flex-direction: row; width: auto; }
-  .adp-nav-list { flex-direction: row; justify-content: space-around; width: 100%; margin: 0; padding: 0; }
-  .adp-item { width: auto; padding: 10px; }
+
+  .adp-header, 
+  .adp-logo-wrapper, 
+  .adp-text, 
+  .adp-divider,
+  .adp-hide-mobile {
+    display: none !important;
+  }
+
+  .adp-actions-bottom {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    flex-direction: row !important;
+    width: auto !important;
+  }
+
+  .adp-nav-list {
+    flex-direction: row !important;
+    justify-content: space-around !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .adp-item {
+    width: auto !important;
+    padding: 10px !important;
+    justify-content: center !important;
+  }
+
+  .adp-item--active::before {
+    left: 50% !important;
+    top: auto !important;
+    bottom: -6px !important;
+    transform: translateX(-50%) !important;
+    height: 4px !important;
+    width: 20px !important;
+    border-radius: 4px 4px 0 0 !important;
+  }
 }
