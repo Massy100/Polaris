@@ -168,7 +168,6 @@ export default function PerformanceAlertPage() {
         <main className="pa-main">
           <div className="pa-page-header">
             <h1 className="pa-page-title">Alertas de Desempeño de Docentes</h1>
-            <p className="pa-page-subtitle">Monitoreo y seguimiento del rendimiento académico</p>
           </div>
 
           <div className="pa-summary-row">
@@ -212,8 +211,6 @@ export default function PerformanceAlertPage() {
             ))}
           </div>
         </main>
-
-        <span className="pa-brand">Polaris</span>
       </div>
     </>
   );
