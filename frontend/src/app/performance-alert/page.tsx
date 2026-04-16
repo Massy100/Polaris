@@ -203,8 +203,6 @@ export default function PerformanceAlertPage() {
           ))}
         </div>
       </main>
-
-      <span className="pa-brand">Polaris</span>
     </div>
   );
 }
