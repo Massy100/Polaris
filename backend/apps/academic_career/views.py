@@ -38,6 +38,9 @@ class TeacherViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         search = self.request.query_params.get('search', None)
+
+        queryset = queryset.filter(status__iexact='active')
+
         if search:
             queryset = queryset.filter(
                 Q(first_name__icontains=search) |
@@ -46,6 +49,17 @@ class TeacherViewSet(viewsets.ModelViewSet):
                 Q(code__icontains=search)
             )
         return queryset
+        
+    
+    def destroy(self, request, *args, **kwargs):
+        teacher = self.get_object()
+        teacher.status = 'INACTIVE'
+        teacher.save()
+        return Response(
+            {'message': 'Docente desactivado correctamente'},
+            status=status.HTTP_200_OK
+        )
+
     
     @action(detail=False, methods=['get'], url_path='search-by-name')
     def search_by_name(self, request):
