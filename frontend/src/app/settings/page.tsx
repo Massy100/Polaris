@@ -60,7 +60,7 @@ export default function SettingsPage() {
     checkLoadStatus();
   }, []);
 
-  const handleNavigation = (section) => {
+  const handleNavigation = (section: any) => {
     if (section.id === 'structure' && isAcademicLoaded) {
       setShowNotification(true);
       setTimeout(() => setShowNotification(false), 5000);
@@ -85,6 +85,28 @@ export default function SettingsPage() {
 
       <main className="url-container" style={{ paddingTop: '80px', paddingBottom: '60px' }}>
         <header className="settings-header">
+          {/* BOTÓN PARA REGRESAR A TOP-OF-PAGE */}
+          <button 
+            onClick={() => router.push('/top-of-page')}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px', 
+              background: 'none', 
+              border: 'none', 
+              color: '#4b5563', 
+              cursor: 'pointer', 
+              marginBottom: '20px',
+              fontWeight: 500
+            }}
+            className="hover:text-blue-600 transition-colors"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Regresar al menú principal
+          </button>
+
           <h1 className="url-title" style={{ fontSize: '32px' }}>Configuración</h1>
           <p className="settings-subtitle">Administra los parámetros globales de Polaris y tu perfil institucional.</p>
         </header>

@@ -38,8 +38,9 @@ export default function PensumUploadPage() {
         </div>
         <h2>El pensum ya fue cargado</h2>
         <p>La estructura académica ya se encuentra configurada en el sistema.</p>
-        <button className="pup-btn-primary" onClick={() => router.push('/')}>
-          Ir al panel principal
+        <p>Para definir una nueva, restablece el estado en Auditoría y Equipo.</p>
+        <button className="pup-btn-primary" onClick={() => router.push('/settings')}>
+          Regresar a Configuración
         </button>
       </div>
     );
@@ -47,7 +48,8 @@ export default function PensumUploadPage() {
 
   return (
     <div className="flex-1 bg-gray-50 pup-wrapper">
-      <PensumUploadCard onSuccess={() => router.push('/')} />
+      {/* Modificado para redirigir a /settings tras una carga exitosa */}
+      <PensumUploadCard onSuccess={() => router.push('/settings')} />
     </div>
   );
 }
