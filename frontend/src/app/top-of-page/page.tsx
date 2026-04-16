@@ -3,7 +3,7 @@
 import DashboardCard from '../components/dashboard-card';
 import '../styles/top-of-page.css';
 
-type IconType = 'teachers' | 'ranking' | 'alerts' | 'history' | 'upload';
+type IconType = 'teachers' | 'ranking' | 'alerts' | 'history' | 'upload' | 'user' ;
 
 const cards: { id: string; icon: IconType; iconColor: 'blue' | 'yellow'; title: string; description: string; href: string }[] = [
   {
@@ -14,6 +14,16 @@ const cards: { id: string; icon: IconType; iconColor: 'blue' | 'yellow'; title: 
     description: 'CRUD (Crear, Leer, Actualizar, Borrar) de Docentes. Crear docentes para tener acceso rápido a sus demás funciones como carga masiva.',
     href: '/user-management',
   },
+
+  {
+    id: 'coordinators',
+    icon: 'user',
+    iconColor: 'yellow',
+    title: 'Gestión de Coordinadores',
+    description: 'Centro de administración de coordinadores. Permite crear, editar y gestionar los accesos y roles de los coordinadores del sistema.',
+    href: '/coord-management',
+  },
+
   {
     id: 'ranking',
     icon: 'ranking',

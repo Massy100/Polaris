@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import '../styles/admin-dashboard-panel.css';
 
 type IconProps = React.SVGProps<SVGSVGElement>;
@@ -33,13 +33,13 @@ const Icons = {
   ),
   LogOut: (props: IconProps) => (
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
-  )
+  ),
 };
 
 const navItems = [
   { id: 1, label: 'Inicio',                icon: 'Home',       path: '/top-of-page' },
   { id: 2, label: 'Gestión Docente',       icon: 'Users',      path: '/user-management' },
-  { id: 3, label: 'Ranking Institucional', icon: 'TrendingUp', path: '/institutional-ranking'},
+  { id: 3, label: 'Ranking Institucional', icon: 'TrendingUp', path: '/institutional-ranking' },
   { id: 4, label: 'Alertas de Desempeño',  icon: 'Bell',       path: '/performance-alert' },
   { id: 5, label: 'Cursos Históricos',     icon: 'History',    path: '/history-view' },
   { id: 6, label: 'Carga Masiva',          icon: 'Upload',     path: '/bulk-upload' },
@@ -47,15 +47,15 @@ const navItems = [
 
 const AdminDashboardPanel: React.FC<{ userName?: string }> = ({ userName = 'Jorge Escalante' }) => {
   const router = useRouter();
-  const activePath = usePathname(); 
+  const activePath = usePathname();
   const [isHovered, setIsHovered] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
-  const isExpanded = (isHovered || isPinned);
+  const isExpanded = isHovered || isPinned;
 
-  useEffect(() => { 
-    setIsMounted(true); 
+  useEffect(() => {
+    setIsMounted(true);
   }, []);
 
   const handleNavigation = (path: string) => {
@@ -71,7 +71,7 @@ const AdminDashboardPanel: React.FC<{ userName?: string }> = ({ userName = 'Jorg
     <>
       <div className={`adp-layout-spacer ${isPinned ? 'adp-spacer--pinned' : 'adp-spacer--collapsed'}`} />
 
-      <nav 
+      <nav
         className={`adp-pill-container ${isExpanded ? 'adp-pill--expanded' : 'adp-pill--collapsed'}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -86,9 +86,12 @@ const AdminDashboardPanel: React.FC<{ userName?: string }> = ({ userName = 'Jorg
               <span className="adp-brand-subtitle">Universidad R. Landívar</span>
             </div>
           </div>
-          
+
           <div className={`adp-header-actions adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
-            <button className={`adp-pin-btn ${isPinned ? 'adp-pin-btn--active' : ''}`} onClick={() => setIsPinned(!isPinned)}>
+            <button
+              className={`adp-pin-btn ${isPinned ? 'adp-pin-btn--active' : ''}`}
+              onClick={() => setIsPinned(!isPinned)}
+            >
               <Icons.Pin />
             </button>
           </div>
@@ -99,9 +102,9 @@ const AdminDashboardPanel: React.FC<{ userName?: string }> = ({ userName = 'Jorg
             const Icon = Icons[item.icon as keyof typeof Icons];
             const isActive = activePath === item.path;
             return (
-              <button 
-                key={item.id} 
-                className={`adp-item ${isActive ? 'adp-item--active' : ''}`} 
+              <button
+                key={item.id}
+                className={`adp-item ${isActive ? 'adp-item--active' : ''}`}
                 onClick={() => handleNavigation(item.path)}
               >
                 <span className="adp-item-icon"><Icon /></span>
@@ -123,9 +126,9 @@ const AdminDashboardPanel: React.FC<{ userName?: string }> = ({ userName = 'Jorg
           </div>
 
           <div className="adp-divider" />
-          
-          <button 
-            className={`adp-item ${activePath === '/settings' ? 'adp-item--active' : ''}`} 
+
+          <button
+            className={`adp-item ${activePath === '/settings' ? 'adp-item--active' : ''}`}
             onClick={() => handleNavigation('/settings')}
           >
             <Icons.Settings />
