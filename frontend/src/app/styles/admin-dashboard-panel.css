@@ -1,195 +1,358 @@
-.adp-toggle {
-  position: fixed;
-  top: 16px;
-  left: 16px;
-  z-index: 1001;
-  background: #1a2fcc;
-  border: none;
-  border-radius: 12px;
-  color: #ffffff;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(26, 47, 204, 0.5);
-  transition: background 0.2s ease, opacity 0.2s ease;
-}
-
-.adp-toggle:hover {
-  background: #1530a0;
-}
-
-.adp-toggle--hidden {
-  display: none;
-}
-
-.adp-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-
-.adp-overlay--visible {
-  opacity: 1;
-  pointer-events: all;
-}
-
-.adp-container {
-  position: fixed;
-  top: 0;
-  left: 0;
+.adp-layout-spacer {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
   height: 100vh;
-  width: 300px;
-  z-index: 1000;
+}
+
+.adp-spacer--pinned { width: 280px; }
+.adp-spacer--collapsed { width: 88px; }
+
+.adp-pill-container {
+  position: fixed;
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+  background: linear-gradient(135deg, var(--url-navy) 0%, var(--url-navy-dark) 100%);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  background: #1a2fcc;
-  padding: 24px 20px 32px;
-  box-sizing: border-box;
-  font-family: "Nunito", "Segoe UI", sans-serif;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
-  overflow-y: auto;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
 }
 
-.adp-container--open {
-  transform: translateX(0);
+.adp-pill--collapsed {
+  width: 72px;
+  border-radius: 36px;
+  padding: 16px 12px;
+  max-height: 96vh;
+  align-items: center;
+  height: fit-content;
+}
+
+.adp-pill--expanded {
+  width: 260px;
+  border-radius: 20px;
+  padding: 0 0 16px 0;
+  max-height: 96vh;
+  align-items: stretch;
+  height: fit-content;
 }
 
 .adp-header {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.adp-logo-wrapper {
+  width: 100%;
+  padding: 20px 16px 16px 16px;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 28px;
+  background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 100%);
+  box-sizing: border-box;
+  text-align: center;
 }
 
-.adp-header-actions {
+.adp-pill--collapsed .adp-logo-wrapper {
+  display: none !important;
+}
+
+.adp-institutional-logo {
+  object-fit: contain;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100px;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
+  transition: transform 0.3s ease;
+  display: block;
+  margin: 0 auto;
+}
+
+.adp-brand-card {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  width: calc(100% - 32px);
+  margin: 0 auto;
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 14px 12px;
 }
 
-.adp-icon-btn {
-  background: rgba(255, 255, 255, 0.18);
+.adp-pill--collapsed .adp-brand-card {
+  width: 100%;
+  background: transparent;
   border: none;
-  border-radius: 12px;
-  color: #ffffff;
-  width: 44px;
-  height: 44px;
+  padding: 0;
+}
+
+.adp-profile-area {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  flex-shrink: 0;
+  width: 100%;
 }
 
-.adp-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.28);
+.adp-pill--expanded .adp-profile-area {
+  justify-content: space-between;
 }
 
-.adp-username {
-  color: #ffffff;
-  font-size: 24px;
-  font-weight: 900;
-  text-align: center;
-  margin: 0 0 32px;
-  letter-spacing: 0.3px;
+.adp-user-profile {
+  display: flex;
+  align-items: center;
+  gap: 0;
 }
 
-.adp-quick-access {
-  background: rgba(255, 255, 255, 0.13);
-  border-radius: 20px;
-  padding: 20px 16px;
+.adp-pill--expanded .adp-user-profile {
+  gap: 10px;
+  justify-content: flex-start;
   flex: 1;
 }
 
-.adp-section-label {
-  color: rgba(255, 255, 255, 0.7);
+.adp-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(45deg, var(--url-gold), var(--url-gold-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--url-navy-dark);
+  font-weight: 700;
   font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  display: block;
-  margin-bottom: 14px;
+  flex-shrink: 0;
 }
 
-.adp-items-list {
+.adp-user-details {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  overflow: hidden;
+}
+
+.adp-user-name {
+  color: var(--url-white);
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.adp-user-role, .adp-system-name {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.adp-system-name {
+  margin-top: 1px;
+}
+
+.adp-profile-actions {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+}
+
+.adp-pin-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.adp-pin-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.adp-pin-btn--active {
+  background: var(--url-gold) !important;
+  color: var(--url-navy) !important;
+}
+
+.adp-nav-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 12px 0;
+  flex: 1;
+  padding: 0 12px;
+}
+
+.adp-pill--expanded .adp-nav-list {
+  align-items: stretch;
 }
 
 .adp-item {
   display: flex;
   align-items: center;
-  gap: 16px;
-  background: rgba(255, 255, 255, 0.2);
+  justify-content: center;
+  background: transparent;
   border: none;
-  border-radius: 14px;
-  padding: 18px;
-  color: #ffffff;
-  font-size: 15px;
-  font-weight: 700;
+  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.15s ease;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.adp-pill--expanded .adp-item {
   width: 100%;
-  text-align: left;
+  justify-content: flex-start;
+  padding: 0 12px;
 }
 
 .adp-item:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateX(3px);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--url-white);
 }
 
 .adp-item--active {
-  background: rgba(255, 255, 255, 0.32);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--url-gold-pale);
+}
+
+.adp-item--active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 20px;
+  width: 4px;
+  background: var(--url-gold);
+  border-radius: 0 4px 4px 0;
 }
 
 .adp-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
   flex-shrink: 0;
+}
+
+.adp-actions-bottom {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 14px;
+  margin: 0 12px;
+  padding: 8px 0;
+  flex-shrink: 0;
 }
 
-.adp-item-label {
-  line-height: 1.3;
+.adp-pill--expanded .adp-actions-bottom {
+  padding: 10px 4px;
+  align-items: stretch;
 }
 
-.adp-footer {
-  margin-top: 32px;
-  display: flex;
-  justify-content: center;
+.adp-text {
+  opacity: 0;
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--url-white);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.adp-logout-btn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #f5a623;
-  border: none;
-  border-radius: 16px;
-  padding: 18px 40px;
-  color: #ffffff;
-  font-size: 17px;
-  font-weight: 800;
-  cursor: pointer;
-  width: 100%;
-  justify-content: center;
-  transition: background 0.2s ease, transform 0.15s ease;
-  letter-spacing: 0.3px;
+.adp-pill--expanded .adp-text {
+  opacity: 1;
+  max-width: 200px;
 }
 
-.adp-logout-btn:hover {
-  background: #e09510;
-  transform: translateY(-2px);
+.adp-pill--expanded .adp-item .adp-text {
+  margin-left: 12px;
 }
 
-.adp-logout-btn:active {
-  transform: translateY(0);
+.adp-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 6px 8px;
+  width: auto;
+}
+
+.adp-item-logout {
+  color: #FCA5A5;
+}
+
+.adp-item-logout:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+@media (max-width: 768px) {
+  .adp-layout-spacer {
+    display: none !important;
+  }
+  
+  .adp-pill-container,
+  .adp-pill--expanded,
+  .adp-pill--collapsed {
+    top: auto !important;
+    bottom: 16px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    flex-direction: row !important;
+    width: 94% !important;
+    max-width: 450px !important;
+    height: 64px !important;
+    border-radius: 32px !important;
+    padding: 0 16px !important;
+    align-items: center !important;
+  }
+
+  .adp-header, 
+  .adp-logo-wrapper, 
+  .adp-text, 
+  .adp-divider,
+  .adp-hide-mobile {
+    display: none !important;
+  }
+
+  .adp-actions-bottom {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    flex-direction: row !important;
+    width: auto !important;
+  }
+
+  .adp-nav-list {
+    flex-direction: row !important;
+    justify-content: space-around !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .adp-item {
+    width: auto !important;
+    padding: 10px !important;
+    justify-content: center !important;
+  }
+
+  .adp-item--active::before {
+    left: 50% !important;
+    top: auto !important;
+    bottom: -6px !important;
+    transform: translateX(-50%) !important;
+    height: 4px !important;
+    width: 20px !important;
+    border-radius: 4px 4px 0 0 !important;
+  }
 }

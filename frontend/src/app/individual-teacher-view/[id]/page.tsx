@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { useRouter, usePathname, useParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import "../individual-teacher-view.css";
 import SentimentAnalysisChart, { SentimentChartItem } from "../../components/sentiment-analysis-chart";
-import AdminDashboardPanel from "../../components/admin-dashboard-panel";
 
 type CourseFromAPI = {
     course_id: number;
@@ -24,11 +23,9 @@ type TeacherFromAPI = {
     since: string;
     status: string;
     code: string;
-
     courses: number[];          
     courses_detail: CourseFromAPI[]; 
 };
-
 
 type CommentGroup = {
     positive: string[];
@@ -66,11 +63,8 @@ function formatRole(role: string): string {
         titular: "Profesor Titular",
         asociado: "Profesor Asociado",
         auxiliar: "Profesor Auxiliar",
-        
     };
-
     const normalized = role?.toLowerCase().trim();
-
     return roles[normalized] || role;
 }
 
@@ -79,6 +73,7 @@ function formatSince(dateStr: string): string {
         "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
         "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
     ];
+    if (!dateStr || !dateStr.includes("-")) return dateStr;
     const [year, month] = dateStr.split("-");
     return `${months[parseInt(month) - 1]} ${year}`;
 }
@@ -92,7 +87,7 @@ function mapTeacher(data: TeacherFromAPI): Teacher {
         phone: data.phone ?? "",
         role: data.role ? formatRole(data.role) : "",
         since: data.since ? formatSince(data.since) : "",
-        finalScore: 0, //conectar cuando el backend exponga este dato
+        finalScore: 0,
         classes: (data.courses_detail ?? []).map((course) => ({
             id: String(course.course_id),
             name: course.name,
@@ -104,9 +99,7 @@ function mapTeacher(data: TeacherFromAPI): Teacher {
 
 export default function IndividualTeacherView() {
     const router = useRouter();
-    const pathname = usePathname();
     const params = useParams();
-
     const teacherId = params?.id as string;
 
     const [teacher, setTeacher] = useState<Teacher | null>(null);
@@ -142,38 +135,26 @@ export default function IndividualTeacherView() {
 
     if (loading) {
         return (
-            <div className="flex min-h-screen bg-gray-50">
-                <AdminDashboardPanel
-                    userName="Usuario Admin"
-                    activePath={pathname}
-                    onNavigate={(path) => router.push(path)}
-                    onLogout={() => router.push("/")}
-                />
-                <main className="flex-1 individual-teacher-general-container" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <p style={{ color: "var(--color-text-secondary)" }}>Cargando información del maestro...</p>
-                </main>
+            <div className="individual-teacher-general-container url-page-bg" style={{ justifyContent: "center" }}>
+                <div className="itv-loading-spinner"></div>
+                <p style={{ color: "var(--url-text-sec)", marginTop: "16px" }}>Cargando información del maestro...</p>
             </div>
         );
     }
 
     if (error || !teacher) {
         return (
-            <div className="flex min-h-screen bg-gray-50">
-                <AdminDashboardPanel
-                    userName="Usuario Admin"
-                    activePath={pathname}
-                    onNavigate={(path) => router.push(path)}
-                    onLogout={() => router.push("/")}
-                />
-                <main className="flex-1 individual-teacher-general-container" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <p style={{ color: "red" }}>{error ?? "Maestro no encontrado"}</p>
-                </main>
+            <div className="individual-teacher-general-container url-page-bg" style={{ justifyContent: "center" }}>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--url-danger)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: "16px" }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <p style={{ color: "var(--url-danger)", fontWeight: "600", fontSize: "18px", marginBottom: "24px" }}>{error ?? "Maestro no encontrado"}</p>
+                <button className="url-btn-primary" onClick={() => router.back()} style={{ background: "var(--url-navy)", color: "white", padding: "10px 20px", borderRadius: "8px", border: "none", cursor: "pointer" }}>
+                    Volver al listado
+                </button>
             </div>
         );
     }
 
     const teacherClasses = teacher.classes;
-
     const sentimentData: SentimentChartItem[] = teacherClasses.map((teacherClass) => ({
         subject: teacherClass.name,
         positiveReal: teacherClass.sentiment.positiveReal,
@@ -183,15 +164,9 @@ export default function IndividualTeacherView() {
     }));
 
     return (
-        <div className="flex min-h-screen bg-gray-50">
-            <AdminDashboardPanel
-                userName="Usuario Admin"
-                activePath={pathname}
-                onNavigate={(path) => router.push(path)}
-                onLogout={() => router.push("/")}
-            />
-
-            <main className="flex-1 individual-teacher-general-container">
+        <div className="individual-teacher-general-container url-page-bg">
+            <div className="url-container" style={{ width: '100%' }}>
+                
                 <div className="individual-teacher-presentation-container">
                     <div className="individual-teacher-personal-info">
                         <h1 className="individual-teacher-name">{teacher.name}</h1>
@@ -233,6 +208,7 @@ export default function IndividualTeacherView() {
                             </div>
                         </div>
                     </div>
+                    
                     <div className="individual-teacher-score">
                         <div className="individual-teacher-score-card">
                             <div className="individual-teacher-score-icon">
@@ -280,7 +256,7 @@ export default function IndividualTeacherView() {
                                                             {comment}
                                                         </div>
                                                     ))
-                                                    : <p style={{ color: "var(--color-text-secondary)", fontSize: "0.875rem" }}>Sin comentarios aún</p>
+                                                    : <p style={{ color: "var(--url-text-muted)", fontSize: "14px" }}>Sin comentarios aún</p>
                                                 }
                                             </div>
                                         </div>
@@ -296,7 +272,7 @@ export default function IndividualTeacherView() {
                                                             {comment}
                                                         </div>
                                                     ))
-                                                    : <p style={{ color: "var(--color-text-secondary)", fontSize: "0.875rem" }}>Sin comentarios aún</p>
+                                                    : <p style={{ color: "var(--url-text-muted)", fontSize: "14px" }}>Sin comentarios aún</p>
                                                 }
                                             </div>
                                         </div>
@@ -314,7 +290,7 @@ export default function IndividualTeacherView() {
                         height={500}
                     />
                 </div>
-            </main>
+            </div>
         </div>
     );
 }

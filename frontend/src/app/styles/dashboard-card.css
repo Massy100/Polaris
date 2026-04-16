@@ -2,20 +2,37 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  background-color: #ffffff;
-  border-radius: 14px;
+  background-color: var(--url-white);
+  border-radius: var(--url-radius-md);
   padding: 24px;
   text-decoration: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  box-shadow: var(--url-shadow-xs);
+  transition: all var(--url-transition);
   cursor: pointer;
-  border: 1px solid transparent;
+  border: 1px solid var(--url-border-soft);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: transparent;
+  transition: background var(--url-transition);
 }
 
 .card:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-  border-color: #e2e8f0;
+  box-shadow: var(--url-shadow-md);
+  transform: translateY(-4px);
+  border-color: var(--url-border);
+}
+
+.card:hover::before {
+  background: var(--url-navy-light);
 }
 
 .header {
@@ -25,42 +42,52 @@
 }
 
 .iconWrapper {
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--url-radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: transform var(--url-transition);
+}
+
+.card:hover .iconWrapper {
+  transform: scale(1.05) rotate(-3deg);
 }
 
 .iconBgBlue {
-  background-color: #dbeafe;
+  background-color: var(--url-info-bg);
 }
 
 .iconBgYellow {
-  background-color: #fef9c3;
+  background-color: var(--url-warn-bg);
 }
 
 .iconStrokeBlue {
-  stroke: #2563eb;
+  stroke: var(--url-navy-light);
 }
 
 .iconStrokeYellow {
-  stroke: #ca8a04;
+  stroke: var(--url-gold);
 }
 
 .title {
   font-size: 17px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--url-text-pri);
   margin: 0;
   line-height: 1.3;
+  transition: color var(--url-transition);
+}
+
+.card:hover .title {
+  color: var(--url-navy);
 }
 
 .description {
   font-size: 14px;
-  color: #64748b;
+  color: var(--url-text-sec);
   margin: 0;
   line-height: 1.6;
 }

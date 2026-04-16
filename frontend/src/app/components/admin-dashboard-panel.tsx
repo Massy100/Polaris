@@ -1,82 +1,54 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@clerk/nextjs';
+import Image from 'next/image';
 import '../styles/admin-dashboard-panel.css';
 
 type IconProps = React.SVGProps<SVGSVGElement>;
 
-const Icons: Record<string, React.FC<IconProps>> = {
-  Users: (props) => (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
+const Icons = {
+  Users: (props: IconProps) => (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
   ),
-  TrendingUp: (props) => (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-      <polyline points="17 6 23 6 23 12" />
-    </svg>
+  TrendingUp: (props: IconProps) => (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>
   ),
-  Bell: (props) => (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-    </svg>
+  Bell: (props: IconProps) => (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
   ),
-  History: (props) => (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
+  AlertTriangle: (props: IconProps) => (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
   ),
-  Upload: (props) => (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="17 8 12 3 7 8" />
-      <line x1="12" y1="3" x2="12" y2="15" />
-    </svg>
+  History: (props: IconProps) => (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
   ),
-  Menu: (props) => (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <line x1="3" y1="12" x2="21" y2="12" />
-      <line x1="3" y1="6" x2="21" y2="6" />
-      <line x1="3" y1="18" x2="21" y2="18" />
-    </svg>
+  Upload: (props: IconProps) => (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
   ),
-  X: (props) => (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
+  Settings: (props: IconProps) => (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
   ),
-  LogOut: (props) => (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-      <polyline points="16 17 21 12 16 7" />
-      <line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
+  Pin: (props: IconProps) => (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.68V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v4.68a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
   ),
-  Settings: (props) => (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-    </svg>
+  Home: (props: IconProps) => (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  ),
+  LogOut: (props: IconProps) => (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
   ),
 };
 
-type IconName = keyof typeof Icons;
-
-interface QuickAccessItem {
-  id: number;
-  label: string;
-  icon: IconName;
-  path: string;
-}
+const navItems = [
+  { id: 1, label: 'Inicio',                icon: 'Home',          path: '/top-of-page' },
+  { id: 2, label: 'Gestión Docente',       icon: 'Users',         path: '/user-management' },
+  { id: 3, label: 'Ranking Institucional', icon: 'TrendingUp',    path: '/institutional-ranking' },
+  { id: 5, label: 'Alertas de Desempeño',  icon: 'AlertTriangle', path: '/performance-alert' },
+  { id: 6, label: 'Cursos Históricos',     icon: 'History',       path: '/history-view' },
+  { id: 7, label: 'Carga Masiva',          icon: 'Upload',        path: '/bulk-upload' },
+];
 
 interface AdminDashboardPanelProps {
   userName?: string;
@@ -85,52 +57,36 @@ interface AdminDashboardPanelProps {
   onLogout?: () => void;
 }
 
-const quickAccessItems: QuickAccessItem[] = [
-  { id: 1, label: 'Gestion Docente',       icon: 'Users',      path: '/user-management'      },
-  { id: 2, label: 'Ranking Institucional',  icon: 'TrendingUp', path: '/institutional-ranking'},
-  { id: 3, label: 'Alerta de Desempeno',    icon: 'Bell',       path: '/performance-alert'    },
-  { id: 4, label: 'Cursos Historicos',      icon: 'History',    path: '/history-view'         },
-  { id: 5, label: 'Carga de Pensum',        icon: 'Upload',     path: '/pensum-upload'        },
-];
-
-const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
-  userName = 'Usuario Admin',
-  activePath = '',
+const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({ 
+  userName = 'Jorge Escalante', 
+  activePath: propActivePath,
   onNavigate,
-  onLogout,
+  onLogout
 }) => {
   const { signOut } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   
-  const [open, setOpen] = useState<boolean>(false);
+  const activePath = propActivePath || pathname;
+
+  const [isHovered, setIsHovered] = useState(false);
+  const [isPinned, setIsPinned] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [pensumLoaded, setPensumLoaded] = useState<boolean>(true);
+
+  const isExpanded = isHovered || isPinned;
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  useEffect(() => {
-    fetch('http://localhost:8000/api/pensum/status/')
-      .then(res => res.json())
-      .then(data => setPensumLoaded(data.is_loaded))
-      .catch(() => setPensumLoaded(true));
-  }, []);
-
-  const handleItemClick = (item: QuickAccessItem): void => {
-    try {
-      if (onNavigate) {
-        onNavigate(item.path);
-      } else {
-        router.push(item.path);
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setOpen(false);
+  const handleNavigation = (path: string) => {
+    setIsHovered(false);
+    if (onNavigate) {
+      onNavigate(path);
+    } else {
+      router.push(path);
     }
   };
-
 
   const handleLogout = async (): Promise<void> => {
     try {
@@ -139,92 +95,99 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
       onLogout?.();
     } catch (error) {
       console.error(error);
-    } finally {
-      setOpen(false);
     }
   };
 
-  if (!isMounted) {
-    return null;
-  }
+  if (!isMounted) return null;
 
-  const handleSettings = (): void => {
-    setOpen(false);
-    if (onNavigate) {
-      onNavigate('/notifications');
-    } else {
-      router.push('/notifications');
-    }
-  };
-
-  const handleNotifications = (): void => {
-    setOpen(false);
-    if (onNavigate) {
-      onNavigate('/weights-config');
-    } else {
-      router.push('/weights-config');
-    }
-  };
+  const initials = userName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
   return (
     <>
-      <button
-        className={`adp-toggle ${open ? 'adp-toggle--hidden' : ''}`}
-        onClick={() => setOpen(true)}
+      <div className={`adp-layout-spacer ${isPinned ? 'adp-spacer--pinned' : 'adp-spacer--collapsed'}`} />
+
+      <nav
+        className={`adp-pill-container ${isExpanded ? 'adp-pill--expanded' : 'adp-pill--collapsed'}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
-        <Icons.Menu />
-      </button>
-
-      <div
-        className={`adp-overlay ${open ? 'adp-overlay--visible' : ''}`}
-        onClick={() => setOpen(false)}
-      />
-
-      <div className={`adp-container ${open ? 'adp-container--open' : ''}`}>
         <div className="adp-header">
-          <button className="adp-icon-btn" onClick={() => setOpen(false)}>
-            <Icons.X />
-          </button>
-          <div className="adp-header-actions">
-            <button className="adp-icon-btn" onClick={handleSettings}>
-              <Icons.Bell />
-            </button>
-            <button className="adp-icon-btn" onClick={handleNotifications}>
-              <Icons.Settings />
-            </button>
+          <div className={`adp-logo-wrapper adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src="/icon.png" 
+              alt="Logo Landívar" 
+              className="adp-institutional-logo"
+            />
+          </div>
+
+          <div className="adp-brand-card">
+            <div className="adp-profile-area">
+              <div className="adp-user-profile">
+                <div className="adp-avatar">
+                  <span>{initials}</span>
+                </div>
+                <div className={`adp-user-details adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
+                  <span className="adp-user-name">{userName}</span>
+                  <span className="adp-user-role">Facultad de Ingenieria</span>
+                  <span className="adp-system-name">SGA Polaris</span>
+                </div>
+              </div>
+
+              <div className={`adp-profile-actions adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
+                <button
+                  className={`adp-pin-btn ${isPinned ? 'adp-pin-btn--active' : ''}`}
+                  onClick={() => setIsPinned(!isPinned)}
+                >
+                  <Icons.Pin />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <h1 className="adp-username">{userName}</h1>
-
-        <div className="adp-quick-access">
-          <span className="adp-section-label">Acceso Rapido</span>
-          <div className="adp-items-list">
-            {quickAccessItems
-              .filter(item => item.path !== '/pensum-upload' || !pensumLoaded)
-              .map((item) => {
-                const Icon = Icons[item.icon];
-                return (
-                  <button
-                    key={item.id}
-                    className={`adp-item ${activePath === item.path ? 'adp-item--active' : ''}`}
-                    onClick={() => handleItemClick(item)}
-                  >
-                    <span className="adp-item-icon"><Icon /></span>
-                    <span className="adp-item-label">{item.label}</span>
-                  </button>
-                );
-              })}
-          </div>
+        <div className="adp-nav-list">
+          {navItems.map((item) => {
+            const Icon = Icons[item.icon as keyof typeof Icons];
+            const isActive = activePath === item.path;
+            return (
+              <button
+                key={item.id}
+                className={`adp-item ${isActive ? 'adp-item--active' : ''}`}
+                onClick={() => handleNavigation(item.path)}
+              >
+                <span className="adp-item-icon"><Icon /></span>
+                <span className={`adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>{item.label}</span>
+              </button>
+            );
+          })}
         </div>
 
-        <div className="adp-footer">
-          <button className="adp-logout-btn" onClick={handleLogout}>
-            <Icons.LogOut />
-            <span>Cerrar Sesion</span>
+        <div className="adp-actions-bottom">
+          <button
+            className={`adp-item ${activePath === '/notifications' ? 'adp-item--active' : ''}`}
+            onClick={() => handleNavigation('/notifications')}
+          >
+            <span className="adp-item-icon"><Icons.Bell /></span>
+            <span className={`adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>Notificaciones</span>
+          </button>
+
+          <button
+            className={`adp-item adp-hide-mobile ${activePath === '/settings' ? 'adp-item--active' : ''}`}
+            onClick={() => handleNavigation('/settings')}
+          >
+            <span className="adp-item-icon"><Icons.Settings /></span>
+            <span className={`adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>Configuración</span>
+          </button>
+
+          <div className="adp-divider adp-hide-mobile" />
+
+          <button className="adp-item adp-item-logout adp-hide-mobile" onClick={handleLogout}>
+            <span className="adp-item-icon"><Icons.LogOut /></span>
+            <span className={`adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>Cerrar Sesión</span>
           </button>
         </div>
-      </div>
+      </nav>
     </>
   );
 };

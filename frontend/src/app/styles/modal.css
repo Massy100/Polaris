@@ -1,91 +1,92 @@
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(16, 24, 40, 0.55);
+    background: rgba(13, 31, 78, 0.4);
     backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 18px;
     z-index: 9999;
+    animation: url-fade-in 0.2s ease-out;
 }
 
 .modal-card {
-    background: white;
-    border-radius: 14px;
-    box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.25),
-        0 2px 8px rgba(0, 0, 0, 0.08);
+    background: var(--url-white);
+    border-radius: var(--url-radius-lg);
+    box-shadow: var(--url-shadow-lg);
     overflow: hidden;
-
-    transform: translateY(8px);
-    animation: modalIn 0.18s ease forwards;
-}
-
-@keyframes modalIn {
-    to {
-        transform: translateY(0);
-    }
+    animation: url-slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 16px;
-    border-bottom: 1px solid #e8eefc;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--url-border-soft);
 }
 
 .modal-title {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
-    color: #1b1a21;
+    color: var(--url-navy);
 }
 
 .modal-close {
     width: 32px;
     height: 32px;
-    border-radius: 999px;
-    border: none;
-    color: #1b1a21;
+    border-radius: var(--url-radius-sm);
+    border: 1px solid transparent;
+    background: var(--url-surface);
+    color: var(--url-text-muted);
     cursor: pointer;
     font-size: 18px;
-    line-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--url-transition);
 }
 
-.modal-close:hover svg {
-    color: #d63535 !important;
+.modal-close:hover {
+    background: var(--url-danger-bg);
+    color: var(--url-danger);
+    border-color: var(--url-danger-bd);
 }
 
 .modal-body {
-    padding: 16px;
+    padding: 24px;
+    overflow-y: auto;
 }
-
 
 .modal-content {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
 }
 
 .modal-text {
     margin: 0;
-    font-size: 18px;
-    color: #1b1a21;
-    line-height: 1.50;
+    font-size: 15px;
+    color: var(--url-text-pri);
+    line-height: 1.6;
 }
 
 .modal-highlight {
     font-weight: 600;
+    color: var(--url-navy);
 }
 
 .modal-meta {
-    background: #f6f9ff;
-    border: 1px solid #e8eefc;
-    border-radius: 12px;
-    padding: 10px 12px;
-    color: #1b1a21;
-    font-size: 16px;
+    background: var(--url-surface-2);
+    border: 1px solid var(--url-border);
+    border-radius: var(--url-radius-md);
+    padding: 12px 16px;
+    color: var(--url-text-pri);
+    font-size: 14px;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -94,17 +95,18 @@
 .modal-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
-    margin-top: 4px;
+    gap: 12px;
+    margin-top: 24px;
 }
 
 .modal-btn {
-    padding: 10px 14px;
-    border-radius: 10px;
+    padding: 10px 20px;
+    border-radius: var(--url-radius-sm);
     border: none;
     cursor: pointer;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 14px;
+    transition: all var(--url-transition);
 }
 
 .modal-btn:active {
@@ -112,30 +114,33 @@
 }
 
 .modal-btn-ghost {
-    background: #eef4fe;
-    color: #1b1a21;
+    background: var(--url-white);
+    border: 1px solid var(--url-border);
+    color: var(--url-text-sec);
 }
 
 .modal-btn-ghost:hover {
-    background: #e0e8f8;
+    background: var(--url-surface);
+    color: var(--url-text-pri);
 }
 
 .modal-btn-primary {
-    background: #3f7ee2;
-    color: #fff;
-    box-shadow: 0px 5px 9px rgba(0, 0, 0, 0.20);
+    background: var(--url-navy);
+    color: var(--url-white);
 }
 
 .modal-btn-primary:hover {
-    background: #1944b8;
+    background: var(--url-navy-dark);
+    box-shadow: var(--url-shadow-sm);
+    transform: translateY(-1px);
 }
 
 .modal-btn-danger {
-    background: rgb(255, 69, 69);
-    color: #fff;
-    box-shadow: 0px 5px 9px rgba(0, 0, 0, 0.20);
+    background: var(--url-danger);
+    color: var(--url-white);
 }
 
 .modal-btn-danger:hover {
-    background: #d63535;
+    background: #991b1b;
+    box-shadow: var(--url-shadow-sm);
 }

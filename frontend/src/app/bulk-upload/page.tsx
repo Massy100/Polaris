@@ -1,8 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import AdminDashboardPanel from "../components/admin-dashboard-panel";
+import { useState, useRef, useCallback, useMemo } from "react";
 import "./bulk-upload.css";
 
 type TabKey = 'titulos' | 'meritos' | 'opiniones' | 'encuestas';
@@ -437,51 +435,20 @@ export default function BulkUploadPage() {
   };
 
   return (
-    <div className="bu-root">
-      <AdminDashboardPanel userName="Coordinador Admin" activePath="/bulk-upload" />
+    <div className="bu-root bg-gray-50 min-h-screen">
+      <Toast toast={toast} />
 
-      <div className="flex-1">
-        <Toast toast={toast} />
-
-        <header className="bu-header">
-          <div className="bu-brand">
-            <div className="bu-brand-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <polyline points="9 22 9 12 15 12 15 22" />
-              </svg>
-            </div>
-            <div className="bu-brand-text">
-              <span className="bu-brand-name">Carga Masiva de Datos</span>
-              <span className="bu-brand-sub">Sistema de gestion de profesores</span>
-            </div>
+      <header className="bu-header">
+        <div className="bu-brand">
+          <div className="bu-brand-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
           </div>
-          <button className="bu-btn-download" onClick={handleDownload}>
-            <IconDownload />
-            Descargar
-          </button>
-        </header>
-
-        <nav className="bu-tabs">
-          {TABS.map((t) => {
-            const Icon = TAB_ICONS[t.key];
-            return (
-              <button
-                key={t.key}
-                className={`bu-tab${activeTab === t.key ? " bu-tab--active" : ""}`}
-                onClick={() => setActiveTab(t.key)}
-              >
-                <Icon />
-                {t.label}
-              </button>
-            );
-          })}
-        </nav>
-
-        <main className="bu-main">
-          <div className="bu-section-head">
-            <h1 className="bu-h1">{tab.title}</h1>
-            <p className="bu-h1-sub">{tab.subtitle}</p>
+          <div className="bu-brand-text">
+            <span className="bu-brand-name">Carga Masiva de Datos</span>
+            <span className="bu-brand-sub">Sistema de gestion de profesores</span>
           </div>
         </div>
         <button className="bu-btn-download" onClick={handleDownload}>
@@ -512,21 +479,11 @@ export default function BulkUploadPage() {
           <p className="bu-h1-sub">{tab.subtitle}</p>
         </div>
 
-          <div className="bu-card">
-            <p className="bu-card-title">{tab.cardTitle}</p>
-            <p className="bu-card-sub">{tab.cardSub}</p>
-            {upload ? (
-              <FileTag
-                uploaded={upload}
-                onRemove={() => setUploads((p) => ({ ...p, [activeTab]: null }))}
-              />
-            ) : (
-              <DropZone onFile={handleFile} />
-            )}
-          </div>
-
-          {upload && (
-            <DataPreview
+        <div className="bu-card">
+          <p className="bu-card-title">{tab.cardTitle}</p>
+          <p className="bu-card-sub">{tab.cardSub}</p>
+          {upload ? (
+            <FileTag
               uploaded={upload}
               onRemove={() =>
                 setUploads((previous) => ({
@@ -535,10 +492,19 @@ export default function BulkUploadPage() {
                 }))
               }
             />
+          ) : (
+            <DropZone onFile={handleFile} />
           )}
-        </main>
+        </div>
 
-        {upload && <DataPreview uploaded={upload} saveLabel={tab.saveLabel} onSave={handleSave} isSaving={isSaving} />}
+        {upload && (
+          <DataPreview
+            uploaded={upload}
+            saveLabel={tab.saveLabel}
+            onSave={handleSave}
+            isSaving={isSaving}
+          />
+        )}
       </main>
 
       <footer className="bu-footer">

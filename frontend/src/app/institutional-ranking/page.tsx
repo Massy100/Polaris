@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import AdminDashboardPanel from "../components/admin-dashboard-panel";
+import { useRouter } from "next/navigation";
 import Pagination from "../components/pagination";
 import "./institutional-ranking.css";
 
@@ -25,7 +24,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 export default function InstitutionalRanking() {
     const router = useRouter();
-    const pathname = usePathname();
     const [isMounted, setIsMounted] = useState(false);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -77,7 +75,7 @@ export default function InstitutionalRanking() {
                 rank: (page - 1) * pageSize + index + 1,
                 initials: getInitials(teacher.full_name || `${teacher.first_name} ${teacher.last_name}`),
                 name: teacher.full_name || `${teacher.first_name} ${teacher.last_name}`,
-                rating: teacher.rating ?? 0,// Rating will default to 0 until the evaluation system is implemented
+                rating: teacher.rating ?? 0,
                 specialties: teacher.specialties || [],
             }));
 
@@ -85,7 +83,6 @@ export default function InstitutionalRanking() {
             setTotalItems(data.count);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error desconocido');
-            console.error('Error fetching teachers:', err);
         } finally {
             setLoading(false);
         }
@@ -117,61 +114,60 @@ export default function InstitutionalRanking() {
         setPage(1);
     };
 
-    return (
-        <div className="flex min-h-screen bg-gray-50">
-            <AdminDashboardPanel
-                userName="Usuario Admin"
-                activePath={pathname}
-                onNavigate={(path) => router.push(path)}
-                onLogout={() => router.push("/")}
-            />
+    if (!isMounted) return null;
 
-            <div className="flex-1 institutional-ranking-container">
+    return (
+        <div className="url-page-bg">
+            <div className="url-container institutional-ranking-container flex-1" style={{ paddingTop: '40px', paddingBottom: '60px', width: '100%' }}>
                 <div className="i-r-header">
-                    <h1>Ranking institucional</h1>
-                    <p>Docentes mejor evaluados</p>
+                    <h1 className="url-title">Ranking Institucional</h1>
+                    <p>Docentes mejor evaluados de la facultad</p>
                 </div>
 
                 <div className="i-r-content">
                     <div className="i-r-c-description">
                         <h2>Ranking Docente</h2>
-                        <p>{totalItems} docentes evaluados</p>
+                        <p>{totalItems} docentes evaluados en este período</p>
                     </div>
-
-                    <div className="i-r-table-height">
+                    
+                    <div className="i-r-table-wrapper">
                         <table className="i-r-table">
                             <thead>
                                 <tr>
-                                    <th>Posición</th>
-                                    <th>Docente</th>
-                                    <th className="sortable-header" onClick={handleRatingSort}>
+                                    <th style={{ width: '12%' }}>Posición</th>
+                                    <th style={{ width: '35%' }}>Docente</th>
+                                    <th style={{ width: '20%' }} className="sortable-header" onClick={handleRatingSort}>
                                         <span className="sortable-header-content">
                                             Calificación
                                             <span className="sort-icon">
-                                                {ratingSortOrder === "desc" ? " ▼" : " ▲"}
+                                                {ratingSortOrder === "desc" ? (
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                                                ) : (
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+                                                )}
                                             </span>
                                         </span>
                                     </th>
-                                    <th>Especialidades</th>
+                                    <th style={{ width: '33%' }}>Especialidades</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={4} style={{ padding: 16, textAlign: 'center' }}>
+                                        <td colSpan={4} style={{ padding: '32px', textAlign: 'center', color: 'var(--url-text-sec)' }}>
                                             Cargando docentes...
                                         </td>
                                     </tr>
                                 ) : error ? (
                                     <tr>
-                                        <td colSpan={4} style={{ padding: 16, textAlign: 'center', color: 'red' }}>
+                                        <td colSpan={4} style={{ padding: '32px', textAlign: 'center', color: 'var(--url-danger)' }}>
                                             {error}
                                         </td>
                                     </tr>
                                 ) : docentes.length === 0 ? (
                                     <tr>
-                                        <td colSpan={4} style={{ padding: 16, textAlign: 'center' }}>
-                                            No hay docentes registrados
+                                        <td colSpan={4} style={{ padding: '32px', textAlign: 'center', color: 'var(--url-text-sec)' }}>
+                                            No hay docentes registrados en este período.
                                         </td>
                                     </tr>
                                 ) : (
@@ -179,11 +175,9 @@ export default function InstitutionalRanking() {
                                         const displayRank = (page - 1) * pageSize + index + 1;
 
                                         return (
-                                            <tr
+                                            <tr 
                                                 key={docente.id}
                                                 onClick={() => router.push(`/individual-teacher-view/${docente.id}`)}
-                                                style={{ cursor: 'pointer' }}
-                                                className="ranking-row-hover"
                                             >
                                                 <td>
                                                     <div className="rank-cell">
@@ -214,7 +208,7 @@ export default function InstitutionalRanking() {
                                                                 </span>
                                                             ))
                                                         ) : (
-                                                            <span className="specialty-badge">—</span>
+                                                            <span className="specialty-badge" style={{ background: 'transparent', border: '1px solid var(--url-border)', color: 'var(--url-text-muted)' }}>—</span>
                                                         )}
                                                     </div>
                                                 </td>
@@ -225,22 +219,24 @@ export default function InstitutionalRanking() {
                             </tbody>
                         </table>
                     </div>
-
+                    
                     {!loading && totalItems > 0 && (
-                        <Pagination
-                            page={page}
-                            pageSize={pageSize}
-                            totalItems={totalItems}
-                            onPageChange={(newPage) => {
-                                const totalPages = Math.ceil(totalItems / pageSize) || 1;
-                                if (newPage < 1 || newPage > totalPages) return;
-                                setPage(newPage);
-                            }}
-                            onPageSizeChange={(size) => {
-                                setPageSize(size > 0 ? size : 10);
-                                setPage(1);
-                            }}
-                        />
+                        <div className="i-r-pagination-wrapper">
+                            <Pagination
+                                page={page}
+                                pageSize={pageSize}
+                                totalItems={totalItems}
+                                onPageChange={(newPage) => {
+                                    const totalPages = Math.ceil(totalItems / pageSize) || 1;
+                                    if (newPage < 1 || newPage > totalPages) return;
+                                    setPage(newPage);
+                                }}
+                                onPageSizeChange={(size) => {
+                                    setPageSize(size > 0 ? size : 10);
+                                    setPage(1);
+                                }}
+                            />
+                        </div>
                     )}
                 </div>
             </div>

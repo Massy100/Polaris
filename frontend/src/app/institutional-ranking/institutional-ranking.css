@@ -1,460 +1,285 @@
 .institutional-ranking-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 45px;
-    height: 100vh;
-    width: 100%;
-    background-color: #EFF4FE;
-    color: black;
-    overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(20px, 4vw, 48px);
+  min-height: 100vh;
+  width: 100%;
+  background: var(--url-surface);
+  color: var(--url-text-pri);
+  overflow: auto;
 }
 
-/* i-r- = institutional ranking */
 .i-r-header {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: 4px;
 }
 
 .i-r-header h1 {
-    font-size: 32px;
-    font-weight: bold;
+  font-size: clamp(22px, 3.5vw, 34px);
+  font-weight: 700;
+  color: var(--url-navy);
+  margin: 0;
 }
 
 .i-r-header p {
-    font-size: 18px;
-    color: #555;
+  font-size: clamp(13px, 1.6vw, 16px);
+  color: var(--url-text-sec);
+  margin: 4px 0 0;
 }
 
 .i-r-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    margin-top: 30px;
-    background-color: white;
-    border: solid 1px #ddd;
-    border-radius: 18px;
-    padding: 8px 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 26px;
+  background: var(--url-white);
+  border: 1px solid var(--url-border-soft);
+  border-radius: var(--url-radius-lg);
+  box-shadow: var(--url-shadow-sm);
+  overflow: hidden;
 }
 
 .i-r-c-description {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    padding: 20px;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: clamp(16px, 2.5vw, 26px) clamp(16px, 2.8vw, 26px) clamp(12px, 1.8vw, 20px);
+  width: 100%;
+  border-bottom: 1px solid var(--url-border-soft);
 }
 
 .i-r-c-description h2 {
-    font-size: 24px;
-    font-weight: bold;
+  font-size: clamp(17px, 2vw, 22px);
+  font-weight: 700;
+  color: var(--url-navy);
+  margin: 0 0 4px;
 }
 
 .i-r-c-description p {
-    font-size: 16px;
-    color: #555;
+  font-size: clamp(12.5px, 1.4vw, 14.5px);
+  color: var(--url-text-sec);
+  margin: 0;
 }
 
 .i-r-table-height {
-    margin-top: 20px;
-    max-height: 700px;
-    overflow: auto;
-    width: 100%;
+  max-height: clamp(420px, 62vh, 720px);
+  overflow: auto;
+  width: 100%;
 }
-
-.i-r-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    table-layout: fixed;
-}
-
-.i-r-table thead th {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    text-align: left;
-    font-size: 17px;
-    font-weight: 700;
-    color: #111827;
-    padding: 16px 12px;
-    background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
-    box-shadow: 0 1px 0 #e5e7eb;
-}
-
-.i-r-table tbody td {
-    padding: 14px 12px;
-    vertical-align: middle;
-    border-bottom: 1px solid #e5e7eb;
-    font-size: 17px;
-}
-
-.i-r-table tbody tr:hover {
-    background-color: #eff1f594;
-}
-
-.i-r-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.rank-cell {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-}
-
-.rank-medal {
-    width: 34px;
-    height: 34px;
-    border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.rank-medal svg {
-    width: 35px;
-    height: 35px;
-}
-
-.rank-medal.gold {
-    color: #f4b400;
-}
-
-.rank-medal.silver {
-    color: #9ca3af;
-}
-
-.rank-medal.bronze {
-    color: #b45309;
-}
-
-.rank-number {
-    font-size: 20px;
-    color: #6b7280;
-    font-weight: 500;
-}
-
-.teacher-cell {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.teacher-name {
-    font-weight: 550;
-    color: #1f1f1f;
-}
-
-.rating-value {
-    color: #2563eb;
-    font-size: 20px;
-    font-weight: 600;
-}
-
-.rating-max {
-    color: #6b7280;
-    margin-left: 4px;
-    font-size: 18px;
-}
-
-.specialties-cell {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.specialty-badge {
-    background-color: #f3f4f6;
-    color: #111827;
-    border-radius: 999px;
-    padding: 6px 12px;
-    font-size: 15px;
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-}
-
-/* Scroll bar styles for institutional ranking table ----------- */
 
 .i-r-table-height::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 .i-r-table-height::-webkit-scrollbar-track {
-    background: transparent;
-    margin: 4px;
+  background: transparent;
 }
 
 .i-r-table-height::-webkit-scrollbar-thumb {
-    background: rgba(47, 115, 223, 0.28);
-    border-radius: 999px;
-
-    transition:
-        background 0.25s ease,
-        opacity 0.25s ease,
-        transform 0.2s ease;
+  background: rgba(13, 31, 78, 0.18);
+  border-radius: 999px;
 }
 
 .i-r-table-height::-webkit-scrollbar-thumb:hover {
-    background: rgba(47, 115, 223, 0.28);
+  background: rgba(13, 31, 78, 0.32);
 }
 
 .i-r-table-height::-webkit-scrollbar-thumb:active {
-    background: rgba(47, 115, 223, 0.40);
+  background: rgba(13, 31, 78, 0.45);
 }
 
 .i-r-table-height::-webkit-scrollbar-button {
-    display: none;
+  display: none;
 }
 
-/* ------------------------------------------------------- */
+.i-r-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.i-r-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  text-align: left;
+  font-size: clamp(12px, 1.4vw, 14px);
+  font-weight: 700;
+  color: var(--url-navy);
+  padding: clamp(12px, 1.8vw, 16px) clamp(10px, 1.6vw, 14px);
+  background: var(--url-surface);
+  border-bottom: 2px solid var(--url-border);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.i-r-table tbody td {
+  padding: clamp(11px, 1.5vw, 14px) clamp(10px, 1.6vw, 14px);
+  vertical-align: middle;
+  border-bottom: 1px solid var(--url-border-soft);
+  font-size: clamp(13px, 1.5vw, 15px);
+  color: var(--url-text-pri);
+}
+
+.i-r-table tbody tr:hover {
+  background: var(--url-surface);
+}
+
+.i-r-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.rank-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+}
+
+.rank-medal {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rank-medal svg {
+  width: 32px;
+  height: 32px;
+}
+
+.rank-medal.gold   { color: var(--url-gold); }
+.rank-medal.silver { color: #8A9AAE; }
+.rank-medal.bronze { color: #A0674A; }
+
+.rank-number {
+  font-size: clamp(15px, 1.8vw, 18px);
+  color: var(--url-text-muted);
+  font-weight: 600;
+}
+
+.teacher-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.teacher-name {
+  font-weight: 600;
+  color: var(--url-text-pri);
+  font-size: clamp(13px, 1.5vw, 15px);
+}
+
+.rating-value {
+  color: var(--url-navy-light);
+  font-size: clamp(16px, 2vw, 20px);
+  font-weight: 700;
+}
+
+.rating-max {
+  color: var(--url-text-muted);
+  margin-left: 3px;
+  font-size: clamp(13px, 1.4vw, 16px);
+}
+
+.specialties-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.specialty-badge {
+  background: var(--url-info-bg);
+  color: var(--url-navy);
+  border: 1px solid var(--url-info-bd);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: clamp(11.5px, 1.2vw, 13.5px);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+}
 
 .sortable-header {
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-    min-width: 110px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  min-width: 100px;
+  transition: color var(--url-transition);
+}
+
+.sortable-header:hover {
+  color: var(--url-navy-dark);
 }
 
 .sortable-header-content {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    min-width: max-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: max-content;
 }
 
 .sort-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: #6b7280;
-    line-height: 1;
-    flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--url-text-muted);
+  flex-shrink: 0;
 }
 
 .sort-icon svg {
-    width: 30px;
-    height: 30px;
+  width: 16px;
+  height: 16px;
 }
 
 .sortable-header:hover .sort-icon {
-    color: #111827;
+  color: var(--url-navy);
 }
 
-@media (max-width: 1200px) {
-    .institutional-ranking-container {
-        padding: 32px;
-    }
+@media (max-width: 900px) {
+  .institutional-ranking-container {
+    padding: clamp(14px, 3vw, 28px);
+  }
 
-    .i-r-header h1 {
-        font-size: 28px;
-    }
-
-    .i-r-header p {
-        font-size: 16px;
-    }
-
-    .i-r-c-description h2 {
-        font-size: 22px;
-    }
-
-    .i-r-table thead th,
-    .i-r-table tbody td {
-        font-size: 15px;
-        padding: 14px 10px;
-    }
-
-    .rating-value {
-        font-size: 18px;
-    }
-
-    .rating-max {
-        font-size: 16px;
-    }
-
-    .specialty-badge {
-        font-size: 14px;
-        padding: 5px 10px;
-    }
+  .i-r-table thead th,
+  .i-r-table tbody td {
+    padding: 10px 8px;
+  }
 }
 
-@media (max-width: 768px) {
-    .institutional-ranking-container {
-        padding: 16px;
-        height: auto;
-        min-height: 100vh;
-    }
+@media (max-width: 640px) {
+  .institutional-ranking-container {
+    padding: 12px;
+  }
 
-    .i-r-header {
-        gap: 4px;
-    }
+  .i-r-content {
+    border-radius: var(--url-radius-md);
+  }
 
-    .i-r-header h1 {
-        font-size: 22px;
-    }
+  .i-r-table {
+    min-width: 420px;
+  }
 
-    .i-r-header p {
-        font-size: 14px;
-    }
+  .specialty-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
 
-    .i-r-content {
-        margin-top: 20px;
-        border-radius: 14px;
-        padding: 6px 8px;
-    }
+  .sort-icon svg {
+    width: 13px;
+    height: 13px;
+  }
 
-    .i-r-c-description {
-        padding: 14px 10px;
-    }
-
-    .i-r-c-description h2 {
-        font-size: 18px;
-    }
-
-    .i-r-c-description p {
-        font-size: 14px;
-    }
-
-    .i-r-table-height {
-        margin-top: 12px;
-        max-height: 720px;
-        border-radius: 12px;
-    }
-
-    .i-r-table {
-        width: 100%;
-        /* min-width: 760px; */
-    }
-
-    .i-r-table thead th,
-    .i-r-table tbody td {
-        font-size: 13px;
-        padding: 10px 8px;
-    }
-
-    .rank-cell {
-        width: 40px;
-    }
-
-    .rank-number {
-        font-size: 16px;
-    }
-
-    .rank-medal {
-        width: 28px;
-        height: 28px;
-    }
-
-    .rank-medal svg {
-        width: 24px;
-        height: 24px;
-    }
-
-    .teacher-name {
-        font-size: 13px;
-    }
-
-    .rating-value {
-        font-size: 15px;
-    }
-
-    .rating-max {
-        font-size: 13px;
-    }
-
-    .specialty-badge {
-        font-size: 12px;
-        padding: 4px 8px;
-    }
-
-    .sortable-header-content {
-        gap: 4px;
-    }
-
-    .sort-icon svg {
-        width: 16px;
-        height: 16px;
-    }
-}
-
-@media (max-width: 480px) {
-    .institutional-ranking-container {
-        padding: 12px;
-    }
-
-    .i-r-header {
-        align-items: center;
-    }
-
-    .i-r-header h1 {
-        font-size: 20px;
-    }
-
-    .i-r-header p {
-        font-size: 13px;
-    }
-
-    .i-r-c-description h2 {
-        font-size: 17px;
-    }
-
-    .i-r-c-description p {
-        font-size: 13px;
-    }
-
-    .i-r-table-height {
-        max-height: 820px;
-    }
-
-    .i-r-table {
-        min-width: 400px;
-    }
-
-    .i-r-table thead th {
-        font-size: 12px;
-        padding: 9px 0px;
-    }
-
-    .i-r-table tbody td {
-        font-size: 12px;
-        padding: 9px 7px;
-    }
-
-    .teacher-name {
-        font-size: 12px;
-    }
-
-    .rating-value {
-        font-size: 14px;
-    }
-
-    .rating-max {
-        font-size: 12px;
-    }
-
-    .specialty-badge {
-        font-size: 11px;
-        padding: 4px 7px;
-    }
-
-    .sortable-header {
-        min-width: 80px;
-        gap: 0;
-    }
-
-    .sortable-header-content {
-        gap: 0;
-    }
-
-    .sort-icon svg {
-        width: 14px;
-        height: 14px;
-    }
+  .sortable-header {
+    min-width: 70px;
+  }
 }

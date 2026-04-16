@@ -1,509 +1,405 @@
 .container-management-general {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 45px;
-    height: 100vh;
-    width: 100%;
-    background-color: #EFF4FE;
-    overflow-x: hidden;
-    overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(16px, 3.5vw, 48px);
+  min-height: 100vh;
+  width: 100%;
+  background: var(--url-surface);
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .user-management-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 40px;
-    height: 100%;
-    width: 100%;
-    border-radius: 18px;
-    color: black;
-    background-color: white;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(16px, 2.5vw, 28px) clamp(16px, 3vw, 44px);
+  height: 100%;
+  width: 100%;
+  border-radius: var(--url-radius-lg);
+  color: var(--url-text-pri);
+  background: var(--url-white);
+  border: 1px solid var(--url-border-soft);
+  box-shadow: var(--url-shadow-sm);
+  min-height: 0;
 }
 
 .user-management-header {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    padding: 20px 20px;
-    gap: 20px;
-    width: 100%;
-    justify-content: space-between;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(12px, 1.8vw, 20px) 0;
+  gap: 16px;
+  width: 100%;
+  border-bottom: 1px solid var(--url-border-soft);
+  margin-bottom: 4px;
 }
 
 .user-management-header .title-management {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .title-management h1 {
-    font-size: 30px;
-    font-weight: bold;
-    color: #1B1A21;
-    letter-spacing: 1.5px;
+  font-size: clamp(20px, 2.8vw, 28px);
+  font-weight: 700;
+  color: var(--url-navy);
+  letter-spacing: 0.01em;
+  margin: 0;
+  line-height: 1.2;
 }
 
 .title-management h2 {
-    font-size: 20px;
-    color: #4174EE;
-    letter-spacing: 1px;
+  font-size: clamp(14px, 1.6vw, 17px);
+  color: var(--url-navy-light);
+  letter-spacing: 0.01em;
+  font-weight: 500;
+  margin: 3px 0 0;
 }
 
 .user-management-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    gap: 20px;
-    width: 100%;
-    border-radius: 12px;
-    background-color: #E9F1FD;
-    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.09);
-    flex: 1;
-    min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(14px, 2vw, 22px) 0;
+  gap: 16px;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
 }
 
 .search-management-section-wrapper {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: left;
-    gap: 25px;
-    width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  width: 100%;
 }
 
 .search-section-management {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    max-width: 380px;
-    padding: 10px 12px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(224, 232, 248, 1);
-    box-shadow:
-        0 8px 18px rgba(16, 24, 40, 0.06),
-        0 1px 2px rgba(16, 24, 40, 0.06);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  max-width: 380px;
+  padding: 9px 14px;
+  border-radius: var(--url-radius-sm);
+  background: var(--url-surface);
+  border: 1px solid var(--url-border);
+  transition: border-color var(--url-transition), box-shadow var(--url-transition);
 }
 
 .search-section-management:hover {
-    border-color: rgba(47, 115, 223, 0.30);
-}
-
-.search-section-management svg {
-    color: #B6B9BC;
-}
-
-.search-management-input {
-    flex: 1;
-    border: none;
-    outline: none;
-    background: transparent;
-    color: #1B1A21;
-    font-size: 15px;
-    font-weight: 500;
-    letter-spacing: 0.2px;
-    padding: 2px 0;
-}
-
-.search-section-management .search-management-input::placeholder {
-    color: #B6B9BC;
-}
-
-.search-section-management .search-management-input:focus {
-    outline: none;
+  border-color: var(--url-navy-light);
 }
 
 .search-section-management:focus-within {
-    border-color: rgba(47, 115, 223, 0.30);
-    box-shadow:
-        0 8px 18px rgba(16, 24, 40, 0.06),
-        0 1px 2px rgba(16, 24, 40, 0.06);
+  border-color: var(--url-navy-light);
+  box-shadow: 0 0 0 3px rgba(26, 50, 112, 0.1);
+}
+
+.search-section-management svg {
+  color: var(--url-text-muted);
+  flex-shrink: 0;
+}
+
+.search-management-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--url-text-pri);
+  font-size: 13.5px;
+  font-weight: 400;
+  padding: 2px 0;
+}
+
+.search-management-input::placeholder {
+  color: var(--url-text-muted);
 }
 
 .search-clear-btn {
-    width: 30px;
-    height: 30px;
-    border: none;
-    color: #667085;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.1s ease;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--url-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background var(--url-transition), color var(--url-transition);
 }
 
-.search-clear-btn:active {
-    transform: scale(0.96);
+.search-clear-btn:hover {
+  background: var(--url-danger-bg);
+  color: var(--url-danger);
 }
 
 .user-management-table {
-    width: 100%;
-    border-radius: 12px;
-    background-color: #FFFFFF;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    flex: 1;
-    min-height: 0;
-    overflow: auto;
+  width: 100%;
+  border-radius: var(--url-radius-md);
+  border: 1px solid var(--url-border-soft);
+  background: var(--url-white);
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
 }
 
-/* Scroll bar styles for user management table ----------- */
-
 .user-management-table::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 .user-management-table::-webkit-scrollbar-track {
-    background: transparent;
-    margin: 4px;
+  background: transparent;
 }
 
 .user-management-table::-webkit-scrollbar-thumb {
-    background: rgba(47, 115, 223, 0.28);
-    border-radius: 999px;
-
-    transition:
-        background 0.25s ease,
-        opacity 0.25s ease,
-        transform 0.2s ease;
+  background: rgba(13, 31, 78, 0.18);
+  border-radius: 999px;
 }
 
 .user-management-table::-webkit-scrollbar-thumb:hover {
-    background: rgba(47, 115, 223, 0.28);
+  background: rgba(13, 31, 78, 0.32);
 }
 
 .user-management-table::-webkit-scrollbar-thumb:active {
-    background: rgba(47, 115, 223, 0.40);
+  background: rgba(13, 31, 78, 0.45);
 }
 
 .user-management-table::-webkit-scrollbar-button {
-    display: none;
+  display: none;
 }
 
-/* ------------------------------------------------------- */
-
 .user-management-table table {
-    width: 100%;
-    border-collapse: collapse;
-    flex: 1;
-    overflow: auto;
+  width: 100%;
+  border-collapse: collapse;
 }
 
 .user-management-table thead {
-    background-color: #E0E8F8;
+  background: var(--url-surface);
 }
 
 .user-management-table thead th {
-    position: sticky;
-    top: 0;
-    background-color: #E0E8F8;
-    z-index: 10;
+  position: sticky;
+  top: 0;
+  background: var(--url-surface);
+  z-index: 10;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--url-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .user-management-table tbody {
-    background-color: #FFFDFE;
+  background: var(--url-white);
 }
 
 .user-management-table th,
 .user-management-table td {
-    padding: 12px 16px;
-    text-align: left;
-    border-bottom: 1px solid #E0E8F8;
+  padding: clamp(10px, 1.5vw, 14px) clamp(12px, 1.8vw, 18px);
+  text-align: left;
+  border-bottom: 1px solid var(--url-border-soft);
+  font-size: clamp(13px, 1.4vw, 14px);
+  color: var(--url-text-pri);
+}
+
+.user-management-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.user-management-table tbody tr:hover {
+  background: var(--url-surface);
 }
 
 .action-buttons-table {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 9px;
 }
 
-/* DELETE BUTTON (OPEN EFFECT) */
 .delete-bin-button {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: rgb(66, 66, 66);
-    border: none;
-    font-weight: 600;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-
-    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.164);
-    cursor: pointer;
-    overflow: hidden;
-    position: relative;
-
-    transition-duration: 0.3s;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--url-navy);
+  border: none;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  box-shadow: var(--url-shadow-xs);
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  transition: background 0.28s ease, box-shadow 0.2s ease;
 }
 
 .delete-bin-icon {
-    width: 12px;
-    transition-duration: 0.3s;
+  width: 12px;
+  transition: transform 0.3s ease;
 }
 
 .delete-bin-icon path {
-    fill: white;
+  fill: #FFFFFF;
 }
 
 .delete-bin-button:hover {
-    background-color: rgb(255, 69, 69);
-    gap: 0;
+  background: var(--url-danger);
+  gap: 0;
+  box-shadow: var(--url-shadow-sm);
 }
 
 .delete-bin-top {
-    transform-origin: bottom right;
+  transform-origin: bottom right;
 }
 
 .delete-bin-button:hover .delete-bin-top {
-    transition-duration: 0.5s;
-    transform: rotate(160deg);
+  transition-duration: 0.5s;
+  transform: rotate(160deg);
 }
 
-/* EDIT BUTTON (PENCIL EFFECT) */
 .edit-pencil-button {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: rgb(66, 66, 66);
-    border: none;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    cursor: pointer;
-    overflow: hidden;
-    transition: 0.3s;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--url-navy);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: var(--url-shadow-xs);
+  transition: background 0.28s ease, box-shadow 0.2s ease;
 }
 
 .edit-pencil-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .edit-pencil-icon {
-    width: 14px;
-    z-index: 2;
+  width: 14px;
+  z-index: 2;
 }
 
 .edit-pencil-icon path {
-    fill: white;
+  fill: #FFFFFF;
 }
 
 .edit-writing-line {
-    position: absolute;
-    bottom: -8px;
-    left: 2px;
-    width: 22px;
-    height: 8px;
-    overflow: visible;
+  position: absolute;
+  bottom: -8px;
+  left: 2px;
+  width: 22px;
+  height: 8px;
+  overflow: visible;
 }
 
 .edit-writing-path {
-    fill: none;
-    stroke: white;
-    stroke-width: 2;
-    stroke-linecap: round;
-
-    stroke-dasharray: 40;
-    stroke-dashoffset: 40;
+  fill: none;
+  stroke: #FFFFFF;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
 }
 
 @keyframes writeWiggle {
-    0% {
-        stroke-dashoffset: 40;
-        transform: translateX(0);
-    }
-
-    30% {
-        transform: translateX(1px) rotate(0.5deg);
-    }
-
-    60% {
-        transform: translateX(-1px) rotate(-0.5deg);
-    }
-
-    100% {
-        stroke-dashoffset: 0;
-        transform: translateX(0);
-    }
+  0%   { stroke-dashoffset: 40; transform: translateX(0); }
+  30%  { transform: translateX(1px) rotate(0.5deg); }
+  60%  { transform: translateX(-1px) rotate(-0.5deg); }
+  100% { stroke-dashoffset: 0; transform: translateX(0); }
 }
 
 .edit-pencil-button:hover .edit-writing-path {
-    animation: writeWiggle 0.8s ease forwards;
+  animation: writeWiggle 0.8s ease forwards;
 }
 
 @keyframes pencilWrite {
-    0% {
-        transform: rotate(0deg) translate(0, 0);
-    }
-
-    25% {
-        transform: rotate(-20deg) translate(-2px, 2px);
-    }
-
-    50% {
-        transform: rotate(-15deg) translate(2px, 2px);
-    }
-
-    75% {
-        transform: rotate(-20deg) translate(-2px, 2px);
-    }
-
-    100% {
-        transform: rotate(0deg) translate(0, 0);
-    }
+  0%   { transform: rotate(0deg) translate(0, 0); }
+  25%  { transform: rotate(-20deg) translate(-2px, 2px); }
+  50%  { transform: rotate(-15deg) translate(2px, 2px); }
+  75%  { transform: rotate(-20deg) translate(-2px, 2px); }
+  100% { transform: rotate(0deg) translate(0, 0); }
 }
 
 @keyframes drawLine {
-    0% {
-        width: 0;
-        opacity: 1;
-    }
-
-    70% {
-        width: 18px;
-        opacity: 1;
-    }
-
-    100% {
-        width: 18px;
-        opacity: 0;
-    }
+  0%   { width: 0; opacity: 1; }
+  70%  { width: 18px; opacity: 1; }
+  100% { width: 18px; opacity: 0; }
 }
 
 .edit-pencil-button:hover {
-    background-color: #2F73DF;
+  background: var(--url-navy-light);
+  box-shadow: var(--url-shadow-sm);
 }
 
 .edit-pencil-button:hover .edit-pencil-icon {
-    animation: pencilWrite 0.8s ease forwards;
-    animation-iteration-count: 1;
+  animation: pencilWrite 0.8s ease forwards;
 }
 
 .edit-pencil-button:hover .edit-writing-line {
-    animation: drawLine 0.8s ease forwards;
+  animation: drawLine 0.8s ease forwards;
 }
 
-
-
 @media (max-width: 1024px) {
-    .container-management-general {
-        padding: 24px;
-    }
+  .container-management-general {
+    padding: clamp(14px, 2.5vw, 28px);
+  }
 
-    .user-management-container {
-        padding: 20px 24px;
-    }
-
-    .title-management h1 {
-        font-size: 26px;
-        text-align: center;
-    }
-
-    .user-management-content {
-        padding: 16px;
-    }
+  .user-management-container {
+    padding: clamp(14px, 2vw, 22px) clamp(14px, 2.5vw, 28px);
+  }
 }
 
 @media (max-width: 768px) {
-    .container-management-general {
-        padding: 16px;
-    }
+  .user-management-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
 
-    .user-management-container {
-        padding: 16px;
-        border-radius: 14px;
-    }
+  .title-management {
+    width: 100%;
+  }
 
-    .user-management-header {
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: flex-start;
-        gap: 12px;
-        padding: 8px 0 12px;
-    }
+  .search-section-management {
+    max-width: 100%;
+    width: 100%;
+  }
 
-    .title-management {
-        width: 100%;
-        align-items: center !important;
-    }
+  .edit-pencil-button,
+  .delete-bin-button {
+    width: 34px;
+    height: 34px;
+  }
 
-    .title-management h1 {
-        font-size: 22px;
-        letter-spacing: 0.5px;
-        text-align: left;
-    }
-
-    .user-management-content {
-        padding: 12px;
-        gap: 16px;
-    }
-
-    .search-management-section-wrapper {
-        width: 100%;
-    }
-
-    .search-section-management {
-        max-width: 100%;
-        width: 100%;
-    }
-
-    .search-management-input {
-        font-size: 14px;
-    }
-
-    .action-buttons-table {
-        gap: 8px;
-    }
-
-    .edit-pencil-button,
-    .delete-bin-button {
-        width: 36px;
-        height: 36px;
-    }
+  .action-buttons-table {
+    gap: 7px;
+  }
 }
 
 @media (max-width: 480px) {
-    .container-management-general {
-        padding: 10px;
-    }
+  .container-management-general {
+    padding: 10px;
+  }
 
-    .user-management-container {
-        padding: 12px;
-        border-radius: 12px;
-    }
-
-    .title-management h1 {
-        font-size: 20px;
-    }
-
-    .user-management-content {
-        padding: 10px;
-    }
-
-    .search-section-management {
-        padding: 9px 10px;
-        border-radius: 10px;
-    }
-
-    .search-management-input {
-        font-size: 13px;
-    }
+  .user-management-container {
+    padding: 12px;
+    border-radius: var(--url-radius-md);
+  }
 }
