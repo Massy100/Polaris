@@ -1,10 +1,34 @@
 'use client';
 
-import { useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import "./individual-teacher-view.css";
-import SentimentAnalysisChart, { SentimentChartItem } from "../components/sentiment-analysis-chart";
-import AdminDashboardPanel from "../components/admin-dashboard-panel";
+import { useState, useEffect } from "react";
+import { useRouter, usePathname, useParams } from "next/navigation";
+import "../individual-teacher-view.css";
+import SentimentAnalysisChart, { SentimentChartItem } from "../../components/sentiment-analysis-chart";
+import AdminDashboardPanel from "../../components/admin-dashboard-panel";
+
+type CourseFromAPI = {
+    course_id: number;
+    name: string;
+    credits: number;
+    status: string;
+};
+
+type TeacherFromAPI = {
+    teacher_id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string;
+    role: string;
+    department: string;
+    since: string;
+    status: string;
+    code: string;
+
+    courses: number[];          
+    courses_detail: CourseFromAPI[]; 
+};
+
 
 type CommentGroup = {
     positive: string[];
@@ -37,87 +61,118 @@ type Teacher = {
     classes: TeacherClass[];
 };
 
+function formatRole(role: string): string {
+    const roles: Record<string, string> = {
+        titular: "Profesor Titular",
+        asociado: "Profesor Asociado",
+        auxiliar: "Profesor Auxiliar",
+        
+    };
+
+    const normalized = role?.toLowerCase().trim();
+
+    return roles[normalized] || role;
+}
+
+function formatSince(dateStr: string): string {
+    const months = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+    ];
+    const [year, month] = dateStr.split("-");
+    return `${months[parseInt(month) - 1]} ${year}`;
+}
+
+function mapTeacher(data: TeacherFromAPI): Teacher {
+    return {
+        id: String(data.teacher_id),
+        name: `${data.first_name} ${data.last_name}`,
+        department: data.department ?? "",
+        email: data.email,
+        phone: data.phone ?? "",
+        role: data.role ? formatRole(data.role) : "",
+        since: data.since ? formatSince(data.since) : "",
+        finalScore: 0, //conectar cuando el backend exponga este dato
+        classes: (data.courses_detail ?? []).map((course) => ({
+            id: String(course.course_id),
+            name: course.name,
+            comments: { positive: [], negative: [] },
+            sentiment: { positiveReal: 0, negativeReal: 0, falsePositive: 0, falseNegative: 0 },
+        })),
+    };
+}
+
 export default function IndividualTeacherView() {
     const router = useRouter();
     const pathname = usePathname();
+    const params = useParams();
+
+    const teacherId = params?.id as string;
+
+    const [teacher, setTeacher] = useState<Teacher | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [openClassId, setOpenClassId] = useState<string | null>(null);
 
-    const teacherClasses: TeacherClass[] = [
-        {
-            id: "matematicas-avanzadas",
-            name: "Matemáticas Avanzadas",
-            comments: {
-                positive: [
-                    "Excelente profesor, explica muy claro",
-                    "Las clases son muy dinámicas",
-                    "Siempre está disponible para resolver dudas",
-                    "Los ejemplos prácticos son muy útiles",
-                    "Motiva mucho a los estudiantes",
-                ],
-                negative: [
-                    "A veces va muy rápido en las explicaciones",
-                    "Los exámenes son muy difíciles",
-                    "Podría dar más tiempo para las tareas",
-                ],
-            },
-            sentiment: {
-                positiveReal: 42,
-                negativeReal: 18,
-                falsePositive: 8,
-                falseNegative: 5,
-            },
-        },
-        {
-            id: "fisica-cuantica",
-            name: "Física Cuántica",
-            comments: {
-                positive: [
-                    "El contenido está muy bien organizado",
-                    "Hace interesante una materia difícil",
-                ],
-                negative: [
-                    "A veces falta más práctica en clase",
-                ],
-            },
-            sentiment: {
-                positiveReal: 38,
-                negativeReal: 22,
-                falsePositive: 6,
-                falseNegative: 7,
-            },
-        },
-        {
-            id: "calculo-integral",
-            name: "Cálculo Integral",
-            comments: {
-                positive: [
-                    "Explica bien los ejercicios paso a paso",
-                    "Tiene mucha paciencia para enseñar",
-                ],
-                negative: [
-                    "La carga de tareas es algo pesada",
-                ],
-            },
-            sentiment: {
-                positiveReal: 30,
-                negativeReal: 12,
-                falsePositive: 4,
-                falseNegative: 3,
-            },
-        },
-    ];
+    useEffect(() => {
+        if (!teacherId) return;
 
-    const teacher: Teacher = {
-        id: "maria-gonzalez",
-        name: "Dr. María Elena González",
-        department: "Departamento de Ciencias Exactas",
-        email: "maria.gonzalez@universidad.edu",
-        phone: "+52 555 765 4321",
-        role: "Profesor Titular",
-        since: "Enero 2015",
-        finalScore: 8.6,
-        classes: teacherClasses,
+        setLoading(true);
+        setError(null);
+
+        fetch(`http://localhost:8000/api/academic-career/teachers/${teacherId}/`)
+            .then((res) => {
+                if (!res.ok) throw new Error(`Error ${res.status}: no se pudo cargar el maestro`);
+                return res.json();
+            })
+            .then((data: TeacherFromAPI) => {
+                setTeacher(mapTeacher(data));
+            })
+            .catch((err) => {
+                setError(err.message);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }, [teacherId]);
+
+    const toggleComments = (classId: string): void => {
+        setOpenClassId((prev) => (prev === classId ? null : classId));
     };
+
+    if (loading) {
+        return (
+            <div className="flex min-h-screen bg-gray-50">
+                <AdminDashboardPanel
+                    userName="Usuario Admin"
+                    activePath={pathname}
+                    onNavigate={(path) => router.push(path)}
+                    onLogout={() => router.push("/")}
+                />
+                <main className="flex-1 individual-teacher-general-container" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <p style={{ color: "var(--color-text-secondary)" }}>Cargando información del maestro...</p>
+                </main>
+            </div>
+        );
+    }
+
+    if (error || !teacher) {
+        return (
+            <div className="flex min-h-screen bg-gray-50">
+                <AdminDashboardPanel
+                    userName="Usuario Admin"
+                    activePath={pathname}
+                    onNavigate={(path) => router.push(path)}
+                    onLogout={() => router.push("/")}
+                />
+                <main className="flex-1 individual-teacher-general-container" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <p style={{ color: "red" }}>{error ?? "Maestro no encontrado"}</p>
+                </main>
+            </div>
+        );
+    }
+
+    const teacherClasses = teacher.classes;
 
     const sentimentData: SentimentChartItem[] = teacherClasses.map((teacherClass) => ({
         subject: teacherClass.name,
@@ -126,10 +181,6 @@ export default function IndividualTeacherView() {
         falsePositive: teacherClass.sentiment.falsePositive,
         falseNegative: teacherClass.sentiment.falseNegative,
     }));
-
-    const toggleComments = (classId: string): void => {
-        setOpenClassId((prev) => (prev === classId ? null : classId));
-    };
 
     return (
         <div className="flex min-h-screen bg-gray-50">
@@ -223,11 +274,14 @@ export default function IndividualTeacherView() {
                                                 <p>Comentarios Positivos</p>
                                             </h4>
                                             <div className="individual-teacher-comments-list scrollable">
-                                                {teacherClass.comments.positive.map((comment, index) => (
-                                                    <div className="individual-teacher-comment positive" key={`${teacherClass.id}-positive-${index}`}>
-                                                        {comment}
-                                                    </div>
-                                                ))}
+                                                {teacherClass.comments.positive.length > 0
+                                                    ? teacherClass.comments.positive.map((comment, index) => (
+                                                        <div className="individual-teacher-comment positive" key={`${teacherClass.id}-positive-${index}`}>
+                                                            {comment}
+                                                        </div>
+                                                    ))
+                                                    : <p style={{ color: "var(--color-text-secondary)", fontSize: "0.875rem" }}>Sin comentarios aún</p>
+                                                }
                                             </div>
                                         </div>
                                         <div className="individual-teacher-comments-column negative">
@@ -236,11 +290,14 @@ export default function IndividualTeacherView() {
                                                 <p>Comentarios Negativos</p>
                                             </h4>
                                             <div className="individual-teacher-comments-list scrollable">
-                                                {teacherClass.comments.negative.map((comment, index) => (
-                                                    <div className="individual-teacher-comment negative" key={`${teacherClass.id}-negative-${index}`}>
-                                                        {comment}
-                                                    </div>
-                                                ))}
+                                                {teacherClass.comments.negative.length > 0
+                                                    ? teacherClass.comments.negative.map((comment, index) => (
+                                                        <div className="individual-teacher-comment negative" key={`${teacherClass.id}-negative-${index}`}>
+                                                            {comment}
+                                                        </div>
+                                                    ))
+                                                    : <p style={{ color: "var(--color-text-secondary)", fontSize: "0.875rem" }}>Sin comentarios aún</p>
+                                                }
                                             </div>
                                         </div>
                                     </div>

@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import '../styles/dashboard-card.css'; 
 
-type IconType = 'teachers' | 'ranking' | 'alerts' | 'history' | 'upload';
+type IconType = 'teachers' | 'ranking' | 'alerts' | 'history' | 'upload' | 'user';
 type IconColor = 'blue' | 'yellow';
 
 interface DashboardCardProps {
@@ -45,6 +45,17 @@ function CardIcon({ type, color }: { type: IconType; color: IconColor }) {
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className={strokeClass}>
         <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
+    ),
+    user: (
+      <svg width="22" height="25" viewBox="0 0 24 24" fill="none" className={strokeClass}>
+  <path 
+    d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M8.5 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17 11l2 2 4-4" 
+    stroke="currentColor" 
+    strokeWidth="1.8" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+  />
+</svg>
     ),
   };
 

@@ -5,24 +5,21 @@ import { useRouter, usePathname } from "next/navigation";
 import AdminDashboardPanel from "../components/admin-dashboard-panel";
 import "./bulk-upload.css";
 
-type TabKey = "titulos" | "meritos" | "opiniones" | "encuestas";
+type TabKey = 'titulos' | 'meritos' | 'opiniones' | 'encuestas';
 
-interface ParsedRow {
-  [key: string]: string | number;
-}
-
-interface UploadedFile {
+type UploadedFile = {
   file: File;
-  rows: ParsedRow[];
+  rows: Record<string, string>[];
   columns: string[];
-}
+};
 
-interface ToastState {
+type ToastState = {
   visible: boolean;
   message: string;
   success: boolean;
-}
+};
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 const TABS: {
   key: TabKey;
   label: string;
@@ -33,42 +30,49 @@ const TABS: {
   saveLabel: string;
 }[] = [
   {
-    key: "titulos",
-    label: "Titulos",
-    title: "Carga de Titulos Academicos",
-    subtitle: "Sube archivos Excel o CSV con los datos de titulos de cada profesor",
-    cardTitle: "Subir Archivo de Titulos",
-    cardSub: "Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con los datos de titulos",
-    saveLabel: "Guardar Titulos",
+    key: 'titulos',
+    label: 'Titulos',
+    title: 'Carga de Titulos Academicos',
+    subtitle: 'Sube archivos Excel o CSV con los datos de titulos de cada profesor',
+    cardTitle: 'Subir Archivo de Titulos',
+    cardSub: 'Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con los datos de titulos',
+    saveLabel: 'Guardar Titulos',
   },
   {
-    key: "meritos",
-    label: "Meritos",
-    title: "Carga de Meritos de Profesores",
-    subtitle: "Sube archivos Excel o CSV con los meritos academicos de cada profesor",
-    cardTitle: "Subir Archivo de Meritos",
-    cardSub: "Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con los datos de meritos",
-    saveLabel: "Guardar Meritos",
+    key: 'meritos',
+    label: 'Meritos',
+    title: 'Carga de Meritos de Profesores',
+    subtitle: 'Sube archivos Excel o CSV con los meritos academicos de cada profesor',
+    cardTitle: 'Subir Archivo de Meritos',
+    cardSub: 'Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con los datos de meritos',
+    saveLabel: 'Guardar Meritos',
   },
   {
-    key: "opiniones",
-    label: "Opiniones",
-    title: "Carga de Opiniones de Profesores",
-    subtitle: "Sube archivos Excel o CSV con las opiniones y evaluaciones de estudiantes",
-    cardTitle: "Subir Archivo de Opiniones",
-    cardSub: "Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con las opiniones de estudiantes",
-    saveLabel: "Guardar Opiniones",
+    key: 'opiniones',
+    label: 'Opiniones',
+    title: 'Carga de Opiniones de Coordinacion',
+    subtitle: 'Sube archivos Excel o CSV con las opiniones del coordinador hacia cada docente',
+    cardTitle: 'Subir Archivo de Opiniones',
+    cardSub: 'Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con las opiniones del coordinador',
+    saveLabel: 'Guardar Opiniones de Coordinacion',
   },
   {
-    key: "encuestas",
-    label: "Encuestas",
-    title: "Carga de Encuestas",
-    subtitle: "Sube archivos Excel o CSV con las encuestas que nos proporciona directamente",
-    cardTitle: "Subir Archivo de Encuestas",
-    cardSub: "Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con las encuestas",
-    saveLabel: "Guardar Encuestas",
+    key: 'encuestas',
+    label: 'Encuestas',
+    title: 'Carga de Encuestas de Estudiantes',
+    subtitle: 'Sube archivos Excel o CSV con las encuestas de estudiantes hacia su docente',
+    cardTitle: 'Subir Archivo de Encuestas',
+    cardSub: 'Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con las encuestas de estudiantes',
+    saveLabel: 'Guardar Encuestas de Estudiantes',
   },
 ];
+
+const REQUIRED_FIELDS: Record<TabKey, string[]> = {
+  titulos: ['nombre_profesor', 'email', 'telefono', 'especialidad', 'grado_academico', 'experiencia_anos', 'institucion_actual'],
+  meritos: ['nombre_profesor', 'email', 'tipo_merito', 'descripcion', 'fecha_obtencion', 'institucion_otorgante'],
+  opiniones: ['nombre_profesor', 'email', 'opinion', 'calificacion', 'fecha_opinion', 'autor'],
+  encuestas: ['nombre_profesor', 'email', 'opinion', 'calificacion', 'fecha_opinion', 'autor'],
+};
 
 const IconTitulos = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -145,36 +149,50 @@ const TAB_ICONS: Record<TabKey, React.FC> = {
   encuestas: IconEncuestas,
 };
 
-function parseCSV(text: string): { rows: ParsedRow[]; columns: string[] } {
-  const lines = text.trim().split("\n").filter(Boolean);
-  if (!lines.length) return { rows: [], columns: [] };
-  const columns = lines[0].split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
-  const rows: ParsedRow[] = lines.slice(1).map((line) => {
-    const vals = line.split(",").map((v) => v.trim().replace(/^"|"$/g, ""));
-    const row: ParsedRow = {};
-    columns.forEach((col, i) => { row[col] = vals[i] ?? ""; });
+function parseCSVPreview(text: string): { rows: Record<string, string>[]; columns: string[] } {
+  const lines = text
+    .trim()
+    .split(/\r?\n/)
+    .filter(Boolean);
+  if (!lines.length) {
+    return { rows: [], columns: [] };
+  }
+
+  const columns = lines[0]
+    .split(',')
+    .map((column) => column.trim().replace(/^"|"$/g, ''));
+
+  const rows = lines.slice(1).map((line) => {
+    const values = line.split(',').map((value) => value.trim().replace(/^"|"$/g, ''));
+    const row: Record<string, string> = {};
+    columns.forEach((column, index) => {
+      row[column] = values[index] ?? '';
+    });
     return row;
   });
+
   return { rows, columns };
 }
 
-function simulateParse(fileName: string): { rows: ParsedRow[]; columns: string[] } {
-  const columns = ["teacher_id", "first_name", "last_name", "detail"];
-  const rows: ParsedRow[] = Array.from({ length: 12 }, (_, i) => ({
-    teacher_id: i + 1,
-    first_name: `Docente ${i + 1}`,
-    last_name: `Apellido ${i + 1}`,
-    detail: `Registro de ${fileName}`,
-  }));
-  return { rows, columns };
+function buildTemplateCSV(category: TabKey): string {
+  const columns = REQUIRED_FIELDS[category];
+  return `${columns.join(',')}\n`;
 }
 
-async function parseFile(file: File): Promise<{ rows: ParsedRow[]; columns: string[] }> {
-  if (file.name.endsWith(".csv")) {
-    const text = await file.text();
-    return parseCSV(text);
+async function parsePreview(file: File): Promise<{ rows: Record<string, string>[]; columns: string[] }> {
+  if (file.name.toLowerCase().endsWith('.csv')) {
+    return parseCSVPreview(await file.text());
   }
-  return simulateParse(file.name);
+
+  return {
+    rows: [
+      {
+        archivo: file.name,
+        nota: 'Vista previa simplificada para Excel',
+      },
+    ],
+    columns: ['archivo', 'nota'],
+  };
 }
 
 function formatBytes(bytes: number): string {
@@ -183,21 +201,29 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-function DropZone({ onFile }: { onFile: (f: File) => void }) {
+function DropZone({ onFile }: { onFile: (file: File) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
 
-  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) onFile(file);
-  }, [onFile]);
+  const handleDrop = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      setDragging(false);
+      const file = event.dataTransfer.files?.[0];
+      if (file) {
+        onFile(file);
+      }
+    },
+    [onFile]
+  );
 
   return (
     <div
-      className={`bu-dropzone${dragging ? " bu-dropzone--drag" : ""}`}
-      onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+      className={`bu-dropzone${dragging ? ' bu-dropzone--drag' : ''}`}
+      onDragOver={(event) => {
+        event.preventDefault();
+        setDragging(true);
+      }}
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
     >
@@ -206,11 +232,7 @@ function DropZone({ onFile }: { onFile: (f: File) => void }) {
       </div>
       <p className="bu-dz-main">Arrastra tu archivo aqui o haz clic para seleccionar</p>
       <p className="bu-dz-sub">Formatos soportados: .xlsx, .xls, .csv</p>
-      <button
-        type="button"
-        className="bu-dz-btn"
-        onClick={() => inputRef.current?.click()}
-      >
+      <button type="button" className="bu-dz-btn" onClick={() => inputRef.current?.click()}>
         <IconFile />
         Seleccionar Archivo
       </button>
@@ -218,11 +240,13 @@ function DropZone({ onFile }: { onFile: (f: File) => void }) {
         ref={inputRef}
         type="file"
         accept=".xlsx,.xls,.csv"
-        style={{ display: "none" }}
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) onFile(file);
-          e.target.value = "";
+        style={{ display: 'none' }}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) {
+            onFile(file);
+          }
+          event.target.value = '';
         }}
       />
     </div>
@@ -232,7 +256,9 @@ function DropZone({ onFile }: { onFile: (f: File) => void }) {
 function FileTag({ uploaded, onRemove }: { uploaded: UploadedFile; onRemove: () => void }) {
   return (
     <div className="bu-file-tag">
-      <span className="bu-file-tag-check"><IconCheck size={17} /></span>
+      <span className="bu-file-tag-check">
+        <IconCheck size={17} />
+      </span>
       <div className="bu-file-tag-info">
         <span className="bu-file-tag-name">{uploaded.file.name}</span>
         <span className="bu-file-tag-size">{formatBytes(uploaded.file.size)}</span>
@@ -248,12 +274,14 @@ function DataPreview({
   uploaded,
   saveLabel,
   onSave,
+  isSaving,
 }: {
   uploaded: UploadedFile;
   saveLabel: string;
   onSave: () => void;
+  isSaving: boolean;
 }) {
-  const { rows, columns } = uploaded;
+  const previewRows = uploaded.rows.slice(0, 10);
 
   return (
     <div className="bu-preview-card">
@@ -263,9 +291,9 @@ function DataPreview({
           <span className="bu-preview-file">Archivo: {uploaded.file.name}</span>
         </div>
         <div className="bu-preview-head-right">
-          <span className="bu-preview-count">{rows.length} registros</span>
+          <span className="bu-preview-count">{uploaded.rows.length} registros</span>
           <span className="bu-preview-cols">
-            {columns.length} {columns.length === 1 ? "columna" : "columnas"}
+            {uploaded.columns.length} {uploaded.columns.length === 1 ? 'columna' : 'columnas'}
           </span>
         </div>
       </div>
@@ -275,17 +303,21 @@ function DataPreview({
           <thead>
             <tr>
               <th className="bu-th bu-th-num">#</th>
-              {columns.map((col) => (
-                <th key={col} className="bu-th">{col}</th>
+              {uploaded.columns.map((column) => (
+                <th key={column} className="bu-th">
+                  {column}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, i) => (
-              <tr key={i} className="bu-tr">
-                <td className="bu-td bu-td-num">{i + 1}</td>
-                {columns.map((col) => (
-                  <td key={col} className="bu-td">{String(row[col] ?? "")}</td>
+            {previewRows.map((row, index) => (
+              <tr key={index} className="bu-tr">
+                <td className="bu-td bu-td-num">{index + 1}</td>
+                {uploaded.columns.map((column) => (
+                  <td key={column} className="bu-td">
+                    {String(row[column] ?? '')}
+                  </td>
                 ))}
               </tr>
             ))}
@@ -300,9 +332,9 @@ function DataPreview({
       </div>
 
       <div className="bu-save-row">
-        <button className="bu-save-btn" onClick={onSave}>
+        <button className="bu-save-btn" onClick={onSave} disabled={isSaving}>
           <IconFile />
-          {saveLabel} ({rows.length})
+          {isSaving ? 'Guardando...' : `${saveLabel} (${uploaded.rows.length})`}
         </button>
       </div>
     </div>
@@ -310,9 +342,12 @@ function DataPreview({
 }
 
 function Toast({ toast }: { toast: ToastState }) {
-  if (!toast.visible) return null;
+  if (!toast.visible) {
+    return null;
+  }
+
   return (
-    <div className={`bu-toast ${toast.success ? "bu-toast--ok" : "bu-toast--err"}`}>
+    <div className={`bu-toast ${toast.success ? 'bu-toast--ok' : 'bu-toast--err'}`}>
       <IconCheck size={15} />
       <span>{toast.message}</span>
     </div>
@@ -320,52 +355,90 @@ function Toast({ toast }: { toast: ToastState }) {
 }
 
 export default function BulkUploadPage() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const [activeTab, setActiveTab] = useState<TabKey>("titulos");
+  const [activeTab, setActiveTab] = useState<TabKey>('titulos');
   const [uploads, setUploads] = useState<Record<TabKey, UploadedFile | null>>({
     titulos: null,
     meritos: null,
     opiniones: null,
     encuestas: null,
   });
-  const [toast, setToast] = useState<ToastState>({ visible: false, message: "", success: true });
+  const [toast, setToast] = useState<ToastState>({ visible: false, message: '', success: true });
+  const [isSaving, setIsSaving] = useState(false);
 
-  const tab = TABS.find((t) => t.key === activeTab)!;
+  const tab = useMemo(() => TABS.find((item) => item.key === activeTab)!, [activeTab]);
   const upload = uploads[activeTab];
 
-  const showToast = (msg: string, ok: boolean) => {
-    setToast({ visible: true, message: msg, success: ok });
-    setTimeout(() => setToast((p) => ({ ...p, visible: false })), 3500);
+  const showToast = (message: string, success: boolean) => {
+    setToast({ visible: true, message, success });
+    setTimeout(() => {
+      setToast((previous) => ({ ...previous, visible: false }));
+    }, 3500);
   };
 
   const handleFile = async (file: File) => {
     try {
-      const parsed = await parseFile(file);
-      setUploads((p) => ({ ...p, [activeTab]: { file, ...parsed } }));
-      showToast("Archivo procesado correctamente", true);
+      const preview = await parsePreview(file);
+      setUploads((previous) => ({
+        ...previous,
+        [activeTab]: {
+          file,
+          rows: preview.rows,
+          columns: preview.columns,
+        },
+      }));
+      showToast('Archivo procesado correctamente', true);
     } catch {
-      showToast("Error al procesar el archivo", false);
+      showToast('Error al procesar el archivo', false);
     }
   };
 
-  const handleSave = () => {
-    if (!upload) return;
-    showToast(`${upload.rows.length} ${tab.saveLabel.toLowerCase()}(s) guardado(s) correctamente`, true);
+  const handleSave = async () => {
+    if (!upload || isSaving) {
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('category', activeTab);
+      formData.append('files', upload.file);
+
+      const response = await fetch(`${API_URL}/integrations/bulk-upload/`, {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.ok) {
+        throw new Error(data.message || 'No se pudo guardar la carga masiva.');
+      }
+
+      showToast(`${upload.file.name} guardado correctamente`, true);
+      setUploads((previous) => ({ ...previous, [activeTab]: null }));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo guardar la carga masiva.';
+      showToast(message, false);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleDownload = () => {
-    showToast("Descargando plantilla...", true);
+    const csv = buildTemplateCSV(activeTab);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `plantilla_${activeTab}.csv`;
+    anchor.click();
+    window.URL.revokeObjectURL(url);
+    showToast('Plantilla descargada', true);
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 bu-root">
-      <AdminDashboardPanel
-        userName="Coordinador Admin"
-        activePath={pathname}
-        onNavigate={(path) => router.push(path)}
-        onLogout={() => router.push('/login')}
-      />
+    <div className="bu-root">
+      <AdminDashboardPanel userName="Coordinador Admin" activePath="/bulk-upload" />
 
       <div className="flex-1">
         <Toast toast={toast} />
@@ -410,6 +483,34 @@ export default function BulkUploadPage() {
             <h1 className="bu-h1">{tab.title}</h1>
             <p className="bu-h1-sub">{tab.subtitle}</p>
           </div>
+        </div>
+        <button className="bu-btn-download" onClick={handleDownload}>
+          <IconDownload />
+          Descargar
+        </button>
+      </header>
+
+      <nav className="bu-tabs">
+        {TABS.map((item) => {
+          const Icon = TAB_ICONS[item.key];
+          return (
+            <button
+              key={item.key}
+              className={`bu-tab${activeTab === item.key ? ' bu-tab--active' : ''}`}
+              onClick={() => setActiveTab(item.key)}
+            >
+              <Icon />
+              {item.label}
+            </button>
+          );
+        })}
+      </nav>
+
+      <main className="bu-main">
+        <div className="bu-section-head">
+          <h1 className="bu-h1">{tab.title}</h1>
+          <p className="bu-h1-sub">{tab.subtitle}</p>
+        </div>
 
           <div className="bu-card">
             <p className="bu-card-title">{tab.cardTitle}</p>
@@ -427,16 +528,22 @@ export default function BulkUploadPage() {
           {upload && (
             <DataPreview
               uploaded={upload}
-              saveLabel={tab.saveLabel}
-              onSave={handleSave}
+              onRemove={() =>
+                setUploads((previous) => ({
+                  ...previous,
+                  [activeTab]: null,
+                }))
+              }
             />
           )}
         </main>
 
-        <footer className="bu-footer">
-          <span>Sistema de Carga Masiva de Datos - Gestion de Profesores</span>
-        </footer>
-      </div>
+        {upload && <DataPreview uploaded={upload} saveLabel={tab.saveLabel} onSave={handleSave} isSaving={isSaving} />}
+      </main>
+
+      <footer className="bu-footer">
+        <span>Sistema de Carga Masiva de Datos - Gestion de Profesores</span>
+      </footer>
     </div>
   );
 }

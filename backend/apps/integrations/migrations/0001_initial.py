@@ -1,0 +1,72 @@
+from django.db import migrations, models
+import django.db.models.deletion
+
+
+class Migration(migrations.Migration):
+    initial = True
+
+    dependencies = []
+
+    operations = [
+        migrations.CreateModel(
+            name="BulkUploadBatch",
+            fields=[
+                ("batch_id", models.BigAutoField(primary_key=True, serialize=False)),
+                (
+                    "category",
+                    models.CharField(
+                        choices=[("titulos", "Titulos"), ("meritos", "Meritos"), ("opiniones", "Opiniones")],
+                        max_length=20,
+                    ),
+                ),
+                ("source_filename", models.CharField(max_length=255)),
+                ("source_extension", models.CharField(max_length=10)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("processed", "Processed"),
+                            ("processed_with_errors", "Processed With Errors"),
+                            ("failed", "Failed"),
+                        ],
+                        default="processed",
+                        max_length=30,
+                    ),
+                ),
+                ("total_rows", models.IntegerField(default=0)),
+                ("valid_rows", models.IntegerField(default=0)),
+                ("invalid_rows", models.IntegerField(default=0)),
+                ("summary", models.JSONField(blank=True, default=dict)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("processed_at", models.DateTimeField(blank=True, null=True)),
+            ],
+            options={
+                "db_table": "bulk_upload_batch",
+                "ordering": ("-created_at",),
+            },
+        ),
+        migrations.CreateModel(
+            name="BulkUploadRecord",
+            fields=[
+                ("record_id", models.BigAutoField(primary_key=True, serialize=False)),
+                ("row_number", models.IntegerField()),
+                ("status", models.CharField(choices=[("valid", "Valid"), ("invalid", "Invalid")], max_length=20)),
+                ("raw_data", models.JSONField(blank=True, default=dict)),
+                ("normalized_data", models.JSONField(blank=True, default=dict)),
+                ("error_message", models.TextField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "batch",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="records",
+                        to="integrations.bulkuploadbatch",
+                    ),
+                ),
+            ],
+            options={
+                "db_table": "bulk_upload_record",
+                "ordering": ("batch_id", "row_number"),
+            },
+        ),
+    ]

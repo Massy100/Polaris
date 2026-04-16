@@ -4,10 +4,21 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
-from .models import Teacher, Career, Course, Faculty
+from .models import (
+    Teacher,
+    Career,
+    Course,
+    Faculty,
+    TeacherTitle,
+    TeacherMerit,
+    TeacherCoordinatorOpinion,
+    TeacherStudentSurvey,
+)
 from .serializers import (
     TeacherSerializer, TeacherListSerializer,
-    CareerSerializer, CourseSerializer, FacultySerializer
+    CareerSerializer, CourseSerializer, FacultySerializer,
+    TeacherTitleSerializer, TeacherMeritSerializer,
+    TeacherCoordinatorOpinionSerializer, TeacherStudentSurveySerializer,
 )
 
 class StandardResultsSetPagination(PageNumberPagination):
@@ -16,7 +27,7 @@ class StandardResultsSetPagination(PageNumberPagination):
     max_page_size = 100
 
 class TeacherViewSet(viewsets.ModelViewSet):
-    queryset = Teacher.objects.all().order_by('-created_at')
+    queryset = Teacher.objects.all().prefetch_related('courses').order_by('-created_at')
     pagination_class = StandardResultsSetPagination
     
     def get_serializer_class(self):
@@ -101,4 +112,56 @@ class CourseViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(name__icontains=search)
         if career_id:
             queryset = queryset.filter(career_id=career_id)
+        return queryset
+
+
+class TeacherTitleViewSet(viewsets.ModelViewSet):
+    queryset = TeacherTitle.objects.all()
+    serializer_class = TeacherTitleSerializer
+    pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        teacher_id = self.request.query_params.get('teacher')
+        if teacher_id:
+            queryset = queryset.filter(teacher_id=teacher_id)
+        return queryset
+
+
+class TeacherMeritViewSet(viewsets.ModelViewSet):
+    queryset = TeacherMerit.objects.all()
+    serializer_class = TeacherMeritSerializer
+    pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        teacher_id = self.request.query_params.get('teacher')
+        if teacher_id:
+            queryset = queryset.filter(teacher_id=teacher_id)
+        return queryset
+
+
+class TeacherCoordinatorOpinionViewSet(viewsets.ModelViewSet):
+    queryset = TeacherCoordinatorOpinion.objects.all()
+    serializer_class = TeacherCoordinatorOpinionSerializer
+    pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        teacher_id = self.request.query_params.get('teacher')
+        if teacher_id:
+            queryset = queryset.filter(teacher_id=teacher_id)
+        return queryset
+
+
+class TeacherStudentSurveyViewSet(viewsets.ModelViewSet):
+    queryset = TeacherStudentSurvey.objects.all()
+    serializer_class = TeacherStudentSurveySerializer
+    pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        teacher_id = self.request.query_params.get('teacher')
+        if teacher_id:
+            queryset = queryset.filter(teacher_id=teacher_id)
         return queryset
