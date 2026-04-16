@@ -86,8 +86,8 @@ const AdminDashboardPanel: React.FC<{ userName?: string }> = ({ userName = 'Jorg
               <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--url-gold)' }}>S</span>
             </div>
             <div className={`adp-brand-text-container adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
-              <span className="adp-brand-title">Gestión Academica</span>
-              <span className="adp-brand-subtitle">URL · Polaris</span>
+              <span className="adp-brand-title">Polaris</span>
+              <span className="adp-brand-subtitle">Universidad Rafael Landivar</span>
             </div>
           </div>
 
