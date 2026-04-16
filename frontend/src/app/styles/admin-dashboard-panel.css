@@ -16,86 +16,146 @@
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1000;
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  height: fit-content;
+  overflow: hidden;
 }
 
 .adp-pill--collapsed {
   width: 72px;
   border-radius: 36px;
-  padding: 20px 14px;
-  max-height: 90vh;
+  padding: 16px 12px;
+  max-height: 96vh;
   align-items: center;
+  height: fit-content;
 }
 
 .adp-pill--expanded {
   width: 260px;
   border-radius: 20px;
-  padding: 24px 16px;
-  max-height: 95vh;
+  padding: 0 0 16px 0;
+  max-height: 96vh;
   align-items: stretch;
+  height: fit-content;
 }
 
 .adp-header {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.adp-logo-wrapper {
+  width: 100%;
+  padding: 20px 16px 16px 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 100%);
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.adp-pill--collapsed .adp-logo-wrapper {
+  display: none !important;
+}
+
+.adp-institutional-logo {
+  object-fit: contain;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100px;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
+  transition: transform 0.3s ease;
+  display: block;
+  margin: 0 auto;
+}
+
+.adp-brand-card {
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - 32px);
+  margin: 0 auto;
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 14px 12px;
+}
+
+.adp-pill--collapsed .adp-brand-card {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.adp-profile-area {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  margin-bottom: 24px;
 }
 
-.adp-pill--expanded .adp-header {
+.adp-pill--expanded .adp-profile-area {
   justify-content: space-between;
 }
 
-.adp-brand-info {
+.adp-user-profile {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 0;
 }
 
-.adp-pill--expanded .adp-brand-info {
-  gap: 12px;
+.adp-pill--expanded .adp-user-profile {
+  gap: 10px;
   justify-content: flex-start;
+  flex: 1;
 }
 
-.adp-brand-logo {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
+.adp-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(45deg, var(--url-gold), var(--url-gold-light));
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--url-navy-dark);
+  font-weight: 700;
+  font-size: 13px;
   flex-shrink: 0;
 }
 
-.adp-brand-text-container {
+.adp-user-details {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
-.adp-brand-title {
+.adp-user-name {
   color: var(--url-white);
-  font-weight: 700;
-  font-size: 16px;
-  letter-spacing: 0.5px;
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
 }
 
-.adp-brand-subtitle {
-  color: var(--url-gold-pale);
-  font-size: 11px;
-  font-weight: 500;
+.adp-user-role, .adp-system-name {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 10px;
+  line-height: 1.2;
 }
 
-.adp-header-actions {
+.adp-system-name {
+  margin-top: 1px;
+}
+
+.adp-profile-actions {
   display: flex;
   align-items: center;
+  margin-left: 8px;
 }
 
 .adp-pin-btn {
@@ -103,30 +163,29 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
-  padding: 6px;
+  padding: 5px;
   border-radius: 8px;
-  transition: var(--url-transition);
+  transition: all 0.2s ease;
 }
 
 .adp-pin-btn:hover {
-  color: var(--url-white);
   background: rgba(255, 255, 255, 0.15);
+  color: white;
 }
 
 .adp-pin-btn--active {
   background: var(--url-gold) !important;
   color: var(--url-navy) !important;
-  box-shadow: 0 0 15px rgba(184, 146, 10, 0.4);
 }
 
 .adp-nav-list {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 6px;
+  margin: 10px 0 12px 0;
   flex: 1;
-  width: 100%;
+  padding: 0 12px;
 }
 
 .adp-pill--expanded .adp-nav-list {
@@ -142,7 +201,6 @@
   border-radius: 12px;
   width: 44px;
   height: 44px;
-  padding: 0;
   color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -158,10 +216,6 @@
 .adp-item:hover {
   background: rgba(255, 255, 255, 0.08);
   color: var(--url-white);
-}
-
-.adp-pill--expanded .adp-item:hover {
-  transform: translateX(4px);
 }
 
 .adp-item--active {
@@ -187,19 +241,23 @@
   justify-content: center;
   width: 24px;
   flex-shrink: 0;
-  transition: transform 0.3s ease;
 }
 
-.adp-item:hover .adp-item-icon {
-  transform: scale(1.1);
+.adp-actions-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 14px;
+  margin: 0 12px;
+  padding: 8px 0;
+  flex-shrink: 0;
 }
 
-.adp-item-logout {
-  color: #FCA5A5;
-}
-
-.adp-item-logout:hover {
-  background: rgba(239, 68, 68, 0.15);
+.adp-pill--expanded .adp-actions-bottom {
+  padding: 10px 4px;
+  align-items: stretch;
 }
 
 .adp-text {
@@ -211,7 +269,6 @@
   font-weight: 600;
   color: var(--url-white);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin: 0;
 }
 
 .adp-pill--expanded .adp-text {
@@ -223,73 +280,19 @@
   margin-left: 12px;
 }
 
-.adp-actions-bottom {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 18px;
-  padding: 8px 0;
-  margin-top: auto;
-  width: 100%;
-}
-
-.adp-pill--expanded .adp-actions-bottom {
-  padding: 8px;
-  align-items: stretch;
-}
-
-.adp-user-profile {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 4px 0;
-  gap: 0;
-}
-
-.adp-pill--expanded .adp-user-profile {
-  justify-content: flex-start;
-  padding: 4px 8px;
-  gap: 10px;
-}
-
-.adp-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: linear-gradient(45deg, var(--url-gold), var(--url-gold-light));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--url-navy-dark);
-  font-weight: 700;
-  font-size: 13px;
-  flex-shrink: 0;
-}
-
-.adp-user-details {
-  display: flex;
-  flex-direction: column;
-}
-
-.adp-user-name {
-  color: var(--url-white);
-  font-weight: 600;
-  font-size: 13px;
-}
-
-.adp-user-role {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 11px;
-}
-
 .adp-divider {
   height: 1px;
   background: rgba(255, 255, 255, 0.08);
-  margin: 6px 0;
-  width: 100%;
+  margin: 6px 8px;
+  width: auto;
+}
+
+.adp-item-logout {
+  color: #FCA5A5;
+}
+
+.adp-item-logout:hover {
+  background: rgba(239, 68, 68, 0.15);
 }
 
 @media (max-width: 768px) {
@@ -300,29 +303,16 @@
     left: 50%;
     transform: translateX(-50%);
     flex-direction: row;
-    width: 90%;
-    max-width: 400px;
+    width: 94%;
+    max-width: 450px;
     height: 64px !important;
     border-radius: 32px !important;
     padding: 0 16px !important;
     align-items: center;
   }
-  .adp-header, .adp-user-profile, .adp-text, .adp-pin-btn, .adp-divider, .adp-item:nth-last-child(-n+2) { 
-    display: none !important; 
-  }
-  .adp-actions-bottom {
-    background: transparent;
-    padding: 0;
-    margin: 0;
-  }
-  .adp-nav-list { 
-    flex-direction: row; 
-    justify-content: space-around; 
-    width: 100%; 
-    margin: 0; 
-  }
-  .adp-item { 
-    width: auto; 
-    padding: 10px;
-  }
+  .adp-header, .adp-logo-wrapper, .adp-text, .adp-divider { display: none !important; }
+  .adp-hide-mobile { display: none !important; }
+  .adp-actions-bottom { background: transparent; padding: 0; margin: 0; flex-direction: row; width: auto; }
+  .adp-nav-list { flex-direction: row; justify-content: space-around; width: 100%; margin: 0; padding: 0; }
+  .adp-item { width: auto; padding: 10px; }
 }

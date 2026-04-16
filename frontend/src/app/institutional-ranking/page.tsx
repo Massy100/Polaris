@@ -1,12 +1,12 @@
 'use client';
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Pagination from "../components/pagination";
 import "./institutional-ranking.css";
 
 type Docente = {
-    id: string | number;
+    id: number;
     rank: number;
     initials: string;
     name: string;
@@ -20,11 +20,18 @@ type TrophyIconProps = {
 
 type SortOrder = "desc" | "asc";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+
 export default function InstitutionalRanking() {
     const router = useRouter();
+    const [isMounted, setIsMounted] = useState(false);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [ratingSortOrder, setRatingSortOrder] = useState<SortOrder>("desc");
+    const [docentes, setDocentes] = useState<Docente[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [totalItems, setTotalItems] = useState(0);
 
     const TrophyIcon = ({ className = "" }: TrophyIconProps) => (
         <svg className={className} stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
@@ -33,18 +40,59 @@ export default function InstitutionalRanking() {
         </svg>
     );
 
-    const docentes: Docente[] = [
-        { id: "1", rank: 1, initials: "DM", name: "Dr. María González", rating: 4.92, specialties: ["Cálculo", "Álgebra"] },
-        { id: "2", rank: 2, initials: "DC", name: "Dr. Carlos Ramírez", rating: 4.88, specialties: ["Estructuras", "Materiales"] },
-        { id: "3", rank: 3, initials: "DA", name: "Dra. Ana Martínez", rating: 4.85, specialties: ["Literatura", "Filosofía"] },
-        { id: "4", rank: 4, initials: "DR", name: "Dr. Roberto Silva", rating: 4.82, specialties: ["Física", "Química"] },
-        { id: "5", rank: 5, initials: "DP", name: "Dra. Patricia López", rating: 4.78, specialties: ["Marketing", "Finanzas"] },
-        { id: "6", rank: 6, initials: "JF", name: "Dr. Jorge Fernández", rating: 4.75, specialties: ["Estadística", "Datos"] },
-        { id: "7", rank: 7, initials: "LM", name: "Dra. Laura Méndez", rating: 4.72, specialties: ["Biología", "Química"] },
-        { id: "8", rank: 8, initials: "AS", name: "Dr. Andrés Soto", rating: 4.69, specialties: ["Historia", "Política"] },
-        { id: "9", rank: 9, initials: "CR", name: "Dra. Camila Ruiz", rating: 4.65, specialties: ["Diseño", "Arte"] },
-        { id: "10", rank: 10, initials: "PV", name: "Dr. Pablo Vargas", rating: 4.61, specialties: ["Economía", "Finanzas"] },
-    ];
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    const getInitials = (fullName: string): string => {
+        return fullName
+            .split(' ')
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((word) => word[0].toUpperCase())
+            .join('');
+    };
+
+    const fetchTeachers = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const queryParams = new URLSearchParams();
+            queryParams.append('page', page.toString());
+            queryParams.append('page_size', pageSize.toString());
+            const url = `${API_URL}/academic-career/teachers/?${queryParams.toString()}`;
+
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Error al cargar los docentes');
+            }
+
+            const data = await response.json();
+
+            const transformed: Docente[] = data.results.map((teacher: any, index: number) => ({
+                id: teacher.teacher_id,
+                rank: (page - 1) * pageSize + index + 1,
+                initials: getInitials(teacher.full_name || `${teacher.first_name} ${teacher.last_name}`),
+                name: teacher.full_name || `${teacher.first_name} ${teacher.last_name}`,
+                rating: teacher.rating ?? 0,
+                specialties: teacher.specialties || [],
+            }));
+
+            setDocentes(transformed);
+            setTotalItems(data.count);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error desconocido');
+        } finally {
+            setLoading(false);
+        }
+    }, [page, pageSize]);
+
+    useEffect(() => {
+        if (isMounted) {
+            fetchTeachers();
+        }
+    }, [fetchTeachers, isMounted]);
 
     const getMedalClass = (rank: number): string => {
         if (rank === 1) return "gold";
@@ -53,120 +101,144 @@ export default function InstitutionalRanking() {
         return "";
     };
 
-    const totalItems = docentes.length;
-
     const sortedDocentes = useMemo(() => {
         return [...docentes].sort((a, b) => {
             return ratingSortOrder === "desc"
                 ? b.rating - a.rating
                 : a.rating - b.rating;
         });
-    }, [ratingSortOrder]);
-
-    const paginatedDocentes = useMemo(() => {
-        const start = (page - 1) * pageSize;
-        const end = start + pageSize;
-        return sortedDocentes.slice(start, end);
-    }, [page, pageSize, sortedDocentes]);
+    }, [ratingSortOrder, docentes]);
 
     const handleRatingSort = () => {
         setRatingSortOrder((prev) => (prev === "desc" ? "asc" : "desc"));
         setPage(1);
     };
 
-    return (
-        <div className="institutional-ranking-container bg-gray-50 min-h-screen">
-            <div className="i-r-header">
-                <h1>Ranking institucional</h1>
-                <p>Docentes mejor evaluados</p>
-            </div>
+    if (!isMounted) return null;
 
-            <div className="i-r-content">
-                <div className="i-r-c-description">
-                    <h2>Ranking Docente</h2>
-                    <p>{docentes.length} docentes evaluados</p>
+    return (
+        <div className="url-page-bg">
+            <div className="url-container institutional-ranking-container flex-1" style={{ paddingTop: '40px', paddingBottom: '60px', width: '100%' }}>
+                <div className="i-r-header">
+                    <h1 className="url-title">Ranking Institucional</h1>
+                    <p>Docentes mejor evaluados de la facultad</p>
                 </div>
-                <div className="i-r-table-height">
-                    <table className="i-r-table">
-                        <thead>
-                            <tr>
-                                <th>Posición</th>
-                                <th>Docente</th>
-                                <th className="sortable-header" onClick={handleRatingSort}>
-                                    <span className="sortable-header-content">
-                                        Calificación
-                                        <span className="sort-icon">
-                                            {ratingSortOrder === "desc" ?
-                                                <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 16 16" height="2em" width="2em" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M4.646 7.646a.5.5 0 01.708 0L8 10.293l2.646-2.647a.5.5 0 01.708.708l-3 3a.5.5 0 01-.708 0l-3-3a.5.5 0 010-.708z" clipRule="evenodd"></path><path fillRule="evenodd" d="M8 4.5a.5.5 0 01.5.5v5a.5.5 0 01-1 0V5a.5.5 0 01.5-.5z" clipRule="evenodd"></path></svg>
-                                                :
-                                                <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 16 16" height="2em" width="2em" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M8 5.5a.5.5 0 01.5.5v5a.5.5 0 01-1 0V6a.5.5 0 01.5-.5z" clipRule="evenodd"></path><path fillRule="evenodd" d="M7.646 4.646a.5.5 0 01.708 0l3 3a.5.5 0 01-.708.708L8 5.707 5.354 8.354a.5.5 0 01-.708-.708l3-3z" clipRule="evenodd"></path></svg>
-                                            }
-                                        </span>
-                                    </span>
-                                </th>
-                                <th>Especialidades</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {paginatedDocentes.map((docente, index) => {
-                                const displayRank = (page - 1) * pageSize + index + 1;
-                                return (
-                                    <tr
-                                        key={docente.id}
-                                        onClick={() => router.push(`/individual-teacher-view/${docente.id}`)}
-                                        style={{ cursor: 'pointer' }}
-                                        className="ranking-row-hover"
-                                    >
-                                        <td>
-                                            <div className="rank-cell">
-                                                {displayRank <= 3 ? (
-                                                    <span className={`rank-medal ${getMedalClass(displayRank)}`}>
-                                                        <TrophyIcon />
-                                                    </span>
+
+                <div className="i-r-content">
+                    <div className="i-r-c-description">
+                        <h2>Ranking Docente</h2>
+                        <p>{totalItems} docentes evaluados en este período</p>
+                    </div>
+                    
+                    <div className="i-r-table-wrapper">
+                        <table className="i-r-table">
+                            <thead>
+                                <tr>
+                                    <th style={{ width: '12%' }}>Posición</th>
+                                    <th style={{ width: '35%' }}>Docente</th>
+                                    <th style={{ width: '20%' }} className="sortable-header" onClick={handleRatingSort}>
+                                        <span className="sortable-header-content">
+                                            Calificación
+                                            <span className="sort-icon">
+                                                {ratingSortOrder === "desc" ? (
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                                                 ) : (
-                                                    <span className="rank-number">{displayRank}</span>
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
                                                 )}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div className="teacher-cell">
-                                                <span className="teacher-name">{docente.name}</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span className="rating-value">{docente.rating.toFixed(2)}</span>
-                                            <span className="rating-max"> / 5.0</span>
-                                        </td>
-                                        <td>
-                                            <div className="specialties-cell">
-                                                {docente.specialties.map((item) => (
-                                                    <span key={item} className="specialty-badge">
-                                                        {item}
-                                                    </span>
-                                                ))}
-                                            </div>
+                                            </span>
+                                        </span>
+                                    </th>
+                                    <th style={{ width: '33%' }}>Especialidades</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan={4} style={{ padding: '32px', textAlign: 'center', color: 'var(--url-text-sec)' }}>
+                                            Cargando docentes...
                                         </td>
                                     </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                ) : error ? (
+                                    <tr>
+                                        <td colSpan={4} style={{ padding: '32px', textAlign: 'center', color: 'var(--url-danger)' }}>
+                                            {error}
+                                        </td>
+                                    </tr>
+                                ) : docentes.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={4} style={{ padding: '32px', textAlign: 'center', color: 'var(--url-text-sec)' }}>
+                                            No hay docentes registrados en este período.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    sortedDocentes.map((docente, index) => {
+                                        const displayRank = (page - 1) * pageSize + index + 1;
+
+                                        return (
+                                            <tr 
+                                                key={docente.id}
+                                                onClick={() => router.push(`/individual-teacher-view/${docente.id}`)}
+                                            >
+                                                <td>
+                                                    <div className="rank-cell">
+                                                        {displayRank <= 3 ? (
+                                                            <span className={`rank-medal ${getMedalClass(displayRank)}`}>
+                                                                <TrophyIcon />
+                                                            </span>
+                                                        ) : (
+                                                            <span className="rank-number">{displayRank}</span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div className="teacher-cell">
+                                                        <span className="teacher-name">{docente.name}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span className="rating-value">{docente.rating.toFixed(2)}</span>
+                                                    <span className="rating-max"> / 5.0</span>
+                                                </td>
+                                                <td>
+                                                    <div className="specialties-cell">
+                                                        {docente.specialties.length > 0 ? (
+                                                            docente.specialties.map((item) => (
+                                                                <span key={item} className="specialty-badge">
+                                                                    {item}
+                                                                </span>
+                                                            ))
+                                                        ) : (
+                                                            <span className="specialty-badge" style={{ background: 'transparent', border: '1px solid var(--url-border)', color: 'var(--url-text-muted)' }}>—</span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    {!loading && totalItems > 0 && (
+                        <div className="i-r-pagination-wrapper">
+                            <Pagination
+                                page={page}
+                                pageSize={pageSize}
+                                totalItems={totalItems}
+                                onPageChange={(newPage) => {
+                                    const totalPages = Math.ceil(totalItems / pageSize) || 1;
+                                    if (newPage < 1 || newPage > totalPages) return;
+                                    setPage(newPage);
+                                }}
+                                onPageSizeChange={(size) => {
+                                    setPageSize(size > 0 ? size : 10);
+                                    setPage(1);
+                                }}
+                            />
+                        </div>
+                    )}
                 </div>
-                <Pagination
-                    page={page}
-                    pageSize={pageSize}
-                    totalItems={totalItems}
-                    onPageChange={(newPage) => {
-                        const totalPages = Math.ceil(totalItems / pageSize) || 1;
-                        if (newPage < 1 || newPage > totalPages) return;
-                        setPage(newPage);
-                    }}
-                    onPageSizeChange={(size) => {
-                        const safeSize = size > 0 ? size : 10;
-                        setPageSize(safeSize);
-                        setPage(1);
-                    }}
-                />
             </div>
         </div>
     );

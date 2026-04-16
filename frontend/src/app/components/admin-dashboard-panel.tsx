@@ -2,6 +2,8 @@
 
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { useAuth } from '@clerk/nextjs';
+import Image from 'next/image';
 import '../styles/admin-dashboard-panel.css';
 
 type IconProps = React.SVGProps<SVGSVGElement>;
@@ -43,15 +45,30 @@ const navItems = [
   { id: 1, label: 'Inicio',                icon: 'Home',          path: '/top-of-page' },
   { id: 2, label: 'Gestión Docente',       icon: 'Users',         path: '/user-management' },
   { id: 3, label: 'Ranking Institucional', icon: 'TrendingUp',    path: '/institutional-ranking' },
-  { id: 4, label: 'Notificaciones',        icon: 'Bell',          path: '/notifications' },
   { id: 5, label: 'Alertas de Desempeño',  icon: 'AlertTriangle', path: '/performance-alert' },
   { id: 6, label: 'Cursos Históricos',     icon: 'History',       path: '/history-view' },
   { id: 7, label: 'Carga Masiva',          icon: 'Upload',        path: '/bulk-upload' },
 ];
 
-const AdminDashboardPanel: React.FC<{ userName?: string }> = ({ userName = 'Jorge Escalante' }) => {
+interface AdminDashboardPanelProps {
+  userName?: string;
+  activePath?: string;
+  onNavigate?: (path: string) => void;
+  onLogout?: () => void;
+}
+
+const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({ 
+  userName = 'Jorge Escalante', 
+  activePath: propActivePath,
+  onNavigate,
+  onLogout
+}) => {
+  const { signOut } = useAuth();
   const router = useRouter();
-  const activePath = usePathname();
+  const pathname = usePathname();
+  
+  const activePath = propActivePath || pathname;
+
   const [isHovered, setIsHovered] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -64,7 +81,21 @@ const AdminDashboardPanel: React.FC<{ userName?: string }> = ({ userName = 'Jorg
 
   const handleNavigation = (path: string) => {
     setIsHovered(false);
-    router.push(path);
+    if (onNavigate) {
+      onNavigate(path);
+    } else {
+      router.push(path);
+    }
+  };
+
+  const handleLogout = async (): Promise<void> => {
+    try {
+      await signOut();
+      router.push('/sign-in');
+      onLogout?.();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   if (!isMounted) return null;
@@ -81,23 +112,37 @@ const AdminDashboardPanel: React.FC<{ userName?: string }> = ({ userName = 'Jorg
         onMouseLeave={() => setIsHovered(false)}
       >
         <div className="adp-header">
-          <div className="adp-brand-info">
-            <div className="adp-brand-logo">
-              <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--url-gold)' }}>S</span>
-            </div>
-            <div className={`adp-brand-text-container adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
-              <span className="adp-brand-title">Polaris</span>
-              <span className="adp-brand-subtitle">Universidad Rafael Landivar</span>
-            </div>
+          <div className={`adp-logo-wrapper adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src="/icon.png" 
+              alt="Logo Landívar" 
+              className="adp-institutional-logo"
+            />
           </div>
 
-          <div className={`adp-header-actions adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
-            <button
-              className={`adp-pin-btn ${isPinned ? 'adp-pin-btn--active' : ''}`}
-              onClick={() => setIsPinned(!isPinned)}
-            >
-              <Icons.Pin />
-            </button>
+          <div className="adp-brand-card">
+            <div className="adp-profile-area">
+              <div className="adp-user-profile">
+                <div className="adp-avatar">
+                  <span>{initials}</span>
+                </div>
+                <div className={`adp-user-details adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
+                  <span className="adp-user-name">{userName}</span>
+                  <span className="adp-user-role">Facultad de Ingenieria</span>
+                  <span className="adp-system-name">SGA Polaris</span>
+                </div>
+              </div>
+
+              <div className={`adp-profile-actions adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
+                <button
+                  className={`adp-pin-btn ${isPinned ? 'adp-pin-btn--active' : ''}`}
+                  onClick={() => setIsPinned(!isPinned)}
+                >
+                  <Icons.Pin />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -119,27 +164,25 @@ const AdminDashboardPanel: React.FC<{ userName?: string }> = ({ userName = 'Jorg
         </div>
 
         <div className="adp-actions-bottom">
-          <div className="adp-user-profile">
-            <div className="adp-avatar">
-              <span>{initials}</span>
-            </div>
-            <div className={`adp-user-details adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
-              <span className="adp-user-name">{userName}</span>
-              <span className="adp-user-role">Facultad De Ingeniería</span>
-            </div>
-          </div>
-
-          <div className="adp-divider" />
+          <button
+            className={`adp-item ${activePath === '/notifications' ? 'adp-item--active' : ''}`}
+            onClick={() => handleNavigation('/notifications')}
+          >
+            <span className="adp-item-icon"><Icons.Bell /></span>
+            <span className={`adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>Notificaciones</span>
+          </button>
 
           <button
-            className={`adp-item ${activePath === '/settings' ? 'adp-item--active' : ''}`}
+            className={`adp-item adp-hide-mobile ${activePath === '/settings' ? 'adp-item--active' : ''}`}
             onClick={() => handleNavigation('/settings')}
           >
             <span className="adp-item-icon"><Icons.Settings /></span>
             <span className={`adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>Configuración</span>
           </button>
 
-          <button className="adp-item adp-item-logout" onClick={() => handleNavigation('/')}>
+          <div className="adp-divider adp-hide-mobile" />
+
+          <button className="adp-item adp-item-logout adp-hide-mobile" onClick={handleLogout}>
             <span className="adp-item-icon"><Icons.LogOut /></span>
             <span className={`adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>Cerrar Sesión</span>
           </button>
