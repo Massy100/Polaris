@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import './settings.css';
 
@@ -16,7 +17,7 @@ const settingsSections = [
     title: 'Parámetros de Evaluación',
     description: 'Configura los porcentajes y valores para el cálculo del ranking docente.',
     icon: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M7 12h10M10 18h4"/></svg>,
-    path: '/WeightsConfig'
+    path: '/weights-config'
   },
   {
     id: 'structure',
@@ -43,11 +44,46 @@ const settingsSections = [
 
 export default function SettingsPage() {
   const router = useRouter();
+  const [isAcademicLoaded, setIsAcademicLoaded] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+
+  useEffect(() => {
+    const checkLoadStatus = async () => {
+      try {
+        const response = await fetch('/api/integrations/status-pensum');
+        const data = await response.json();
+        setIsAcademicLoaded(data.is_loaded);
+      } catch (error) {
+        console.error('Error verificando carga:', error);
+      }
+    };
+    checkLoadStatus();
+  }, []);
+
+  const handleNavigation = (section) => {
+    if (section.id === 'structure' && isAcademicLoaded) {
+      setShowNotification(true);
+      setTimeout(() => setShowNotification(false), 5000);
+      return;
+    }
+    router.push(section.path);
+  };
 
   return (
     <div className="url-page-bg flex-1">
+      {showNotification && (
+        <div className="status-notification-overlay">
+          <div className="status-notification-card">
+            <div className="status-notification-icon">⚠️</div>
+            <div className="status-notification-text">
+              <p>La carga ya se realizó en la base de datos.</p>
+              <span>Para hacer una carga nueva, restablezca en Auditoria y Equipo.</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <main className="url-container" style={{ paddingTop: '80px', paddingBottom: '60px' }}>
-        
         <header className="settings-header">
           <h1 className="url-title" style={{ fontSize: '32px' }}>Configuración</h1>
           <p className="settings-subtitle">Administra los parámetros globales de Polaris y tu perfil institucional.</p>
@@ -57,8 +93,8 @@ export default function SettingsPage() {
           {settingsSections.map((section) => (
             <button 
               key={section.id} 
-              className="settings-card"
-              onClick={() => router.push(section.path)}
+              className={`settings-card ${section.id === 'structure' && isAcademicLoaded ? 'card-disabled' : ''}`}
+              onClick={() => handleNavigation(section)}
             >
               <div className="settings-card-icon">
                 <section.icon />
