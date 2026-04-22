@@ -168,6 +168,7 @@ class TeacherListSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     courses_taught = serializers.SerializerMethodField()
     specialties = serializers.SerializerMethodField()
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Teacher
@@ -180,6 +181,7 @@ class TeacherListSerializer(serializers.ModelSerializer):
             'email',
             'courses_taught',
             'specialties',
+            'rating',
             'status'
         ]
 
@@ -195,3 +197,24 @@ class TeacherListSerializer(serializers.ModelSerializer):
     def get_specialties(self, obj):
         specialties = obj.titles.filter(status='active').values_list('specialty', flat=True)
         return list(specialties)
+    
+    def get_rating(self, obj):  
+        total_ratings = 0
+        count = 0
+        
+        student_surveys = obj.student_surveys.filter(status='active')
+        if student_surveys.exists():
+            total_ratings += sum(s.rating for s in student_surveys)
+            count += student_surveys.count()
+        
+        coordinator_opinions = obj.coordinator_opinions.filter(status='active')
+        if coordinator_opinions.exists():
+            total_ratings += sum(o.rating for o in coordinator_opinions)
+            count += coordinator_opinions.count()
+        
+        if count == 0:
+            return 0.0
+        
+        rating = total_ratings / count
+        
+        return round(rating, 2)
