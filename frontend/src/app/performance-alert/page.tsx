@@ -9,7 +9,7 @@ import {
   Search,
   Filter,
 } from "lucide-react";
-import "../styles/add-category.css";
+import "./add-category.css";
 
 type Status = "danger" | "warning" | "good";
 

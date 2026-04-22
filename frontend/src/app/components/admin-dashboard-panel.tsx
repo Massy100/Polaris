@@ -3,7 +3,6 @@
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import Image from 'next/image';
 import '../styles/admin-dashboard-panel.css';
 
 type IconProps = React.SVGProps<SVGSVGElement>;
@@ -57,16 +56,16 @@ interface AdminDashboardPanelProps {
   onLogout?: () => void;
 }
 
-const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({ 
-  userName = 'Jorge Escalante', 
+const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
+  userName = 'Jorge Escalante',
   activePath: propActivePath,
   onNavigate,
-  onLogout
+  onLogout,
 }) => {
   const { signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  
+
   const activePath = propActivePath || pathname;
 
   const [isHovered, setIsHovered] = useState(false);
@@ -90,11 +89,11 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
 
   const handleLogout = async (): Promise<void> => {
     try {
-      await signOut();
-      router.push('/sign-in');
+      await signOut({ redirectUrl: '/sign-in' });
       onLogout?.();
     } catch (error) {
       console.error(error);
+      router.push('/sign-in');
     }
   };
 
@@ -113,10 +112,9 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
       >
         <div className="adp-header">
           <div className={`adp-logo-wrapper adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src="/icon.png" 
-              alt="Logo Landívar" 
+            <img
+              src="/icon.png"
+              alt="Logo Landívar"
               className="adp-institutional-logo"
             />
           </div>

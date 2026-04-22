@@ -16,12 +16,11 @@ export default function SignUpPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <SignUp 
-        afterSignInUrl="/top-of-page"
-        afterSignUpUrl="/top-of-page"
-        redirectUrl="/top-of-page"
+      <SignUp
         routing="path"
+        path="/sign-up"
         signInUrl="/sign-in"
+        fallbackRedirectUrl="/top-of-page"
       />
     </div>
   )
