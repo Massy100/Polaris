@@ -15,8 +15,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SGA Polaris",
+  title: "SGA • Polaris",
   description: "Sistema de Gestión Académica - Universidad Rafael Landívar",
+  icons: {
+    icon: "/login-logo.png",
+    apple: "/login-logo.png",
+  },
 };
 
 export default function RootLayout({
