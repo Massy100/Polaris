@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import "./history-view.css";
@@ -159,6 +159,37 @@ interface EditFormData {
   approvalRate: string;
 }
 
+// --- Icons Components ---
+const IconEyebrow = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </svg>
+);
+
+const IconTitle = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--url-navy-light)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+    <path d="M6 12v5c3 3 9 3 12 0v-5" />
+  </svg>
+);
+
+const IconProfessors = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
+
+const IconCourses = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+  </svg>
+);
+
 export default function HistoryView() {
   const [activeTab, setActiveTab] = useState<"professors" | "courses">("professors");
   const [selectedProfId, setSelectedProfId] = useState<string | null>(null);
@@ -210,17 +241,11 @@ export default function HistoryView() {
     <div className="hv-layout flex-1">
       <div className="hv-header-main">
         <div className="hv-eyebrow">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
-          </svg>
+          <IconEyebrow />
           Historial Académico
         </div>
         <div className="hv-title-row">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--url-navy-light)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-            <path d="M6 12v5c3 3 9 3 12 0v-5" />
-          </svg>
+          <IconTitle />
           <h1>Cursos Históricos</h1>
         </div>
         <p className="hv-subtitle-main">
@@ -236,22 +261,14 @@ export default function HistoryView() {
             className={`hv-toggle-btn ${activeTab === "professors" ? "active" : ""}`}
             onClick={() => handleTabSwitch("professors")}
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
+            <IconProfessors />
             Profesores
           </button>
           <button
             className={`hv-toggle-btn ${activeTab === "courses" ? "active" : ""}`}
             onClick={() => handleTabSwitch("courses")}
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-            </svg>
+            <IconCourses />
             Cursos
           </button>
         </div>
@@ -280,9 +297,7 @@ export default function HistoryView() {
                   <p>{prof.department}</p>
                   <div className="hv-badges">
                     <span className="hv-badge-gray">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                      </svg>
+                      <IconCourses />
                       {prof.courseCount} cursos
                     </span>
                     <span className="hv-badge-green">{prof.approvalRate.toFixed(1)}% aprobación</span>
@@ -301,12 +316,7 @@ export default function HistoryView() {
                   <p>{course.code}</p>
                   <div className="hv-badges">
                     <span className="hv-badge-gray">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                      </svg>
+                      <IconProfessors />
                       {course.professorCount} profesores
                     </span>
                     <span className="hv-badge-green">{course.approvalRate.toFixed(1)}% aprobación</span>
@@ -358,7 +368,7 @@ export default function HistoryView() {
               <div className="hv-stats-row">
                 <div className="hv-stat-box">
                   <span className="hv-stat-label">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                    <IconProfessors />
                     Total Estudiantes
                   </span>
                   <span className="hv-stat-value">{selectedProfessor.totalStudents}</span>
@@ -407,7 +417,7 @@ export default function HistoryView() {
                     <div className="hv-hc-stats">
                       <div className="hv-hc-stat">
                         <span className="lbl">
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg>
+                          <IconProfessors />
                           Estudiantes
                         </span>
                         <span className="val">{record.studentsTotal}</span>
@@ -428,7 +438,7 @@ export default function HistoryView() {
                       </div>
                       <div className="hv-hc-stat">
                         <span className="lbl">
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                          <IconEyebrow />
                           Horas
                         </span>
                         <span className="val">{record.hours}h</span>
@@ -457,7 +467,7 @@ export default function HistoryView() {
               <div className="hv-stats-row">
                 <div className="hv-stat-box">
                   <span className="hv-stat-label">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                    <IconProfessors />
                     Total Estudiantes
                   </span>
                   <span className="hv-stat-value">{selectedCourse.totalStudents}</span>
@@ -509,7 +519,7 @@ export default function HistoryView() {
                     <div className="hv-hc-stats">
                       <div className="hv-hc-stat">
                         <span className="lbl">
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg>
+                          <IconProfessors />
                           Estudiantes
                         </span>
                         <span className="val">{record.studentsTotal}</span>
@@ -530,7 +540,7 @@ export default function HistoryView() {
                       </div>
                       <div className="hv-hc-stat">
                         <span className="lbl">
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                          <IconEyebrow />
                           Horas
                         </span>
                         <span className="val">{record.hours}h</span>

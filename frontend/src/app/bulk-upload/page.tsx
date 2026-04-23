@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 import "./bulk-upload.css";
 
-type TabKey = 'titulos' | 'meritos' | 'opiniones' | 'encuestas';
+type TabKey = 'credenciales' | 'evaluaciones';
 
 type UploadedFile = {
   file: File;
@@ -18,6 +18,7 @@ type ToastState = {
 };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+
 const TABS: {
   key: TabKey;
   label: string;
@@ -28,80 +29,41 @@ const TABS: {
   saveLabel: string;
 }[] = [
   {
-    key: 'titulos',
-    label: 'Titulos',
-    title: 'Carga de Titulos Academicos',
-    subtitle: 'Sube archivos Excel o CSV con los datos de titulos de cada profesor',
-    cardTitle: 'Subir Archivo de Titulos',
-    cardSub: 'Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con los datos de titulos',
-    saveLabel: 'Guardar Titulos',
+    key: 'credenciales',
+    label: 'Portafolio Profesional',
+    title: 'Carga de Portafolio Profesional',
+    subtitle: 'Sube archivos Excel o CSV con los títulos, certificaciones y méritos de cada profesor.',
+    cardTitle: 'Subir Archivo de Portafolio',
+    cardSub: 'Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con el portafolio',
+    saveLabel: 'Guardar Portafolio',
   },
   {
-    key: 'meritos',
-    label: 'Meritos',
-    title: 'Carga de Meritos de Profesores',
-    subtitle: 'Sube archivos Excel o CSV con los meritos academicos de cada profesor',
-    cardTitle: 'Subir Archivo de Meritos',
-    cardSub: 'Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con los datos de meritos',
-    saveLabel: 'Guardar Meritos',
-  },
-  {
-    key: 'opiniones',
-    label: 'Opiniones',
-    title: 'Carga de Opiniones de Coordinacion',
-    subtitle: 'Sube archivos Excel o CSV con las opiniones del coordinador hacia cada docente',
-    cardTitle: 'Subir Archivo de Opiniones',
-    cardSub: 'Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con las opiniones del coordinador',
-    saveLabel: 'Guardar Opiniones de Coordinacion',
-  },
-  {
-    key: 'encuestas',
-    label: 'Encuestas',
-    title: 'Carga de Encuestas de Estudiantes',
-    subtitle: 'Sube archivos Excel o CSV con las encuestas de estudiantes hacia su docente',
-    cardTitle: 'Subir Archivo de Encuestas',
-    cardSub: 'Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con las encuestas de estudiantes',
-    saveLabel: 'Guardar Encuestas de Estudiantes',
+    key: 'evaluaciones',
+    label: 'Evaluaciones Estudiantiles',
+    title: 'Carga de Evaluaciones Estudiantiles',
+    subtitle: 'Sube archivos Excel o CSV con los resultados de las evaluaciones de desempeño realizadas por los estudiantes.',
+    cardTitle: 'Subir Archivo de Evaluaciones',
+    cardSub: 'Arrastra o selecciona un archivo Excel (.xlsx, .xls) o CSV con las evaluaciones',
+    saveLabel: 'Guardar Evaluaciones',
   },
 ];
 
 const REQUIRED_FIELDS: Record<TabKey, string[]> = {
-  titulos: ['nombre_profesor', 'email', 'telefono', 'especialidad', 'grado_academico', 'experiencia_anos', 'institucion_actual'],
-  meritos: ['nombre_profesor', 'email', 'tipo_merito', 'descripcion', 'fecha_obtencion', 'institucion_otorgante'],
-  opiniones: ['nombre_profesor', 'email', 'opinion', 'calificacion', 'fecha_opinion', 'autor'],
-  encuestas: ['nombre_profesor', 'email', 'opinion', 'calificacion', 'fecha_opinion', 'autor'],
+  credenciales: [
+    'nombre_profesor', 
+    'email', 
+    'telefono', 
+    'especialidad', 
+    'grado_academico', 
+    'experiencia_anos', 
+    'institucion_actual',
+    'tipo_merito',
+    'descripcion_merito',
+    'fecha_obtencion',
+    'institucion_otorgante'
+  ],
+  evaluaciones: ['nombre_profesor', 'email', 'opinion', 'calificacion', 'fecha_opinion', 'autor'],
 };
-
-const IconTitulos = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-    <polyline points="14 2 14 8 20 8" />
-    <line x1="16" y1="13" x2="8" y2="13" />
-    <line x1="16" y1="17" x2="8" y2="17" />
-  </svg>
-);
-
-const IconMeritos = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="8" r="7" />
-    <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
-  </svg>
-);
-
-const IconOpiniones = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-  </svg>
-);
-
-const IconEncuestas = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-    <line x1="3" y1="9" x2="21" y2="9" />
-    <line x1="3" y1="15" x2="21" y2="15" />
-    <line x1="9" y1="3" x2="9" y2="21" />
-  </svg>
-);
 
 const IconUpload = () => (
   <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -140,11 +102,25 @@ const IconFile = () => (
   </svg>
 );
 
+const IconCredenciales = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+    <path d="M6 12v5c3 3 9 3 12 0v-5" />
+  </svg>
+);
+
+const IconEvaluaciones = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+    <line x1="3" y1="9" x2="21" y2="9" />
+    <line x1="3" y1="15" x2="21" y2="15" />
+    <line x1="9" y1="3" x2="9" y2="21" />
+  </svg>
+);
+
 const TAB_ICONS: Record<TabKey, React.FC> = {
-  titulos: IconTitulos,
-  meritos: IconMeritos,
-  opiniones: IconOpiniones,
-  encuestas: IconEncuestas,
+  credenciales: IconCredenciales,
+  evaluaciones: IconEvaluaciones,
 };
 
 function parseCSVPreview(text: string): { rows: Record<string, string>[]; columns: string[] } {
@@ -228,7 +204,7 @@ function DropZone({ onFile }: { onFile: (file: File) => void }) {
       <div className="bu-dz-icon-wrap">
         <IconUpload />
       </div>
-      <p className="bu-dz-main">Arrastra tu archivo aqui o haz clic para seleccionar</p>
+      <p className="bu-dz-main">Arrastra tu archivo aquí o haz clic para seleccionar</p>
       <p className="bu-dz-sub">Formatos soportados: .xlsx, .xls, .csv</p>
       <button type="button" className="bu-dz-btn" onClick={() => inputRef.current?.click()}>
         <IconFile />
@@ -325,7 +301,7 @@ function DataPreview({
 
       <div className="bu-preview-foot">
         <span className="bu-preview-foot-msg">
-          Los datos se han procesado correctamente y estan listos para ser guardados
+          Los datos se han procesado correctamente y están listos para ser guardados.
         </span>
       </div>
 
@@ -353,12 +329,10 @@ function Toast({ toast }: { toast: ToastState }) {
 }
 
 export default function BulkUploadPage() {
-  const [activeTab, setActiveTab] = useState<TabKey>('titulos');
+  const [activeTab, setActiveTab] = useState<TabKey>('credenciales');
   const [uploads, setUploads] = useState<Record<TabKey, UploadedFile | null>>({
-    titulos: null,
-    meritos: null,
-    opiniones: null,
-    encuestas: null,
+    credenciales: null,
+    evaluaciones: null,
   });
   const [toast, setToast] = useState<ToastState>({ visible: false, message: '', success: true });
   const [isSaving, setIsSaving] = useState(false);
@@ -399,7 +373,8 @@ export default function BulkUploadPage() {
 
     try {
       const formData = new FormData();
-      formData.append('category', activeTab);
+      const backendCategory = activeTab === 'evaluaciones' ? 'encuestas' : activeTab;
+      formData.append('category', backendCategory);
       formData.append('files', upload.file);
 
       const response = await fetch(`${API_URL}/integrations/bulk-upload/`, {
@@ -435,66 +410,78 @@ export default function BulkUploadPage() {
   };
 
   return (
-    <div className="bu-root bg-gray-50 min-h-screen">
+    <div className="bu-layout flex-1">
       <Toast toast={toast} />
 
-      <header className="bu-header">
-        <div className="bu-brand">
-          <div className="bu-brand-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-          </div>
-          <div className="bu-brand-text">
-            <span className="bu-brand-name">Carga Masiva de Datos</span>
-            <span className="bu-brand-sub">Sistema de gestion de profesores</span>
-          </div>
+      <div className="bu-header-main">
+        <div className="bu-eyebrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+          Importación de Datos
         </div>
-        <button className="bu-btn-download" onClick={handleDownload}>
-          <IconDownload />
-          Descargar
-        </button>
-      </header>
-
-      <nav className="bu-tabs">
-        {TABS.map((item) => {
-          const Icon = TAB_ICONS[item.key];
-          return (
-            <button
-              key={item.key}
-              className={`bu-tab${activeTab === item.key ? ' bu-tab--active' : ''}`}
-              onClick={() => setActiveTab(item.key)}
-            >
-              <Icon />
-              {item.label}
-            </button>
-          );
-        })}
-      </nav>
-
-      <main className="bu-main">
-        <div className="bu-section-head">
-          <h1 className="bu-h1">{tab.title}</h1>
-          <p className="bu-h1-sub">{tab.subtitle}</p>
+        <div className="bu-title-row">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--url-navy-light)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          <h1>Importación de Expedientes Docentes</h1>
         </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+          <p className="bu-subtitle-main">
+            Sube y procesa la información académica y evaluaciones del personal docente.
+          </p>
+          <button className="bu-btn-download" onClick={handleDownload}>
+            <IconDownload />
+            Descargar Plantilla
+          </button>
+        </div>
+      </div>
 
+      <div className="bu-toggle-container">
+        <div className="bu-toggle-bg">
+          {TABS.map((item) => {
+            const Icon = TAB_ICONS[item.key];
+            return (
+              <button
+                key={item.key}
+                className={`bu-toggle-btn ${activeTab === item.key ? "active" : ""}`}
+                onClick={() => setActiveTab(item.key)}
+              >
+                <Icon />
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <main className="bu-main-content">
         <div className="bu-card">
-          <p className="bu-card-title">{tab.cardTitle}</p>
-          <p className="bu-card-sub">{tab.cardSub}</p>
-          {upload ? (
-            <FileTag
-              uploaded={upload}
-              onRemove={() =>
-                setUploads((previous) => ({
-                  ...previous,
-                  [activeTab]: null,
-                }))
-              }
-            />
-          ) : (
-            <DropZone onFile={handleFile} />
-          )}
+          <div className="bu-card-header">
+            <h3>{tab.title}</h3>
+            <p>{tab.subtitle}</p>
+          </div>
+          
+          <div className="bu-card-body">
+            <h4 className="bu-card-title">{tab.cardTitle}</h4>
+            <p className="bu-card-sub">{tab.cardSub}</p>
+            {upload ? (
+              <FileTag
+                uploaded={upload}
+                onRemove={() =>
+                  setUploads((previous) => ({
+                    ...previous,
+                    [activeTab]: null,
+                  }))
+                }
+              />
+            ) : (
+              <DropZone onFile={handleFile} />
+            )}
+          </div>
         </div>
 
         {upload && (
@@ -506,10 +493,6 @@ export default function BulkUploadPage() {
           />
         )}
       </main>
-
-      <footer className="bu-footer">
-        <span>Sistema de Carga Masiva de Datos - Gestion de Profesores</span>
-      </footer>
     </div>
   );
 }

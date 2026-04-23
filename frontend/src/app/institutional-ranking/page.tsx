@@ -14,13 +14,29 @@ type Docente = {
     specialties: string[];
 };
 
-type TrophyIconProps = {
-    className?: string;
-};
-
 type SortOrder = "desc" | "asc";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+
+const IconEyebrow = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
+);
+
+const IconTitle = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--url-navy-light)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 20v-6M6 20V10M18 20V4"></path>
+    </svg>
+);
+
+const TrophyIcon = () => (
+    <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 22c3.859 0 7-3.141 7-7s-3.141-7-7-7c-3.86 0-7 3.141-7 7S8.14 22 12 22zM12 10c2.757 0 5 2.243 5 5s-2.243 5-5 5-5-2.243-5-5S9.243 10 12 10zM11 2H7v5.518c1.169-.782 2.531-1.296 4-1.459V2zM17 2h-4v4.059c1.469.163 2.831.677 4 1.459V2z"></path>
+        <path d="M10.019 15.811L9.551 18.537 12 17.25 14.449 18.537 13.981 15.811 15.963 13.879 13.225 13.481 12 11 10.775 13.481 8.037 13.879z"></path>
+    </svg>
+);
 
 export default function InstitutionalRanking() {
     const router = useRouter();
@@ -32,13 +48,6 @@ export default function InstitutionalRanking() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [totalItems, setTotalItems] = useState(0);
-
-    const TrophyIcon = ({ className = "" }: TrophyIconProps) => (
-        <svg className={className} stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 22c3.859 0 7-3.141 7-7s-3.141-7-7-7c-3.86 0-7 3.141-7 7S8.14 22 12 22zM12 10c2.757 0 5 2.243 5 5s-2.243 5-5 5-5-2.243-5-5S9.243 10 12 10zM11 2H7v5.518c1.169-.782 2.531-1.296 4-1.459V2zM17 2h-4v4.059c1.469.163 2.831.677 4 1.459V2z"></path>
-            <path d="M10.019 15.811L9.551 18.537 12 17.25 14.449 18.537 13.981 15.811 15.963 13.879 13.225 13.481 12 11 10.775 13.481 8.037 13.879z"></path>
-        </svg>
-    );
 
     useEffect(() => {
         setIsMounted(true);
@@ -117,26 +126,37 @@ export default function InstitutionalRanking() {
     if (!isMounted) return null;
 
     return (
-        <div className="url-page-bg">
-            <div className="url-container institutional-ranking-container flex-1" style={{ paddingTop: '40px', paddingBottom: '60px', width: '100%' }}>
-                <div className="i-r-header">
-                    <h1 className="url-title">Ranking Institucional</h1>
-                    <p>Docentes mejor evaluados de la facultad</p>
+        <div className="ir-layout flex-1">
+            <div className="ir-header-main">
+                <div className="ir-eyebrow">
+                    <IconEyebrow />
+                    Desempeño Institucional
                 </div>
+                <div className="ir-title-row">
+                    <IconTitle />
+                    <h1>Ranking de Docentes</h1>
+                </div>
+                <p className="ir-subtitle-main">
+                    Listado de los docentes mejor evaluados de la facultad durante el período académico actual.
+                </p>
+            </div>
 
-                <div className="i-r-content">
-                    <div className="i-r-c-description">
-                        <h2>Ranking Docente</h2>
-                        <p>{totalItems} docentes evaluados en este período</p>
+            <main className="ir-main-content">
+                <div className="ir-card">
+                    <div className="ir-card-header">
+                        <div className="ir-card-title-group">
+                            <h3>Clasificación General</h3>
+                            <p>{totalItems} {totalItems === 1 ? 'docente evaluado' : 'docentes evaluados'}</p>
+                        </div>
                     </div>
-                    
-                    <div className="i-r-table-wrapper">
-                        <table className="i-r-table">
+
+                    <div className="ir-table-wrap">
+                        <table className="ir-table">
                             <thead>
                                 <tr>
-                                    <th style={{ width: '12%' }}>Posición</th>
-                                    <th style={{ width: '35%' }}>Docente</th>
-                                    <th style={{ width: '20%' }} className="sortable-header" onClick={handleRatingSort}>
+                                    <th className="ir-th" style={{ width: '12%' }}>Posición</th>
+                                    <th className="ir-th" style={{ width: '35%' }}>Docente</th>
+                                    <th className="ir-th sortable-header" style={{ width: '20%' }} onClick={handleRatingSort}>
                                         <span className="sortable-header-content">
                                             Calificación
                                             <span className="sort-icon">
@@ -148,14 +168,14 @@ export default function InstitutionalRanking() {
                                             </span>
                                         </span>
                                     </th>
-                                    <th style={{ width: '33%' }}>Especialidades</th>
+                                    <th className="ir-th" style={{ width: '33%' }}>Especialidades</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {loading ? (
                                     <tr>
                                         <td colSpan={4} style={{ padding: '32px', textAlign: 'center', color: 'var(--url-text-sec)' }}>
-                                            Cargando docentes...
+                                            Cargando clasificación...
                                         </td>
                                     </tr>
                                 ) : error ? (
@@ -177,9 +197,10 @@ export default function InstitutionalRanking() {
                                         return (
                                             <tr 
                                                 key={docente.id}
+                                                className="ir-tr ir-tr-clickable"
                                                 onClick={() => router.push(`/individual-teacher-view/${docente.id}`)}
                                             >
-                                                <td>
+                                                <td className="ir-td">
                                                     <div className="rank-cell">
                                                         {displayRank <= 3 ? (
                                                             <span className={`rank-medal ${getMedalClass(displayRank)}`}>
@@ -190,16 +211,16 @@ export default function InstitutionalRanking() {
                                                         )}
                                                     </div>
                                                 </td>
-                                                <td>
+                                                <td className="ir-td">
                                                     <div className="teacher-cell">
                                                         <span className="teacher-name">{docente.name}</span>
                                                     </div>
                                                 </td>
-                                                <td>
+                                                <td className="ir-td">
                                                     <span className="rating-value">{docente.rating.toFixed(2)}</span>
                                                     <span className="rating-max"> / 5.0</span>
                                                 </td>
-                                                <td>
+                                                <td className="ir-td">
                                                     <div className="specialties-cell">
                                                         {docente.specialties.length > 0 ? (
                                                             docente.specialties.map((item) => (
@@ -219,9 +240,9 @@ export default function InstitutionalRanking() {
                             </tbody>
                         </table>
                     </div>
-                    
-                    {!loading && totalItems > 0 && (
-                        <div className="i-r-pagination-wrapper">
+
+                    <div className="ir-card-footer">
+                        {!loading && totalItems > 0 && (
                             <Pagination
                                 page={page}
                                 pageSize={pageSize}
@@ -236,10 +257,10 @@ export default function InstitutionalRanking() {
                                     setPage(1);
                                 }}
                             />
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

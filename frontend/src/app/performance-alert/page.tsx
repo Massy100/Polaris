@@ -47,6 +47,20 @@ const INITIAL_TEACHERS: Teacher[] = [
   { id: "t10", name: "Andrés Morales Ríos",   subject: "Educación Física", score: 50, studentEval: 2.6, status: "danger"  },
 ];
 
+const IconEyebrow = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+    <line x1="12" y1="9" x2="12" y2="13"></line>
+    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+  </svg>
+);
+
+const IconTitle = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--url-navy-light)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+  </svg>
+);
+
 function SummaryCard({
   label,
   value,
@@ -155,13 +169,22 @@ export default function PerformanceAlertPage() {
   }), [teachers]);
 
   return (
-    <div className="pa-wrapper">
-      <main className="pa-main">
-        <div className="pa-page-header">
-          <h1 className="pa-page-title">Alertas de Desempeño de Docentes</h1>
-          <p className="pa-page-subtitle">Monitoreo y seguimiento del rendimiento académico</p>
+    <div className="pa-layout flex-1">
+      <div className="pa-header-main">
+        <div className="pa-eyebrow">
+          <IconEyebrow />
+          Monitoreo Académico
         </div>
+        <div className="pa-title-row">
+          <IconTitle />
+          <h1>Alertas de Desempeño</h1>
+        </div>
+        <p className="pa-subtitle-main">
+          Monitoreo y seguimiento del rendimiento académico de los docentes basado en puntuaciones y evaluaciones.
+        </p>
+      </div>
 
+      <main className="pa-main-content">
         <div className="pa-summary-row">
           <SummaryCard label="Total Docentes" value={counts.total}   colorClass="icon-blue"   icon={Users}         />
           <SummaryCard label="En Peligro"     value={counts.danger}  colorClass="icon-red"    icon={TrendingDown}  />
@@ -171,7 +194,7 @@ export default function PerformanceAlertPage() {
 
         <div className="pa-filter-bar">
           <div className="pa-search-wrapper">
-            <Search size={16} className="pa-search-icon" />
+            <Search size={18} className="pa-search-icon" />
             <input
               type="text"
               placeholder="Buscar por nombre o materia..."
@@ -180,17 +203,19 @@ export default function PerformanceAlertPage() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <Filter size={18} style={{ color: "#64748b", flexShrink: 0 }} />
-          <select
-            className="pa-filter-select"
-            value={filterStatus}
-            onChange={(e) => setFilter(e.target.value as "all" | Status)}
-          >
-            <option value="all">Todos los estados</option>
-            <option value="danger">En Peligro</option>
-            <option value="warning">Advertencia</option>
-            <option value="good">Buen Desempeño</option>
-          </select>
+          <div className="pa-select-wrapper">
+            <Filter size={18} className="pa-select-icon" />
+            <select
+              className="pa-filter-select"
+              value={filterStatus}
+              onChange={(e) => setFilter(e.target.value as "all" | Status)}
+            >
+              <option value="all">Todos los estados</option>
+              <option value="danger">En Peligro</option>
+              <option value="warning">Advertencia</option>
+              <option value="good">Buen Desempeño</option>
+            </select>
+          </div>
         </div>
 
         <div className="pa-grid">
