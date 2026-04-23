@@ -6,6 +6,61 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import './sign-in.css'
 
+const clerkAppearance = {
+  elements: {
+    rootBox: {
+      width: '100%',
+      minWidth: 0,
+    },
+    card: {
+      width: '100%',
+      minWidth: 0,
+      maxWidth: '100%',
+      boxShadow: 'none',
+      border: 'none',
+      padding: 0,
+      background: 'transparent',
+      margin: 0,
+    },
+    headerTitle: {
+      fontFamily: 'inherit',
+      fontSize: '26px',
+      fontWeight: '700',
+      letterSpacing: '-0.02em',
+    },
+    headerSubtitle: {
+      fontFamily: 'inherit',
+      fontSize: '14px',
+    },
+    socialButtonsBlockButton: {
+      width: '100%',
+      boxShadow: 'none',
+      fontFamily: 'inherit',
+    },
+    formFieldInput: {
+      width: '100%',
+      fontFamily: 'inherit',
+      fontSize: '14px',
+      boxShadow: 'none',
+    },
+    formButtonPrimary: {
+      width: '100%',
+      fontFamily: 'inherit',
+      fontWeight: '600',
+      fontSize: '15px',
+      background: 'linear-gradient(135deg, #0D1F4E 0%, #1A3270 100%)',
+      boxShadow: 'none',
+    },
+    footer: {
+      background: 'transparent',
+      border: 'none',
+    },
+    badge: {
+      display: 'none',
+    },
+  },
+}
+
 export default function SignInPage() {
   const searchParams = useSearchParams()
   const [showBanner, setShowBanner] = useState(false)
@@ -32,7 +87,6 @@ export default function SignInPage() {
       )}
 
       <div className="login-card">
-
         <div className="login-left">
           <div className="login-blob login-blob-1" />
           <div className="login-blob login-blob-2" />
@@ -51,8 +105,8 @@ export default function SignInPage() {
               <Image
                 src="/login-logo.png"
                 alt="Logo Universidad Rafael Landívar"
-                width={210}
-                height={210}
+                width={240}
+                height={240}
                 priority
               />
             </div>
@@ -97,10 +151,10 @@ export default function SignInPage() {
               path="/sign-in"
               signUpUrl="/sign-up"
               fallbackRedirectUrl="/top-of-page"
+              appearance={clerkAppearance}
             />
           </div>
         </div>
-
       </div>
     </div>
   )
