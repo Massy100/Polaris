@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from '@clerk/nextjs';
 import "./globals.css";
-import AdminDashboardPanel from "./components/admin-dashboard-panel";
+import ConditionalPanel from "./components/conditional-panel";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +15,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SGA Polaris",
+  title: "SGA • Polaris",
   description: "Sistema de Gestión Académica - Universidad Rafael Landívar",
+  icons: {
+    icon: "/login-logo.png",
+    apple: "/login-logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -29,7 +33,7 @@ export default function RootLayout({
       <html lang="es">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           <div className="flex">
-            <AdminDashboardPanel userName="Jorge Escalante" />
+            <ConditionalPanel />
             <main className="flex-1 overflow-auto">
               {children}
             </main>

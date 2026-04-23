@@ -7,7 +7,7 @@ import SidebarDropDown from '../components/sidebar-drop-down';
 import Modal from '../components/modal';
 import Pagination from '../components/pagination';
 import AdminDashboardPanel from '../components/admin-dashboard-panel';
-import '../styles/coord-management.css';
+import './coord-management.css';
 
 type Coordinador = {
     coordinator_id: number;

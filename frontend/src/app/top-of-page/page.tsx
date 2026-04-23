@@ -1,7 +1,7 @@
 'use client';
 
 import DashboardCard from '../components/dashboard-card';
-import '../styles/top-of-page.css';
+import './top-of-page.css';
 
 type IconType = 'teachers' | 'ranking' | 'alerts' | 'history' | 'upload' | 'user' ;
 

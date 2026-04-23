@@ -1,230 +1,232 @@
-.institutional-ranking-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: clamp(20px, 4vw, 48px);
-  min-height: 100vh;
-  width: 100%;
-  background: var(--url-surface);
+.ir-layout {
+  padding: clamp(24px, 4vw, 40px) clamp(16px, 4vw, 36px);
+  max-width: 1440px;
+  margin: 0 auto;
+  font-family: var(--url-font-sans);
   color: var(--url-text-pri);
-  overflow: auto;
+  min-height: 100vh;
 }
 
-.i-r-header {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
-  margin-bottom: 4px;
+.ir-header-main {
+  margin-bottom: 28px;
 }
 
-.i-r-header h1 {
-  font-size: clamp(22px, 3.5vw, 34px);
+.ir-eyebrow {
+  font-size: 11px;
   font-weight: 700;
-  color: var(--url-navy);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--url-gold);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.ir-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 5px;
+}
+
+.ir-title-row h1 {
+  font-size: clamp(22px, 3.2vw, 30px);
+  font-weight: 700;
   margin: 0;
+  color: var(--url-navy);
+  letter-spacing: -0.02em;
 }
 
-.i-r-header p {
-  font-size: clamp(13px, 1.6vw, 16px);
+.ir-subtitle-main {
   color: var(--url-text-sec);
-  margin: 4px 0 0;
+  font-size: 13.5px;
+  margin: 0;
+  max-width: 600px;
 }
 
-.i-r-content {
+.ir-main-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  width: 100%;
-  margin-top: 26px;
+  gap: 24px;
+}
+
+.ir-card {
   background: var(--url-white);
   border: 1px solid var(--url-border-soft);
-  border-radius: var(--url-radius-lg);
+  border-radius: var(--url-radius-md);
   box-shadow: var(--url-shadow-sm);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
-.i-r-c-description {
+.ir-card-header {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: clamp(16px, 2.5vw, 26px) clamp(16px, 2.8vw, 26px) clamp(12px, 1.8vw, 20px);
-  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 28px;
   border-bottom: 1px solid var(--url-border-soft);
+  background: var(--url-white);
+  flex-wrap: wrap;
 }
 
-.i-r-c-description h2 {
-  font-size: clamp(17px, 2vw, 22px);
+.ir-card-title-group h3 {
+  font-size: 16px;
   font-weight: 700;
   color: var(--url-navy);
-  margin: 0 0 4px;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.01em;
 }
 
-.i-r-c-description p {
-  font-size: clamp(12.5px, 1.4vw, 14.5px);
-  color: var(--url-text-sec);
+.ir-card-title-group p {
+  font-size: 13px;
+  color: var(--url-text-muted);
   margin: 0;
 }
 
-.i-r-table-height {
-  max-height: clamp(420px, 62vh, 720px);
-  overflow: auto;
+.ir-table-wrap {
+  overflow-x: auto;
   width: 100%;
 }
 
-.i-r-table-height::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-.i-r-table-height::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.i-r-table-height::-webkit-scrollbar-thumb {
-  background: rgba(13, 31, 78, 0.18);
-  border-radius: 999px;
-}
-
-.i-r-table-height::-webkit-scrollbar-thumb:hover {
-  background: rgba(13, 31, 78, 0.32);
-}
-
-.i-r-table-height::-webkit-scrollbar-thumb:active {
-  background: rgba(13, 31, 78, 0.45);
-}
-
-.i-r-table-height::-webkit-scrollbar-button {
-  display: none;
-}
-
-.i-r-table {
+.ir-table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: clamp(12.5px, 1.4vw, 13.5px);
 }
 
-.i-r-table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 20;
+.ir-th {
+  background: var(--url-surface);
+  padding: clamp(10px, 1.4vw, 12px) clamp(16px, 2vw, 24px);
   text-align: left;
-  font-size: clamp(12px, 1.4vw, 14px);
   font-weight: 700;
-  color: var(--url-navy);
-  padding: clamp(12px, 1.8vw, 16px) clamp(10px, 1.6vw, 14px);
-  background: var(--url-surface);
-  border-bottom: 2px solid var(--url-border);
+  color: var(--url-text-muted);
+  border-bottom: 1px solid var(--url-border);
+  white-space: nowrap;
+  font-size: 11.5px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
 }
 
-.i-r-table tbody td {
-  padding: clamp(11px, 1.5vw, 14px) clamp(10px, 1.6vw, 14px);
-  vertical-align: middle;
+.ir-tr {
   border-bottom: 1px solid var(--url-border-soft);
-  font-size: clamp(13px, 1.5vw, 15px);
-  color: var(--url-text-pri);
+  transition: background var(--url-transition);
 }
 
-.i-r-table tbody tr:hover {
+.ir-tr:hover {
   background: var(--url-surface);
 }
 
-.i-r-table tbody tr:last-child td {
+.ir-tr:last-child {
   border-bottom: none;
+}
+
+.ir-tr-clickable {
+  cursor: pointer;
+}
+
+.ir-td {
+  padding: clamp(12px, 1.4vw, 16px) clamp(16px, 2vw, 24px);
+  color: var(--url-text-pri);
+  vertical-align: middle;
+}
+
+.ir-card-footer {
+  padding: 16px 28px;
+  border-top: 1px solid var(--url-border-soft);
+  background: var(--url-white);
+  display: flex;
+  justify-content: flex-end;
 }
 
 .rank-cell {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 48px;
+  justify-content: flex-start;
 }
 
 .rank-medal {
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-.rank-medal svg {
-  width: 32px;
-  height: 32px;
-}
+.rank-medal svg { width: 26px; height: 26px; }
 
 .rank-medal.gold   { color: var(--url-gold); }
 .rank-medal.silver { color: #8A9AAE; }
 .rank-medal.bronze { color: #A0674A; }
 
 .rank-number {
-  font-size: clamp(15px, 1.8vw, 18px);
+  font-size: clamp(14px, 1.8vw, 16px);
   color: var(--url-text-muted);
-  font-weight: 600;
+  font-weight: 700;
+  padding-left: 8px;
 }
 
 .teacher-cell {
   display: flex;
   align-items: center;
-  gap: 12px;
 }
 
 .teacher-name {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--url-text-pri);
-  font-size: clamp(13px, 1.5vw, 15px);
+  font-size: clamp(13px, 1.5vw, 14.5px);
+  letter-spacing: -0.01em;
 }
 
 .rating-value {
-  color: var(--url-navy-light);
-  font-size: clamp(16px, 2vw, 20px);
+  color: var(--url-navy);
+  font-size: clamp(15px, 1.8vw, 18px);
   font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .rating-max {
   color: var(--url-text-muted);
-  margin-left: 3px;
-  font-size: clamp(13px, 1.4vw, 16px);
+  margin-left: 2px;
+  font-size: clamp(12px, 1.3vw, 13px);
+  font-weight: 500;
 }
 
 .specialties-cell {
   display: flex;
   flex-wrap: wrap;
-  gap: 7px;
+  gap: 6px;
 }
 
 .specialty-badge {
   background: var(--url-info-bg);
-  color: var(--url-navy);
+  color: var(--url-navy-mid);
   border: 1px solid var(--url-info-bd);
-  border-radius: 999px;
+  border-radius: var(--url-radius-pill);
   padding: 4px 12px;
-  font-size: clamp(11.5px, 1.2vw, 13.5px);
-  font-weight: 500;
+  font-size: clamp(11px, 1.2vw, 12.5px);
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
+  letter-spacing: 0.01em;
 }
 
 .sortable-header {
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
-  min-width: 100px;
   transition: color var(--url-transition);
 }
 
-.sortable-header:hover {
-  color: var(--url-navy-dark);
-}
+.sortable-header:hover { color: var(--url-navy); }
 
 .sortable-header-content {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   min-width: max-content;
 }
 
@@ -232,54 +234,18 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--url-text-muted);
+  color: var(--url-text-faint);
   flex-shrink: 0;
 }
 
-.sort-icon svg {
-  width: 16px;
-  height: 16px;
-}
+.sort-icon svg { width: 15px; height: 15px; }
+.sortable-header:hover .sort-icon { color: var(--url-navy-light); }
 
-.sortable-header:hover .sort-icon {
-  color: var(--url-navy);
-}
-
-@media (max-width: 900px) {
-  .institutional-ranking-container {
-    padding: clamp(14px, 3vw, 28px);
-  }
-
-  .i-r-table thead th,
-  .i-r-table tbody td {
-    padding: 10px 8px;
-  }
-}
-
-@media (max-width: 640px) {
-  .institutional-ranking-container {
-    padding: 12px;
-  }
-
-  .i-r-content {
-    border-radius: var(--url-radius-md);
-  }
-
-  .i-r-table {
-    min-width: 420px;
-  }
-
-  .specialty-badge {
-    font-size: 11px;
-    padding: 3px 8px;
-  }
-
-  .sort-icon svg {
-    width: 13px;
-    height: 13px;
-  }
-
-  .sortable-header {
-    min-width: 70px;
+@media (max-width: 768px) {
+  .ir-layout { padding: 20px 16px; }
+  
+  .ir-card-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

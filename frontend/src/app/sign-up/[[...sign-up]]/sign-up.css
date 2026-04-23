@@ -1,0 +1,335 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap");
+
+@keyframes signupFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes signupBlobFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-12px) scale(1.04); }
+}
+@keyframes signupStatCarousel {
+  0%   { opacity: 0; transform: translateY(18px); }
+  12%  { opacity: 1; transform: translateY(0); }
+  28%  { opacity: 1; transform: translateY(0); }
+  40%  { opacity: 0; transform: translateY(-18px); }
+  100% { opacity: 0; transform: translateY(-18px); }
+}
+
+.signup-root {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  font-family: "DM Sans", system-ui, -apple-system, sans-serif;
+  background: #0D1F4E;
+}
+
+.signup-card {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  animation: signupFadeIn 0.4s ease;
+}
+
+.signup-left {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 72px 64px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #081440 0%, #1A3270 55%, #0D1F4E 100%);
+  min-width: 0;
+}
+
+.signup-left::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+  background-size: 52px 52px;
+  pointer-events: none;
+}
+
+.signup-left::after {
+  content: '';
+  position: absolute;
+  top: 12%;
+  right: 0;
+  width: 1px;
+  height: 76%;
+  background: linear-gradient(to bottom, transparent, rgba(212,172,58,0.40), transparent);
+}
+
+.signup-blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: signupBlobFloat 6s ease-in-out infinite;
+}
+.signup-blob-1 { width: 480px; height: 480px; top: -160px; left: -160px; background: rgba(212,172,58,0.11); animation-delay: 0s; }
+.signup-blob-2 { width: 380px; height: 380px; bottom: -110px; right: -110px; background: rgba(43,74,154,0.26); animation-delay: 2s; }
+.signup-blob-3 { width: 240px; height: 240px; top: 44%; left: -70px; background: rgba(184,146,10,0.09); animation-delay: 4s; }
+.signup-blob-4 { width: 170px; height: 170px; top: 14%; right: -44px; background: rgba(212,172,58,0.08); animation-delay: 1s; }
+
+.signup-left-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+  text-align: center;
+  width: 100%;
+  max-width: 500px;
+  margin-top: 16px;
+}
+
+.signup-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  background: rgba(184,146,10,0.14);
+  border: 1px solid rgba(212,172,58,0.36);
+  border-radius: 999px;
+  padding: 7px 20px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #D4AC3A;
+  white-space: nowrap;
+}
+
+.signup-logo-wrap {
+  width: 248px;
+  height: 248px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 10px 40px rgba(0,0,0,0.50));
+}
+.signup-logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+
+.signup-tagline {
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 30px;
+  font-weight: 400;
+  color: #ffffff;
+  line-height: 1.38;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.signup-tagline em { font-style: italic; color: #D4AC3A; }
+
+.signup-sub {
+  font-size: 13.5px;
+  color: rgba(255,255,255,0.48);
+  line-height: 1.75;
+  margin: 0;
+  max-width: 380px;
+}
+
+.signup-divider {
+  width: 52px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #D4AC3A, transparent);
+  border-radius: 999px;
+}
+
+.signup-stats-carousel {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.signup-stat-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  animation: signupStatCarousel 10s ease-in-out infinite;
+}
+.signup-stat-slide:nth-child(1) { animation-delay: 0s; }
+.signup-stat-num  { font-size: 38px; font-weight: 700; color: #D4AC3A; letter-spacing: -0.02em; line-height: 1; }
+.signup-stat-label { font-size: 11.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.48); }
+
+.signup-right {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 40px;
+  background:
+    radial-gradient(ellipse 70% 55% at 110% 10%, rgba(212,172,58,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at -10% 90%, rgba(13,31,78,0.07) 0%, transparent 70%),
+    #EEF1F8;
+}
+
+.signup-right::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #0D1F4E 0%, #2B4A9A 50%, #D4AC3A 100%);
+}
+
+.signup-right::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 28px,
+    rgba(13,31,78,0.018) 28px,
+    rgba(13,31,78,0.018) 29px
+  );
+  pointer-events: none;
+}
+
+.signup-clerk-wrap {
+  width: 100%;
+  max-width: 400px;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 40px 36px 32px;
+  box-shadow:
+    0 0 0 1px rgba(13,31,78,0.08),
+    0 4px 24px rgba(13,31,78,0.10),
+    0 1px 3px rgba(13,31,78,0.06);
+}
+
+.custom-clerk-root { width: 100%; }
+
+.custom-clerk-card-box,
+.custom-clerk-card {
+  box-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+  width: 100% !important;
+  max-width: 380px !important;
+}
+
+.custom-clerk-title {
+  font-family: "DM Serif Display", Georgia, serif !important;
+  font-size: 32px !important;
+  color: #0D1F4E !important;
+  letter-spacing: -0.01em !important;
+  margin-bottom: 6px !important;
+}
+
+.custom-clerk-subtitle {
+  font-family: "DM Sans", sans-serif !important;
+  font-size: 15px !important;
+  color: #6E80A0 !important;
+}
+
+.custom-clerk-social-btn {
+  border: 1px solid #DDE6F4 !important;
+  border-radius: 10px !important;
+  padding: 12px !important;
+  transition: all 0.2s ease !important;
+  background-color: #FFFFFF !important;
+  box-shadow: 0 1px 3px rgba(13,31,78,0.07) !important;
+}
+.custom-clerk-social-btn:hover {
+  border-color: #2B4A9A !important;
+  background-color: #F2F5FC !important;
+  box-shadow: 0 2px 8px rgba(13,31,78,0.12) !important;
+}
+.custom-clerk-social-btn-text {
+  font-weight: 600 !important;
+  color: #3D5080 !important;
+}
+
+.custom-clerk-divider-row  { margin: 24px 0 !important; }
+.custom-clerk-divider-text {
+  color: #9AAAC0 !important;
+  font-size: 12px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.custom-clerk-field-label {
+  color: #0D1F4E !important;
+  font-weight: 600 !important;
+  font-size: 13.5px !important;
+}
+.custom-clerk-input {
+  padding: 12px 14px !important;
+  border: 1px solid #C8D6EB !important;
+  border-radius: 10px !important;
+  font-size: 14.5px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+  background: #FFFFFF !important;
+}
+.custom-clerk-input:focus {
+  border-color: #2B4A9A !important;
+  box-shadow: 0 0 0 3px rgba(43,74,154,0.15) !important;
+  outline: none !important;
+}
+
+.custom-clerk-btn {
+  width: 100% !important;
+  padding: 12px 24px !important;
+  font-family: "DM Sans", sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  border-radius: 10px !important;
+  background: linear-gradient(135deg, #0D1F4E 0%, #1A3270 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 12px rgba(13,31,78,0.22) !important;
+  transition: all 0.2s ease !important;
+  text-transform: none !important;
+  margin-top: 10px !important;
+}
+.custom-clerk-btn:hover {
+  box-shadow: 0 6px 18px rgba(13,31,78,0.32) !important;
+  transform: translateY(-1px) !important;
+}
+
+.custom-clerk-footer {
+  background: transparent !important;
+  border: none !important;
+  padding-top: 20px !important;
+}
+.custom-clerk-footer-text  { color: #6E80A0 !important; font-size: 14px !important; }
+.custom-clerk-footer-link  {
+  color: #D4AC3A !important;
+  font-weight: 700 !important;
+  transition: color 0.2s ease !important;
+}
+.custom-clerk-footer-link:hover { color: #B8920A !important; }
+.custom-clerk-badge { display: none !important; }
+
+@media (max-width: 860px) {
+  .signup-card { grid-template-columns: 1fr; overflow-y: auto; }
+  .signup-left { padding: 56px 32px; flex-shrink: 0; }
+  .signup-left::after { display: none; }
+  .signup-logo-wrap { width: 170px; height: 170px; }
+  .signup-tagline { font-size: 23px; }
+  .signup-left-inner { margin-top: 0; }
+  .signup-eyebrow { font-size: 9px; white-space: normal; text-align: center; }
+  .signup-right { padding: 40px 24px; overflow: visible; }
+  .signup-clerk-wrap { max-width: 100%; padding: 32px 24px 28px; }
+}

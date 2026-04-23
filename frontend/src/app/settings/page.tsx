@@ -51,8 +51,11 @@ export default function SettingsPage() {
     const checkLoadStatus = async () => {
       try {
         const response = await fetch('/api/integrations/status-pensum');
-        const data = await response.json();
-        setIsAcademicLoaded(data.is_loaded);
+        if (!response.ok) return;
+        const text = await response.text();
+        if (!text) return;
+        const data = JSON.parse(text);
+        setIsAcademicLoaded(data.is_loaded ?? false);
       } catch (error) {
         console.error('Error verificando carga:', error);
       }
@@ -85,17 +88,16 @@ export default function SettingsPage() {
 
       <main className="url-container" style={{ paddingTop: '80px', paddingBottom: '60px' }}>
         <header className="settings-header">
-          {/* BOTÓN PARA REGRESAR A TOP-OF-PAGE */}
-          <button 
+          <button
             onClick={() => router.push('/top-of-page')}
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '8px', 
-              background: 'none', 
-              border: 'none', 
-              color: '#4b5563', 
-              cursor: 'pointer', 
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'none',
+              border: 'none',
+              color: '#4b5563',
+              cursor: 'pointer',
               marginBottom: '20px',
               fontWeight: 500
             }}
@@ -113,8 +115,8 @@ export default function SettingsPage() {
 
         <div className="settings-grid">
           {settingsSections.map((section) => (
-            <button 
-              key={section.id} 
+            <button
+              key={section.id}
               className={`settings-card ${section.id === 'structure' && isAcademicLoaded ? 'card-disabled' : ''}`}
               onClick={() => handleNavigation(section)}
             >
