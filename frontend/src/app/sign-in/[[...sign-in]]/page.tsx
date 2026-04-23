@@ -1,91 +1,52 @@
 'use client'
 
-import { SignIn } from '@clerk/nextjs'
-import { useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { SignIn, useAuth } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import Image from 'next/image'
 import './sign-in.css'
 
 const clerkAppearance = {
+  variables: {
+    colorPrimary: '#0D1F4E',
+    colorText: '#0D1F4E',
+    colorTextSecondary: '#6E80A0',
+    colorBackground: 'transparent',
+    fontFamily: '"DM Sans", system-ui, sans-serif',
+    borderRadius: '10px',
+  },
   elements: {
-    rootBox: {
-      width: '100%',
-      minWidth: 0,
-    },
-    card: {
-      width: '100%',
-      minWidth: 0,
-      maxWidth: '100%',
-      boxShadow: 'none',
-      border: 'none',
-      padding: 0,
-      background: 'transparent',
-      margin: 0,
-    },
-    headerTitle: {
-      fontFamily: 'inherit',
-      fontSize: '26px',
-      fontWeight: '700',
-      letterSpacing: '-0.02em',
-    },
-    headerSubtitle: {
-      fontFamily: 'inherit',
-      fontSize: '14px',
-    },
-    socialButtonsBlockButton: {
-      width: '100%',
-      boxShadow: 'none',
-      fontFamily: 'inherit',
-    },
-    formFieldInput: {
-      width: '100%',
-      fontFamily: 'inherit',
-      fontSize: '14px',
-      boxShadow: 'none',
-    },
-    formButtonPrimary: {
-      width: '100%',
-      fontFamily: 'inherit',
-      fontWeight: '600',
-      fontSize: '15px',
-      background: 'linear-gradient(135deg, #0D1F4E 0%, #1A3270 100%)',
-      boxShadow: 'none',
-    },
-    footer: {
-      background: 'transparent',
-      border: 'none',
-    },
-    badge: {
-      display: 'none',
-    },
+    rootBox: 'custom-clerk-root',
+    cardBox: 'custom-clerk-card-box',
+    card: 'custom-clerk-card',
+    headerTitle: 'custom-clerk-title',
+    headerSubtitle: 'custom-clerk-subtitle',
+    socialButtonsBlockButton: 'custom-clerk-social-btn',
+    socialButtonsBlockButtonText: 'custom-clerk-social-btn-text',
+    dividerRow: 'custom-clerk-divider-row',
+    dividerText: 'custom-clerk-divider-text',
+    formFieldLabel: 'custom-clerk-field-label',
+    formFieldInput: 'custom-clerk-input',
+    formButtonPrimary: 'custom-clerk-btn',
+    footerActionText: 'custom-clerk-footer-text',
+    footerActionLink: 'custom-clerk-footer-link',
+    footer: 'custom-clerk-footer',
+    badge: 'custom-clerk-badge',
   },
 }
 
 export default function SignInPage() {
-  const searchParams = useSearchParams()
-  const [showBanner, setShowBanner] = useState(false)
+  const { isSignedIn } = useAuth()
+  const router = useRouter()
 
   useEffect(() => {
-    if (searchParams.get('unauthorized') === '1') {
-      setShowBanner(true)
-      const t = setTimeout(() => setShowBanner(false), 4500)
-      return () => clearTimeout(t)
+    if (isSignedIn) {
+      router.push('/top-of-page')
     }
-  }, [searchParams])
+  }, [isSignedIn, router])
 
   return (
     <div className="login-root">
-      {showBanner && (
-        <div className="login-toast">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-            <line x1="12" y1="9" x2="12" y2="13"/>
-            <line x1="12" y1="17" x2="12.01" y2="17"/>
-          </svg>
-          Debes iniciar sesión para acceder a esa sección.
-        </div>
-      )}
-
       <div className="login-card">
         <div className="login-left">
           <div className="login-blob login-blob-1" />
@@ -95,10 +56,7 @@ export default function SignInPage() {
 
           <div className="login-left-inner">
             <span className="login-eyebrow">
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-              </svg>
-              Sistema de Gestión Académica
+              Sistema De Gestión Académica • Universidad Rafael Landívar
             </span>
 
             <div className="login-logo-wrap">
@@ -125,20 +83,8 @@ export default function SignInPage() {
 
             <div className="login-stats-carousel">
               <div className="login-stat-slide">
-                <span className="login-stat-num">+1,000</span>
-                <span className="login-stat-label">Catedráticos</span>
-              </div>
-              <div className="login-stat-slide">
-                <span className="login-stat-num">9</span>
-                <span className="login-stat-label">Facultades</span>
-              </div>
-              <div className="login-stat-slide">
                 <span className="login-stat-num">+40</span>
-                <span className="login-stat-label">Carreras de pregrado</span>
-              </div>
-              <div className="login-stat-slide">
-                <span className="login-stat-num">9</span>
-                <span className="login-stat-label">Sedes en Guatemala</span>
+                <span className="login-stat-label">CARRERAS DE PREGRADO</span>
               </div>
             </div>
           </div>

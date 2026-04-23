@@ -7,57 +7,31 @@ import Image from 'next/image'
 import './sign-up.css'
 
 const clerkAppearance = {
+  variables: {
+    colorPrimary: '#0D1F4E',
+    colorText: '#0D1F4E',
+    colorTextSecondary: '#6E80A0',
+    colorBackground: 'transparent',
+    fontFamily: '"DM Sans", system-ui, sans-serif',
+    borderRadius: '10px',
+  },
   elements: {
-    rootBox: {
-      width: '100%',
-      minWidth: 0,
-    },
-    card: {
-      width: '100%',
-      minWidth: 0,
-      maxWidth: '100%',
-      boxShadow: 'none',
-      border: 'none',
-      padding: 0,
-      background: 'transparent',
-      margin: 0,
-    },
-    headerTitle: {
-      fontFamily: 'inherit',
-      fontSize: '26px',
-      fontWeight: '700',
-      letterSpacing: '-0.02em',
-    },
-    headerSubtitle: {
-      fontFamily: 'inherit',
-      fontSize: '14px',
-    },
-    socialButtonsBlockButton: {
-      width: '100%',
-      boxShadow: 'none',
-      fontFamily: 'inherit',
-    },
-    formFieldInput: {
-      width: '100%',
-      fontFamily: 'inherit',
-      fontSize: '14px',
-      boxShadow: 'none',
-    },
-    formButtonPrimary: {
-      width: '100%',
-      fontFamily: 'inherit',
-      fontWeight: '600',
-      fontSize: '15px',
-      background: 'linear-gradient(135deg, #0D1F4E 0%, #1A3270 100%)',
-      boxShadow: 'none',
-    },
-    footer: {
-      background: 'transparent',
-      border: 'none',
-    },
-    badge: {
-      display: 'none',
-    },
+    rootBox: 'custom-clerk-root',
+    cardBox: 'custom-clerk-card-box',
+    card: 'custom-clerk-card',
+    headerTitle: 'custom-clerk-title',
+    headerSubtitle: 'custom-clerk-subtitle',
+    socialButtonsBlockButton: 'custom-clerk-social-btn',
+    socialButtonsBlockButtonText: 'custom-clerk-social-btn-text',
+    dividerRow: 'custom-clerk-divider-row',
+    dividerText: 'custom-clerk-divider-text',
+    formFieldLabel: 'custom-clerk-field-label',
+    formFieldInput: 'custom-clerk-input',
+    formButtonPrimary: 'custom-clerk-btn',
+    footerActionText: 'custom-clerk-footer-text',
+    footerActionLink: 'custom-clerk-footer-link',
+    footer: 'custom-clerk-footer',
+    badge: 'custom-clerk-badge',
   },
 }
 
@@ -82,10 +56,7 @@ export default function SignUpPage() {
 
           <div className="signup-left-inner">
             <span className="signup-eyebrow">
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-              </svg>
-              Sistema de Gestión Académica
+              Sistema De Gestión Académica &nbsp;*&nbsp; Universidad Rafael Landívar
             </span>
 
             <div className="signup-logo-wrap">
@@ -114,18 +85,6 @@ export default function SignUpPage() {
               <div className="signup-stat-slide">
                 <span className="signup-stat-num">+1,000</span>
                 <span className="signup-stat-label">Catedráticos</span>
-              </div>
-              <div className="signup-stat-slide">
-                <span className="signup-stat-num">9</span>
-                <span className="signup-stat-label">Facultades</span>
-              </div>
-              <div className="signup-stat-slide">
-                <span className="signup-stat-num">+40</span>
-                <span className="signup-stat-label">Carreras de pregrado</span>
-              </div>
-              <div className="signup-stat-slide">
-                <span className="signup-stat-num">9</span>
-                <span className="signup-stat-label">Sedes en Guatemala</span>
               </div>
             </div>
           </div>
