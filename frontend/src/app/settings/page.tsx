@@ -1,138 +1,134 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import './settings.css';
 
-const settingsSections = [
-  {
-    id: 'profile',
-    title: 'Mi Perfil',
-    description: 'Gestiona tu información personal, avatar y credenciales de acceso.',
-    icon: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
-    path: '/settings/profile'
-  },
-  {
-    id: 'weights',
-    title: 'Parámetros de Evaluación',
-    description: 'Configura los porcentajes y valores para el cálculo del ranking docente.',
-    icon: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M7 12h10M10 18h4"/></svg>,
-    path: '/weights-config'
-  },
-  {
-    id: 'structure',
-    title: 'Estructura Académica',
-    description: 'Gestión del Pensum institucional y ciclos académicos activos.',
-    icon: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
-    path: '/pensum-upload'
-  },
-  {
-    id: 'notifications',
-    title: 'Notificaciones y Alertas',
-    description: 'Define los umbrales de desempeño y canales de comunicación.',
-    icon: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
-    path: '/performance-alert'
-  },
-  {
-    id: 'audit',
-    title: 'Auditoría y Equipo',
-    description: 'Revisa el historial de cambios y gestiona permisos de administrador.',
-    icon: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
-    path: '/settings/audit'
-  }
-];
-
 export default function SettingsPage() {
   const router = useRouter();
-  const [isAcademicLoaded, setIsAcademicLoaded] = useState(false);
-  const [showNotification, setShowNotification] = useState(false);
 
-  useEffect(() => {
-    const checkLoadStatus = async () => {
-      try {
-        const response = await fetch('/api/integrations/status-pensum');
-        if (!response.ok) return;
-        const text = await response.text();
-        if (!text) return;
-        const data = JSON.parse(text);
-        setIsAcademicLoaded(data.is_loaded ?? false);
-      } catch (error) {
-        console.error('Error verificando carga:', error);
-      }
-    };
-    checkLoadStatus();
-  }, []);
-
-  const handleNavigation = (section: any) => {
-    if (section.id === 'structure' && isAcademicLoaded) {
-      setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 5000);
-      return;
+  const CATEGORIES = [
+    {
+      label: 'Cuenta',
+      description: 'Gestión de tu identidad y seguridad personal.',
+      items: [
+        {
+          id: 'profile',
+          title: 'Mi Perfil',
+          description: 'Información personal, foto y preferencias de contacto.',
+          icon: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+          ),
+          path: '/settings/profile'
+        }
+      ]
+    },
+    {
+      label: 'Académico',
+      description: 'Configuración de la estructura y reglas del sistema.',
+      items: [
+        {
+          id: 'data-import',
+          title: 'Gestión de Importaciones',
+          description: 'Carga masiva de pensum y plantillas de encuestas vía Excel.',
+          icon: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/>
+            </svg>
+          ),
+          path: '/settings/data-import'
+        },
+        {
+          id: 'weights',
+          title: 'Pesos y Fórmulas',
+          description: 'Configura los porcentajes y criterios para la evaluación final del docente.',
+          icon: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <path d="M3 9h18" />
+              <path d="M9 21V9" />
+            </svg>
+          ),
+          path: '/weights-config'
+        },
+        {
+          id: 'alerts',
+          title: 'Reglas de Notificación',
+          description: 'Define qué eventos disparan alertas para docentes y administradores.',
+          icon: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          ),
+          path: '/settings/alert-config'
+        }
+      ]
+    },
+    {
+      label: 'Sistema',
+      description: 'Auditoría, equipo y mantenimiento global.',
+      items: [
+        {
+          id: 'audit',
+          title: 'Auditoría y Equipo',
+          description: 'Historial de cambios y gestión de administradores del sistema.',
+          icon: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          ),
+          path: '/settings/audit'
+        }
+      ]
     }
-    router.push(section.path);
-  };
+  ];
 
   return (
     <div className="url-page-bg flex-1">
-      {showNotification && (
-        <div className="status-notification-overlay">
-          <div className="status-notification-card">
-            <div className="status-notification-icon">⚠️</div>
-            <div className="status-notification-text">
-              <p>La carga ya se realizó en la base de datos.</p>
-              <span>Para hacer una carga nueva, restablezca en Auditoria y Equipo.</span>
-            </div>
-          </div>
-        </div>
-      )}
-
       <main className="url-container" style={{ paddingTop: '80px', paddingBottom: '60px' }}>
         <header className="settings-header">
-          <button
-            onClick={() => router.push('/top-of-page')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              background: 'none',
-              border: 'none',
-              color: '#4b5563',
-              cursor: 'pointer',
-              marginBottom: '20px',
-              fontWeight: 500
-            }}
-            className="hover:text-blue-600 transition-colors"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-            Regresar al menú principal
-          </button>
-
-          <h1 className="url-title" style={{ fontSize: '32px' }}>Configuración</h1>
-          <p className="settings-subtitle">Administra los parámetros globales de Polaris y tu perfil institucional.</p>
+          <div className="settings-eyebrow">
+            Configuración General
+          </div>
+          <h1 className="settings-title">Ajustes del Sistema</h1>
+          <p className="settings-subtitle">Administra los parámetros críticos de Polaris y las preferencias de tu cuenta institucional.</p>
         </header>
 
-        <div className="settings-grid">
-          {settingsSections.map((section) => (
-            <button
-              key={section.id}
-              className={`settings-card ${section.id === 'structure' && isAcademicLoaded ? 'card-disabled' : ''}`}
-              onClick={() => handleNavigation(section)}
-            >
-              <div className="settings-card-icon">
-                <section.icon />
+        <div className="settings-categories">
+          {CATEGORIES.map((cat) => (
+            <div key={cat.label} className="settings-category-block">
+              <div className="settings-category-header">
+                <div className="settings-category-label">
+                  <div className="settings-category-dot" />
+                  {cat.label}
+                </div>
+                <p className="settings-category-desc">{cat.description}</p>
               </div>
-              <div className="settings-card-content">
-                <h3>{section.title}</h3>
-                <p>{section.description}</p>
+
+              <div className="settings-grid">
+                {cat.items.map((item) => (
+                  <button 
+                    key={item.id} 
+                    className="settings-card"
+                    onClick={() => router.push(item.path)}
+                  >
+                    <div className="settings-card-icon">
+                      {item.icon}
+                    </div>
+                    <div className="settings-card-content">
+                      <h3>{item.title}</h3>
+                      <p>{item.description}</p>
+                    </div>
+                    <div className="settings-card-arrow">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 18l6-6-6-6"/>
+                      </svg>
+                    </div>
+                  </button>
+                ))}
               </div>
-              <div className="settings-card-arrow">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
-              </div>
-            </button>
+            </div>
           ))}
         </div>
       </main>
