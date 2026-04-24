@@ -206,7 +206,7 @@ class TeacherListSerializer(serializers.ModelSerializer):
         total_ratings = 0
         count = 0
         
-        student_surveys = obj.student_surveys.filter(status='active')
+        student_surveys = obj.student_surveys.filter(status='active', rating__isnull=False)
         if student_surveys.exists():
             total_ratings += sum(s.rating for s in student_surveys)
             count += student_surveys.count()
