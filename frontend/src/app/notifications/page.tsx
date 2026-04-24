@@ -90,7 +90,9 @@ export default function NotificationsPage() {
 
   const deleteNotification = (id: number, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
+    // 1. Agregar a la lista de "eliminando" para disparar la animación CSS
     setDeletingIds(prev => [...prev, id]);
+    // 2. Esperar a que termine la animación (300ms) y remover del estado principal
     setTimeout(() => {
       setNotifications(prev => prev.filter(n => n.id !== id));
       setDeletingIds(prev => prev.filter(delId => delId !== id));
@@ -186,20 +188,15 @@ export default function NotificationsPage() {
               );
             })}
 
-            {/* ESTADO: NOTIFICACIONES AL DÍA */}
             {notifications.length === 0 && (
               <div className="nc-empty">
-                <div className="nc-empty-icon">
-                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                    <polyline points="22 4 12 14.01 9 11.01" />
-                  </svg>
-                </div>
-                <h3>Notificaciones al día</h3>
-                <p>No tienes alertas ni mensajes pendientes en tu bandeja.</p>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+                <p>Estás al día con todas tus notificaciones.</p>
               </div>
             )}
-
           </div>
         </div>
       </div>

@@ -92,7 +92,7 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
       await signOut({ redirectUrl: '/sign-in' });
       onLogout?.();
     } catch (error) {
-      console.error(error);
+      console.error("Error cerrando sesión:", error);
       router.push('/sign-in');
     }
   };
@@ -127,7 +127,7 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
                 </div>
                 <div className={`adp-user-details adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
                   <span className="adp-user-name">{userName}</span>
-                  <span className="adp-user-role">Facultad de Ingenieria</span>
+                  <span className="adp-user-role">Facultad de Ingeniería</span>
                   <span className="adp-system-name">SGA Polaris</span>
                 </div>
               </div>

@@ -1,30 +1,53 @@
-.individual-teacher-general-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: clamp(24px, 4vw, 48px) clamp(16px, 4vw, 48px);
-  width: 100%;
-  background: var(--url-surface);
+.itv-layout {
+  padding: clamp(24px, 4vw, 40px) clamp(16px, 4vw, 36px);
+  max-width: 1440px;
+  margin: 0 auto;
+  font-family: var(--url-font-sans);
   color: var(--url-text-pri);
-  gap: 24px;
   min-height: 100vh;
 }
 
-.individual-teacher-presentation-container {
+.itv-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: var(--url-text-muted);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 24px;
+  transition: color var(--url-transition), transform var(--url-transition);
+  font-family: var(--url-font-sans);
+}
+
+.itv-back-btn:hover {
+  color: var(--url-navy);
+  transform: translateX(-4px);
+}
+
+.itv-content-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.itv-profile-card {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   gap: 32px;
   padding: clamp(24px, 3.2vw, 36px) clamp(24px, 3.5vw, 40px);
-  width: 100%;
-  border-radius: var(--url-radius-lg);
   background: var(--url-white);
   border: 1px solid var(--url-border-soft);
+  border-radius: var(--url-radius-lg);
   box-shadow: var(--url-shadow-sm);
 }
 
-.individual-teacher-personal-info {
+.itv-profile-info {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -32,7 +55,7 @@
   min-width: 0;
 }
 
-.individual-teacher-eyebrow {
+.itv-eyebrow {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -44,22 +67,23 @@
   gap: 7px;
 }
 
-.individual-teacher-name {
+.itv-name {
   font-size: clamp(22px, 3.5vw, 32px);
   font-weight: 700;
-  margin-bottom: 6px;
+  margin: 0 0 6px 0;
   color: var(--url-navy);
   letter-spacing: -0.02em;
   line-height: 1.15;
 }
 
-.individual-teacher-department {
+.itv-department {
   font-size: clamp(14px, 1.8vw, 17px);
   font-weight: 500;
   color: var(--url-text-sec);
+  margin: 0;
 }
 
-.individual-teacher-meta {
+.itv-meta-grid {
   margin-top: 24px;
   width: 100%;
   display: grid;
@@ -68,7 +92,7 @@
   row-gap: 14px;
 }
 
-.individual-teacher-meta-item {
+.itv-meta-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -76,23 +100,21 @@
   font-size: 14px;
 }
 
-.individual-teacher-meta-item p { margin: 0; }
-
-.individual-teacher-meta-item svg {
-  width: 18px;
-  height: 18px;
+.itv-meta-item svg {
+  width: 16px;
+  height: 16px;
   color: var(--url-text-muted);
   flex-shrink: 0;
 }
 
-.individual-teacher-score {
+.itv-score-container {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.individual-teacher-score-card {
+.itv-score-card {
   border: 1px solid var(--url-border-soft);
   border-radius: var(--url-radius-lg);
   background: var(--url-surface);
@@ -106,7 +128,7 @@
   box-shadow: var(--url-shadow-xs);
 }
 
-.individual-teacher-score-icon {
+.itv-score-icon {
   width: 50px;
   height: 50px;
   border-radius: var(--url-radius-sm);
@@ -119,12 +141,12 @@
   margin-bottom: 16px;
 }
 
-.individual-teacher-score-icon svg {
+.itv-score-icon svg {
   width: 24px;
   height: 24px;
 }
 
-.individual-teacher-score-title {
+.itv-score-title {
   margin: 0;
   font-size: 11px;
   font-weight: 700;
@@ -133,8 +155,8 @@
   letter-spacing: 0.07em;
 }
 
-.individual-teacher-score-value {
-  margin: 10px 0 6px;
+.itv-score-value {
+  margin: 8px 0 6px;
   font-size: 40px;
   line-height: 1;
   font-weight: 700;
@@ -142,54 +164,44 @@
   letter-spacing: -0.03em;
 }
 
-.individual-teacher-score-subtitle {
+.itv-score-subtitle {
   margin: 0;
   font-size: 12px;
   color: var(--url-text-muted);
 }
 
-.individual-teacher-classes-section {
+.itv-section-card {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 18px;
-  padding: clamp(22px, 3.2vw, 36px) clamp(24px, 3.5vw, 40px);
-  width: 100%;
-  border-radius: var(--url-radius-lg);
   background: var(--url-white);
   border: 1px solid var(--url-border-soft);
+  border-radius: var(--url-radius-lg);
   box-shadow: var(--url-shadow-sm);
+  padding: clamp(22px, 3.2vw, 36px) clamp(24px, 3.5vw, 40px);
 }
 
-.individual-teacher-section-header {
+.itv-section-header {
   width: 100%;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--url-border-soft);
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+  margin-bottom: 20px;
 }
 
-.individual-teacher-section-eyebrow {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--url-gold);
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.individual-teacher-section-title {
-  font-size: clamp(17px, 2.4vw, 22px);
+.itv-section-title {
+  font-size: clamp(17px, 2.4vw, 20px);
   font-weight: 700;
   color: var(--url-navy);
   margin: 0;
   letter-spacing: -0.015em;
 }
 
-.individual-teacher-class-card {
+.itv-classes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.itv-class-card {
   width: 100%;
   background: var(--url-white);
   border: 1px solid var(--url-border-soft);
@@ -198,12 +210,12 @@
   transition: box-shadow var(--url-transition), border-color var(--url-transition);
 }
 
-.individual-teacher-class-card:hover {
+.itv-class-card:hover {
   border-color: var(--url-border);
-  box-shadow: var(--url-shadow-sm);
+  box-shadow: var(--url-shadow-xs);
 }
 
-.individual-teacher-class-header {
+.itv-class-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -213,66 +225,67 @@
   transition: background var(--url-transition);
 }
 
-.individual-teacher-class-header:hover {
+.itv-class-header:hover {
   background: var(--url-surface-2);
 }
 
-.individual-teacher-class-title {
+.itv-class-title {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.individual-teacher-class-title h3 {
+.itv-class-title h3 {
   margin: 0;
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 700;
   color: var(--url-navy);
   letter-spacing: -0.01em;
 }
 
-.individual-teacher-class-icon {
+.itv-class-icon {
   color: var(--url-gold);
   display: flex;
   align-items: center;
 }
 
-.individual-teacher-comments-toggle {
+.itv-comments-toggle {
   border: none;
   background: transparent;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--url-text-muted);
-  transition: color var(--url-transition);
+  transition: color var(--url-transition), background var(--url-transition);
   font-family: var(--url-font-sans);
   padding: 6px 12px;
   border-radius: var(--url-radius-xs);
 }
 
-.individual-teacher-comments-toggle:hover {
+.itv-class-header:hover .itv-comments-toggle {
   color: var(--url-navy);
-  background: var(--url-surface-2);
+  background: rgba(13, 31, 78, 0.05);
 }
 
-.individual-teacher-comments-container {
+.itv-comments-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
   border-top: 1px solid var(--url-border-soft);
+  background: var(--url-white);
 }
 
-.individual-teacher-comments-column {
+.itv-comments-col {
   padding: 22px 24px;
   min-height: 180px;
 }
 
-.individual-teacher-comments-column.positive {
+.itv-comments-col.positive {
   border-right: 1px solid var(--url-border-soft);
 }
 
-.individual-teacher-comments-title {
+.itv-comments-title {
   margin: 0 0 16px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -281,40 +294,29 @@
   letter-spacing: 0.05em;
 }
 
-.individual-teacher-comments-title.positive { color: var(--url-success); }
-.individual-teacher-comments-title.positive svg {
-  height: 16px;
-  width: 16px;
-  color: var(--url-success);
-}
+.itv-comments-title.positive { color: var(--url-success); }
+.itv-comments-title.positive svg { color: var(--url-success); font-size: 16px; }
 
-.individual-teacher-comments-title.negative { color: var(--url-danger); }
-.individual-teacher-comments-title.negative svg {
-  height: 16px;
-  width: 16px;
-  color: var(--url-danger);
-}
+.itv-comments-title.negative { color: var(--url-danger); }
+.itv-comments-title.negative svg { color: var(--url-danger); font-size: 16px; }
 
-.individual-teacher-comments-list {
+.itv-comments-scrollable {
   display: flex;
   flex-direction: column;
   gap: 10px;
-}
-
-.individual-teacher-comments-list.scrollable {
   max-height: 280px;
   overflow-y: auto;
   padding-right: 6px;
 }
 
-.individual-teacher-comments-list.scrollable::-webkit-scrollbar { width: 4px; }
-.individual-teacher-comments-list.scrollable::-webkit-scrollbar-track { background: transparent; }
-.individual-teacher-comments-list.scrollable::-webkit-scrollbar-thumb {
+.itv-comments-scrollable::-webkit-scrollbar { width: 4px; }
+.itv-comments-scrollable::-webkit-scrollbar-track { background: transparent; }
+.itv-comments-scrollable::-webkit-scrollbar-thumb {
   background: var(--url-border);
   border-radius: 999px;
 }
 
-.individual-teacher-comment {
+.itv-comment {
   padding: 13px 16px;
   border-radius: var(--url-radius-sm);
   font-size: 13.5px;
@@ -322,27 +324,39 @@
   color: var(--url-text-pri);
 }
 
-.individual-teacher-comment.positive {
+.itv-comment.positive {
   background: var(--url-success-bg);
   border: 1px solid var(--url-success-bd);
 }
 
-.individual-teacher-comment.negative {
+.itv-comment.negative {
   background: var(--url-danger-bg);
   border: 1px solid var(--url-danger-bd);
 }
 
-.individual-teacher-sentiment-analysis-section {
+.itv-comment-empty {
+  color: var(--url-text-muted);
+  font-size: 13.5px;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Empty & Loading States */
+.itv-empty-state {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 18px;
-  padding: clamp(22px, 3.2vw, 36px) clamp(24px, 3.5vw, 40px);
-  width: 100%;
-  border-radius: var(--url-radius-lg);
-  background: var(--url-white);
-  border: 1px solid var(--url-border-soft);
-  box-shadow: var(--url-shadow-sm);
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  text-align: center;
+  color: var(--url-text-muted);
+}
+
+.itv-empty-state h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 8px;
+  margin-bottom: 4px;
 }
 
 .itv-loading-spinner {
@@ -352,91 +366,89 @@
   border-top-color: var(--url-gold);
   border-radius: 50%;
   animation: url-spin 0.9s linear infinite;
+  margin-bottom: 16px;
 }
 
-@media (max-width: 1100px) {
-  .individual-teacher-general-container {
-    padding: clamp(20px, 3vw, 32px) clamp(14px, 3vw, 28px);
-  }
+.itv-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 22px;
+  background: var(--url-navy);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--url-radius-sm);
+  font-family: var(--url-font-sans);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--url-transition), box-shadow var(--url-transition), transform var(--url-transition);
+  box-shadow: 0 1px 2px rgba(13,31,78,0.20), inset 0 1px 0 rgba(255,255,255,0.08);
+}
 
-  .individual-teacher-meta {
+.itv-btn-primary:hover {
+  background: var(--url-navy-dark);
+  box-shadow: var(--url-shadow-md);
+  transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .itv-meta-grid {
     grid-template-columns: repeat(2, minmax(160px, 1fr));
     column-gap: 24px;
   }
 }
 
 @media (max-width: 900px) {
-  .individual-teacher-presentation-container {
+  .itv-profile-card {
     flex-direction: column;
     align-items: stretch;
     gap: 24px;
   }
 
-  .individual-teacher-score {
+  .itv-score-container {
     width: 100%;
     justify-content: flex-start;
   }
 
-  .individual-teacher-score-card {
+  .itv-score-card {
     width: 100%;
     max-width: 280px;
     padding: 22px 28px;
   }
 
-  .individual-teacher-meta {
+  .itv-meta-grid {
     grid-template-columns: 1fr 1fr;
     column-gap: 0;
     row-gap: 14px;
   }
 
-  .individual-teacher-class-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .individual-teacher-comments-container {
+  .itv-comments-container {
     grid-template-columns: 1fr;
   }
 
-  .individual-teacher-comments-column.positive {
+  .itv-comments-col.positive {
     border-right: none;
     border-bottom: 1px solid var(--url-border-soft);
   }
 }
 
 @media (max-width: 640px) {
-  .individual-teacher-general-container {
-    padding: 16px;
-    gap: 16px;
-  }
+  .itv-layout { padding: 20px 16px; }
 
-  .individual-teacher-presentation-container,
-  .individual-teacher-classes-section,
-  .individual-teacher-sentiment-analysis-section {
+  .itv-profile-card,
+  .itv-section-card {
     padding: 20px;
-    border-radius: var(--url-radius-md);
   }
 
-  .individual-teacher-name {
-    font-size: 22px;
-  }
-
-  .individual-teacher-department {
-    font-size: 15px;
-  }
-
-  .individual-teacher-meta {
+  .itv-meta-grid {
     grid-template-columns: 1fr;
     row-gap: 12px;
     margin-top: 18px;
   }
 
-  .individual-teacher-meta-item {
-    font-size: 13.5px;
-  }
-
-  .individual-teacher-score-card {
+  .itv-score-card {
     max-width: none;
     flex-direction: row;
     gap: 20px;
@@ -445,18 +457,18 @@
     text-align: left;
   }
 
-  .individual-teacher-score-icon { margin-bottom: 0; }
+  .itv-score-icon { margin-bottom: 0; }
+  .itv-score-value { font-size: 32px; }
 
-  .individual-teacher-score-value { font-size: 32px; }
+  .itv-class-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px;
+  }
 
-  .individual-teacher-section-title { font-size: 17px; }
-
-  .individual-teacher-comments-column {
+  .itv-comments-col {
     padding: 16px;
     min-height: auto;
   }
-
-  .individual-teacher-class-header { padding: 14px 16px; }
-
-  .individual-teacher-class-title h3 { font-size: 14.5px; }
 }
