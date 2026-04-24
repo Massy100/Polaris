@@ -21,7 +21,6 @@ const MOCK_NOTIFICATIONS: Notification[] = [
   { id: 5, title: 'Nuevo docente registrado', message: 'María García fue añadida al sistema de gestión docente.', time: 'Hace 2 días', type: 'info', read: true },
 ];
 
-// --- Íconos ---
 const IconBack = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -90,9 +89,7 @@ export default function NotificationsPage() {
 
   const deleteNotification = (id: number, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    // 1. Agregar a la lista de "eliminando" para disparar la animación CSS
     setDeletingIds(prev => [...prev, id]);
-    // 2. Esperar a que termine la animación (300ms) y remover del estado principal
     setTimeout(() => {
       setNotifications(prev => prev.filter(n => n.id !== id));
       setDeletingIds(prev => prev.filter(delId => delId !== id));

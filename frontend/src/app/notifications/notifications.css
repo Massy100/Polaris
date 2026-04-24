@@ -134,8 +134,6 @@
   flex-direction: column;
 }
 
-/* Efecto "Hover/Levantado" y Transiciones 
-*/
 .nc-item {
   display: flex;
   align-items: flex-start;
@@ -144,7 +142,6 @@
   border-bottom: 1px solid var(--url-border-soft);
   position: relative;
   background: var(--url-white);
-  /* Propiedades para la animación de borrado */
   max-height: 200px;
   overflow: hidden;
   transform-origin: top;
@@ -160,7 +157,6 @@
   border-bottom: none;
 }
 
-/* El efecto visual que querías de "levantarse" */
 .nc-item:hover {
   background: var(--url-white);
   transform: translateY(-2px);
@@ -174,7 +170,6 @@
 }
 
 .nc-item-unread:hover {
-  /* Al hacer hover en una no leída se levanta y se pinta de blanco */
   background: var(--url-white);
 }
 
@@ -189,11 +184,9 @@
   border-radius: 0 4px 4px 0;
 }
 
-/* Animación de Eliminación (Efecto Borrado)
-*/
 .nc-item-deleting {
   opacity: 0;
-  transform: translateX(40px) !important; /* Desliza a la derecha */
+  transform: translateX(40px) !important;
   max-height: 0;
   padding-top: 0;
   padding-bottom: 0;
@@ -201,7 +194,6 @@
   margin: 0;
 }
 
-/* Iconos de tipo */
 .nc-icon-wrapper {
   width: 44px;
   height: 44px;
@@ -236,7 +228,6 @@
   border-color: var(--url-danger-bd);
 }
 
-/* Textos */
 .nc-content {
   flex: 1;
   display: flex;
@@ -284,19 +275,17 @@
   padding-right: 20px;
 }
 
-/* Área de acciones por notificación */
 .nc-action-area {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  width: 68px; /* Espacio fijo para los botones */
+  width: 68px;
   position: relative;
   flex-shrink: 0;
   margin-top: 6px;
 }
 
-/* Indicador de No Leído */
 .nc-unread-indicator {
   width: 10px;
   height: 10px;
@@ -307,7 +296,6 @@
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-/* Botones individuales (Aparecen al hacer hover) */
 .nc-btn-action {
   width: 32px;
   height: 32px;
@@ -325,7 +313,6 @@
   transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Ocultar el punto y mostrar botones en hover */
 .nc-item:hover .nc-unread-indicator {
   opacity: 0;
   transform: scale(0);
@@ -336,7 +323,6 @@
   transform: scale(1) translateY(0);
 }
 
-/* Retraso ligero para que el basurero aparezca después del check */
 .nc-item:hover .nc-btn-delete {
   transition-delay: 0.05s;
 }
@@ -353,7 +339,6 @@
   border-color: var(--url-danger-bd);
 }
 
-/* Estado Vacío */
 .nc-empty {
   display: flex;
   flex-direction: column;
@@ -377,7 +362,6 @@
   margin: 0;
 }
 
-/* Responsivo */
 @media (max-width: 640px) {
   .nc-header {
     flex-direction: column;
