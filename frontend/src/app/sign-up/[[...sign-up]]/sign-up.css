@@ -193,11 +193,6 @@
 
 .signup-right {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: 0;
   overflow-y: auto;
   background:
     radial-gradient(ellipse 70% 55% at 110% 10%, rgba(61,141,172,0.07) 0%, transparent 70%),
@@ -207,8 +202,10 @@
 
 .signup-right::before {
   content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
+  position: sticky;
+  top: 0;
+  display: block;
+  width: 100%;
   height: 3px;
   background: linear-gradient(90deg, #101b23 0%, #1c415c 40%, #3d8dac 70%, #8a8600 100%);
   z-index: 2;
@@ -217,7 +214,7 @@
 
 .signup-right::after {
   content: '';
-  position: absolute;
+  position: fixed;
   inset: 0;
   background-image: repeating-linear-gradient(
     -45deg,
@@ -232,6 +229,7 @@
 .signup-clerk-wrap {
   width: calc(100% - 80px);
   max-width: 400px;
+  margin: 40px auto;
   position: relative;
   z-index: 1;
   background: #ffffff;
@@ -241,18 +239,6 @@
     0 0 0 1px rgba(16,27,35,0.07),
     0 4px 24px rgba(16,27,35,0.09),
     0 1px 3px rgba(16,27,35,0.05);
-  my-margin: 40px 0;
-  flex-shrink: 0;
-}
-
-.signup-right-inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 100%;
-  padding: 48px 40px;
-  box-sizing: border-box;
 }
 
 .custom-clerk-root { width: 100%; }
@@ -369,6 +355,5 @@
   .signup-logo-wrap { width: 160px; height: 160px; }
   .signup-tagline { font-size: 24px; }
   .signup-eyebrow { font-size: 9px; white-space: normal; text-align: center; }
-  .signup-right-inner { padding: 40px 24px; }
-  .signup-clerk-wrap { width: 100%; max-width: 100%; padding: 32px 24px 28px; }
+  .signup-clerk-wrap { width: calc(100% - 48px); padding: 32px 24px 28px; }
 }

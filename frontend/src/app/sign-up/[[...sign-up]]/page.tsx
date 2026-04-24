@@ -99,15 +99,13 @@ export default function SignUpPage() {
         </div>
 
         <div className="signup-right">
-          <div className="signup-right-inner">
-            <div className="signup-clerk-wrap">
-              <SignUp
-                routing="hash"
-                signInUrl="/sign-in"
-                fallbackRedirectUrl="/top-of-page"
-                appearance={clerkAppearance}
-              />
-            </div>
+          <div className="signup-clerk-wrap">
+            <SignUp
+              routing="hash"
+              signInUrl="/sign-in"
+              fallbackRedirectUrl="/top-of-page"
+              appearance={clerkAppearance}
+            />
           </div>
         </div>
       </div>
