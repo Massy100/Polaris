@@ -72,6 +72,7 @@ class TeacherCoordinatorOpinionSerializer(serializers.ModelSerializer):
 
 class TeacherStudentSurveySerializer(serializers.ModelSerializer):
     teacher_name = serializers.CharField(source='teacher.full_name', read_only=True)
+    course_name = serializers.CharField(source='course.name', read_only=True)
 
     class Meta:
         model = TeacherStudentSurvey
@@ -79,6 +80,9 @@ class TeacherStudentSurveySerializer(serializers.ModelSerializer):
             'survey_id',
             'teacher',
             'teacher_name',
+            'course',
+            'course_name',
+            'section',
             'author',
             'opinion',
             'rating',

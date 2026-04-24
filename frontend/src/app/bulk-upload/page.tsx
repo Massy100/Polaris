@@ -175,7 +175,7 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-function DropZone({ onFile }: { onFile: (file: File) => void }) {
+function DropZone({ onFiles }: { onFiles: (files: File[]) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
 
@@ -183,12 +183,12 @@ function DropZone({ onFile }: { onFile: (file: File) => void }) {
     (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
       setDragging(false);
-      const file = event.dataTransfer.files?.[0];
-      if (file) {
-        onFile(file);
+      const files = Array.from(event.dataTransfer.files ?? []);
+      if (files.length) {
+        onFiles(files);
       }
     },
-    [onFile]
+    [onFiles]
   );
 
   return (
@@ -208,17 +208,18 @@ function DropZone({ onFile }: { onFile: (file: File) => void }) {
       <p className="bu-dz-sub">Formatos soportados: .xlsx, .xls, .csv</p>
       <button type="button" className="bu-dz-btn" onClick={() => inputRef.current?.click()}>
         <IconFile />
-        Seleccionar Archivo
+        Seleccionar Archivos
       </button>
       <input
         ref={inputRef}
         type="file"
+        multiple
         accept=".xlsx,.xls,.csv"
         style={{ display: 'none' }}
         onChange={(event) => {
-          const file = event.target.files?.[0];
-          if (file) {
-            onFile(file);
+          const files = Array.from(event.target.files ?? []);
+          if (files.length) {
+            onFiles(files);
           }
           event.target.value = '';
         }}
@@ -250,65 +251,41 @@ function DataPreview({
   onSave,
   isSaving,
 }: {
-  uploaded: UploadedFile;
+  uploaded: UploadedFile[];
   saveLabel: string;
   onSave: () => void;
   isSaving: boolean;
 }) {
-  const previewRows = uploaded.rows.slice(0, 10);
+  const totalRows = uploaded.reduce((sum, item) => sum + item.rows.length, 0);
 
   return (
     <div className="bu-preview-card">
       <div className="bu-preview-head">
         <div className="bu-preview-head-left">
-          <span className="bu-preview-title">Vista Previa de Datos</span>
-          <span className="bu-preview-file">Archivo: {uploaded.file.name}</span>
+          <span className="bu-preview-title">Archivos Listos para Procesar</span>
+          <span className="bu-preview-file">{uploaded.length} archivo(s) cargado(s)</span>
         </div>
         <div className="bu-preview-head-right">
-          <span className="bu-preview-count">{uploaded.rows.length} registros</span>
-          <span className="bu-preview-cols">
-            {uploaded.columns.length} {uploaded.columns.length === 1 ? 'columna' : 'columnas'}
-          </span>
+          <span className="bu-preview-count">{totalRows} registros visibles</span>
         </div>
       </div>
 
-      <div className="bu-table-wrap">
-        <table className="bu-table">
-          <thead>
-            <tr>
-              <th className="bu-th bu-th-num">#</th>
-              {uploaded.columns.map((column) => (
-                <th key={column} className="bu-th">
-                  {column}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {previewRows.map((row, index) => (
-              <tr key={index} className="bu-tr">
-                <td className="bu-td bu-td-num">{index + 1}</td>
-                {uploaded.columns.map((column) => (
-                  <td key={column} className="bu-td">
-                    {String(row[column] ?? '')}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="bu-card-body" style={{ paddingTop: 0 }}>
+        {uploaded.map((item) => (
+          <FileTag key={`${item.file.name}-${item.file.size}`} uploaded={item} onRemove={() => {}} />
+        ))}
       </div>
 
       <div className="bu-preview-foot">
         <span className="bu-preview-foot-msg">
-          Los datos se han procesado correctamente y están listos para ser guardados.
+          El backend detectará automáticamente qué archivo corresponde a títulos, méritos o evaluaciones.
         </span>
       </div>
 
       <div className="bu-save-row">
         <button className="bu-save-btn" onClick={onSave} disabled={isSaving}>
           <IconFile />
-          {isSaving ? 'Guardando...' : `${saveLabel} (${uploaded.rows.length})`}
+          {isSaving ? 'Guardando...' : `${saveLabel} (${uploaded.length})`}
         </button>
       </div>
     </div>
@@ -330,9 +307,9 @@ function Toast({ toast }: { toast: ToastState }) {
 
 export default function BulkUploadPage() {
   const [activeTab, setActiveTab] = useState<TabKey>('credenciales');
-  const [uploads, setUploads] = useState<Record<TabKey, UploadedFile | null>>({
-    credenciales: null,
-    evaluaciones: null,
+  const [uploads, setUploads] = useState<Record<TabKey, UploadedFile[]>>({
+    credenciales: [],
+    evaluaciones: [],
   });
   const [toast, setToast] = useState<ToastState>({ visible: false, message: '', success: true });
   const [isSaving, setIsSaving] = useState(false);
@@ -347,25 +324,31 @@ export default function BulkUploadPage() {
     }, 3500);
   };
 
-  const handleFile = async (file: File) => {
+  const handleFiles = async (files: File[]) => {
     try {
-      const preview = await parsePreview(file);
+      const parsed = await Promise.all(
+        files.map(async (file) => {
+          const preview = await parsePreview(file);
+          return {
+            file,
+            rows: preview.rows,
+            columns: preview.columns,
+          };
+        })
+      );
+
       setUploads((previous) => ({
         ...previous,
-        [activeTab]: {
-          file,
-          rows: preview.rows,
-          columns: preview.columns,
-        },
+        [activeTab]: [...previous[activeTab], ...parsed],
       }));
-      showToast('Archivo procesado correctamente', true);
+      showToast(`${files.length} archivo(s) cargado(s) correctamente`, true);
     } catch {
-      showToast('Error al procesar el archivo', false);
+      showToast('Error al procesar los archivos', false);
     }
   };
 
   const handleSave = async () => {
-    if (!upload || isSaving) {
+    if (!upload.length || isSaving) {
       return;
     }
 
@@ -373,9 +356,10 @@ export default function BulkUploadPage() {
 
     try {
       const formData = new FormData();
-      const backendCategory = activeTab === 'evaluaciones' ? 'encuestas' : activeTab;
-      formData.append('category', backendCategory);
-      formData.append('files', upload.file);
+      formData.append('category', activeTab);
+      upload.forEach((item) => {
+        formData.append('files', item.file);
+      });
 
       const response = await fetch(`${API_URL}/integrations/bulk-upload/`, {
         method: 'POST',
@@ -387,8 +371,8 @@ export default function BulkUploadPage() {
         throw new Error(data.message || 'No se pudo guardar la carga masiva.');
       }
 
-      showToast(`${upload.file.name} guardado correctamente`, true);
-      setUploads((previous) => ({ ...previous, [activeTab]: null }));
+      showToast(`${upload.length} archivo(s) guardado(s) correctamente`, true);
+      setUploads((previous) => ({ ...previous, [activeTab]: [] }));
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No se pudo guardar la carga masiva.';
       showToast(message, false);
@@ -468,23 +452,34 @@ export default function BulkUploadPage() {
           <div className="bu-card-body">
             <h4 className="bu-card-title">{tab.cardTitle}</h4>
             <p className="bu-card-sub">{tab.cardSub}</p>
-            {upload ? (
-              <FileTag
-                uploaded={upload}
-                onRemove={() =>
-                  setUploads((previous) => ({
-                    ...previous,
-                    [activeTab]: null,
-                  }))
-                }
-              />
+            {upload.length ? (
+              <div className="bu-card-body" style={{ paddingTop: 0 }}>
+                {upload.map((item) => (
+                  <FileTag
+                    key={`${item.file.name}-${item.file.size}`}
+                    uploaded={item}
+                    onRemove={() =>
+                      setUploads((previous) => ({
+                        ...previous,
+                        [activeTab]: previous[activeTab].filter(
+                          (candidate) =>
+                            !(
+                              candidate.file.name === item.file.name &&
+                              candidate.file.size === item.file.size
+                            )
+                        ),
+                      }))
+                    }
+                  />
+                ))}
+              </div>
             ) : (
-              <DropZone onFile={handleFile} />
+              <DropZone onFiles={handleFiles} />
             )}
           </div>
         </div>
 
-        {upload && (
+        {upload.length > 0 && (
           <DataPreview
             uploaded={upload}
             saveLabel={tab.saveLabel}

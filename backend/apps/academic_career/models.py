@@ -154,9 +154,11 @@ class TeacherCoordinatorOpinion(models.Model):
 class TeacherStudentSurvey(models.Model):
     survey_id = models.BigAutoField(primary_key=True)
     teacher = models.ForeignKey(Teacher, models.CASCADE, related_name='student_surveys')
+    course = models.ForeignKey(Course, models.DO_NOTHING, blank=True, null=True, related_name='student_surveys')
+    section = models.CharField(max_length=30, blank=True, null=True)
     author = models.CharField(max_length=140)
     opinion = models.TextField()
-    rating = models.IntegerField()
+    rating = models.IntegerField(blank=True, null=True)
     opinion_date = models.DateField(blank=True, null=True)
     status = models.CharField(max_length=20, default='active')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -165,7 +167,7 @@ class TeacherStudentSurvey(models.Model):
     class Meta:
         db_table = 'teacher_student_survey'
         ordering = ['teacher_id', '-opinion_date', '-created_at']
-        unique_together = (('teacher', 'author', 'opinion', 'opinion_date'),)
+        unique_together = (('teacher', 'course', 'section', 'author', 'opinion', 'opinion_date'),)
 
     def __str__(self):
         return f"{self.teacher.full_name} - Encuesta estudiante"
