@@ -415,3 +415,62 @@
     grid-template-columns: 1fr;
   }
 }
+
+.profile-selector {
+  background: var(--url-white);
+  border: 1px solid var(--url-border-soft);
+  border-radius: var(--url-radius-sm);
+  padding: 10px 14px;
+  box-shadow: var(--url-shadow-sm);
+  animation: url-slide-up 0.3s var(--url-ease);
+}
+
+.profile-selector label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--url-text-muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.profile-selector select {
+  width: 100%;
+  appearance: none;
+  background-color: var(--url-surface);
+  border: 1px solid var(--url-border-soft);
+  border-radius: var(--url-radius-sm);
+  padding: 8px 32px 8px 12px;
+  font-size: 13.5px;
+  color: var(--url-navy);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--url-transition), box-shadow var(--url-transition);
+  
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%234A5568%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+}
+
+.profile-selector select:hover {
+  border-color: var(--url-navy-light);
+}
+
+.profile-selector select:focus {
+  outline: none;
+  border-color: var(--url-navy);
+  box-shadow: 0 0 0 3px rgba(10, 37, 64, 0.1);
+}
+
+/* Ajuste responsivo para el header */
+@media (max-width: 768px) {
+  .settings-header {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .profile-selector {
+    width: 100%;
+  }
+}
