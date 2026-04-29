@@ -8,9 +8,9 @@ import './sign-up.css'
 
 const clerkAppearance = {
   variables: {
-    colorPrimary: '#0D1F4E',
-    colorText: '#0D1F4E',
-    colorTextSecondary: '#6E80A0',
+    colorPrimary: '#1c415c',
+    colorText: '#101b23',
+    colorTextSecondary: '#567080',
     colorBackground: 'transparent',
     fontFamily: '"DM Sans", system-ui, sans-serif',
     borderRadius: '10px',
@@ -56,15 +56,15 @@ export default function SignUpPage() {
 
           <div className="signup-left-inner">
             <span className="signup-eyebrow">
-              Sistema De Gestión Académica &nbsp;*&nbsp; Universidad Rafael Landívar
+              Sistema De Gestión Académica &nbsp;·&nbsp; Universidad Rafael Landívar
             </span>
 
             <div className="signup-logo-wrap">
               <Image
                 src="/login-logo.png"
                 alt="Logo Universidad Rafael Landívar"
-                width={240}
-                height={240}
+                width={220}
+                height={220}
                 priority
               />
             </div>
@@ -72,19 +72,27 @@ export default function SignUpPage() {
             <div className="signup-divider" />
 
             <h2 className="signup-tagline">
-              Tu camino hacia<br />
-              la <em>excelencia</em><br />
-              comienza aquí
+              Grandes legados<br />
+              comienzan con<br />
+              <em>una decisión.</em>
             </h2>
 
             <p className="signup-sub">
-              Únete a la comunidad landivariana y accede a la plataforma de evaluación y gestión académica.
+              Únete a la comunidad landivariana y forma parte de una tradición académica que transforma vidas.
             </p>
 
             <div className="signup-stats-carousel">
               <div className="signup-stat-slide">
                 <span className="signup-stat-num">+1,000</span>
-                <span className="signup-stat-label">Catedráticos</span>
+                <span className="signup-stat-label">Catedráticos activos</span>
+              </div>
+              <div className="signup-stat-slide">
+                <span className="signup-stat-num">+20,000</span>
+                <span className="signup-stat-label">Estudiantes formados</span>
+              </div>
+              <div className="signup-stat-slide">
+                <span className="signup-stat-num">75+</span>
+                <span className="signup-stat-label">Años de excelencia</span>
               </div>
             </div>
           </div>
@@ -93,8 +101,7 @@ export default function SignUpPage() {
         <div className="signup-right">
           <div className="signup-clerk-wrap">
             <SignUp
-              routing="path"
-              path="/sign-up"
+              routing="hash"
               signInUrl="/sign-in"
               fallbackRedirectUrl="/top-of-page"
               appearance={clerkAppearance}

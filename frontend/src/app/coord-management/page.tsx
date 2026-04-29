@@ -1,12 +1,9 @@
 'use client';
 
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { Search, Plus, Trash2, Edit3, Info, AlertTriangle, RotateCcw, Filter, Check } from 'lucide-react';
-import SidebarDropDown from '../components/sidebar-drop-down';
+import { Filter, Check, Plus, ShieldAlert, RotateCcw, Info, User, BookOpen } from 'lucide-react';
 import Modal from '../components/modal';
 import Pagination from '../components/pagination';
-import AdminDashboardPanel from '../components/admin-dashboard-panel';
 import './coord-management.css';
 
 type Coordinador = {
@@ -18,33 +15,60 @@ type Coordinador = {
     department?: string;
     phone?: string;
     role?: string;
-    since?: string | null;
     status: string;
     created_at?: string;
     updated_at?: string;
-    user_id?: number;
-    temp_password?: string;
 };
 
 const API_URL = 'http://localhost:8000/api/accounts';
 
+const IconUsersEyebrow = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+    <circle cx="9" cy="7" r="4"></circle>
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+  </svg>
+);
+
+const IconDirectoryTitle = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--url-navy-light)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+    <line x1="16" y1="2" x2="16" y2="6"></line>
+    <line x1="8" y1="2" x2="8" y2="6"></line>
+    <line x1="3" y1="10" x2="21" y2="10"></line>
+    <path d="M8 14h.01"></path>
+    <path d="M12 14h.01"></path>
+    <path d="M16 14h.01"></path>
+    <path d="M8 18h.01"></path>
+    <path d="M12 18h.01"></path>
+    <path d="M16 18h.01"></path>
+  </svg>
+);
+
+const IconSearch = () => (
+  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 16 16" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+    <path fillRule="evenodd" d="M10.442 10.442a1 1 0 011.415 0l3.85 3.85a1 1 0 01-1.414 1.415l-3.85-3.85a1 1 0 010-1.415z" clipRule="evenodd"></path>
+    <path fillRule="evenodd" d="M6.5 12a5.5 5.5 0 100-11 5.5 5.5 0 000 11zM13 6.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" clipRule="evenodd"></path>
+  </svg>
+);
+
+const IconClose = () => (
+  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 512 512" height="1.3em" width="1.3em" xmlns="http://www.w3.org/2000/svg">
+    <path d="M405 136.798L375.202 107 256 226.202 136.798 107 107 136.798 226.202 256 107 375.202 136.798 405 256 285.798 375.202 405 405 375.202 285.798 256z"></path>
+  </svg>
+);
+
 export default function CoordManagementPage() {
-    const router = useRouter();
-    const pathname = usePathname();
     const [isMounted, setIsMounted] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    
     const [coordinadores, setCoordinadores] = useState<Coordinador[]>([]);
     const [includeInactive, setIncludeInactive] = useState(false);
-
-    // Estado para el dropdown de filtro
     const [filterMenuOpen, setFilterMenuOpen] = useState(false);
     const filterRef = useRef<HTMLDivElement>(null);
-
     const [open, setOpen] = useState(false);
     const [viewMode, setViewMode] = useState(false);
     const [confirmOpen, setConfirmOpen] = useState(false);
@@ -58,8 +82,6 @@ export default function CoordManagementPage() {
     useEffect(() => { 
         setIsMounted(true);
         loadCoordinadores();
-
-        // Cerrar filtro al hacer clic fuera
         const handleClickOutside = (event: MouseEvent) => {
             if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
                 setFilterMenuOpen(false);
@@ -75,26 +97,11 @@ export default function CoordManagementPage() {
             setError(null);
             const url = `${API_URL}/coordinators/?include_inactive=${includeInactive}`;
             const response = await fetch(url);
-            if (!response.ok) throw new Error(`Error ${response.status}`);
+            if (!response.ok) throw new Error(`Error al cargar los coordinadores`);
             const data = await response.json();
-            
-            const transformedData = data.map((item: any) => ({
-                coordinator_id: item.coordinator_id,
-                first_name: item.first_name || '',
-                last_name: item.last_name || '',
-                status: item.status || 'inactive',
-                code: item.code || '',
-                phone: item.phone || '',
-                department: item.department || '',
-                role: item.role || '',
-                email: item.email || '',
-                user_id: item.user_id,
-                created_at: item.created_at,
-                updated_at: item.updated_at
-            }));
-            setCoordinadores(transformedData);
+            setCoordinadores(data);
         } catch (err: any) {
-            setError(`Error al cargar coordinadores: ${err.message}`);
+            setError(err.message || 'Error desconocido');
         } finally {
             setLoading(false);
         }
@@ -145,71 +152,29 @@ export default function CoordManagementPage() {
         setIsEditing(true);
         setViewMode(false);
         setSelectedCoord(coord);
-        setDraft({
-            coordinator_id: coord.coordinator_id,
-            first_name: coord.first_name,
-            last_name: coord.last_name,
-            username: '',
-            email: coord.email || '',
-            code: coord.code || '',
-            department: coord.department || '',
-            phone: coord.phone || '',
-            role: coord.role || '',
-            status: coord.status
-        });
+        setDraft({ ...coord, username: '' });
         setOpen(true);
     };
 
     const handleViewDetails = (coord: Coordinador) => {
         setViewMode(true);
         setIsEditing(false);
-        setDraft({
-            first_name: coord.first_name,
-            last_name: coord.last_name,
-            username: '',
-            email: coord.email || '',
-            code: coord.code || '',
-            department: coord.department || '',
-            phone: coord.phone || '',
-            role: coord.role || '',
-            status: coord.status,
-            created_at: coord.created_at,
-            updated_at: coord.updated_at
-        });
+        setDraft(coord);
         setOpen(true);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            if (isEditing && selectedCoord) {
-                const response = await fetch(`${API_URL}/coordinators/${selectedCoord.coordinator_id}/`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        first_name: draft.first_name,
-                        last_name: draft.last_name,
-                        email: draft.email,
-                        code: draft.code,
-                        phone: draft.phone,
-                        department: draft.department,
-                        role: draft.role,
-                    }),
-                });
-                if (!response.ok) throw new Error('Error al actualizar');
-                await loadCoordinadores();
-                alert('Actualizado exitosamente');
-            } else {
-                if (!draft.password) { alert('Ingrese contraseña temporal'); return; }
-                const response = await fetch(`${API_URL}/coordinators/`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(draft),
-                });
-                if (!response.ok) throw new Error('Error al crear');
-                await loadCoordinadores();
-                alert(`Creado exitosamente.`);
-            }
+            const method = isEditing ? 'PUT' : 'POST';
+            const url = isEditing ? `${API_URL}/coordinators/${selectedCoord?.coordinator_id}/` : `${API_URL}/coordinators/`;
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(draft),
+            });
+            if (!response.ok) throw new Error('Error en la operación');
+            await loadCoordinadores();
             setOpen(false);
         } catch (err: any) {
             alert(err.message);
@@ -221,12 +186,10 @@ export default function CoordManagementPage() {
         try {
             const response = await fetch(`${API_URL}/coordinators/${selectedCoord.coordinator_id}/`, {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
             });
             if (!response.ok) throw new Error('Error al eliminar');
             await loadCoordinadores();
             setConfirmOpen(false);
-            alert('Desactivado exitosamente');
         } catch (err) {
             alert('Error al eliminar');
         }
@@ -237,8 +200,6 @@ export default function CoordManagementPage() {
         try {
             const response = await fetch(`${API_URL}/coordinators/${selectedCoord.coordinator_id}/reset-password/`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({})
             });
             const data = await response.json();
             setNewPassword(data.new_password);
@@ -252,222 +213,298 @@ export default function CoordManagementPage() {
     if (!isMounted) return null;
 
     return (
-        <div className="flex min-h-screen bg-gray-50">
-            <AdminDashboardPanel 
-                userName="Admin Usuario"
-                activePath={pathname}
-                onNavigate={(path) => router.push(path)}
-                onLogout={() => router.push('/')}
-            />
+        <div className="cm-layout flex-1">
+            {error && (
+                <div className="cm-toast cm-toast--err">
+                    <span>{error}</span>
+                </div>
+            )}
 
-            <div className='container-management-general flex-1'>
-                <div className='user-management-container'>
-                    <div className='user-management-header flex justify-between items-center'>
-                        <div className="title-management">
-                            <h1>Gestión de Coordinadores</h1>
+            <div className="cm-header-main">
+                <div className="cm-eyebrow">
+                    <IconUsersEyebrow />
+                    Administración
+                </div>
+                <div className="cm-title-row">
+                    <IconDirectoryTitle />
+                    <h1>Gestión de Coordinadores</h1>
+                </div>
+                <div className="cm-header-actions" style={{ justifyContent: 'flex-start' }}>
+                    <p className="cm-subtitle-main">
+                        Administra el acceso, roles e información de los coordinadores de la institución.
+                    </p>
+                </div>
+            </div>
+
+            <main className="cm-main-content">
+                <div className="cm-card">
+                    <div className="cm-card-header">
+                        <div className="cm-card-title-group">
+                            <h3>Directorio Institucional</h3>
+                            <p>{totalItems} {totalItems === 1 ? 'registro encontrado' : 'registros encontrados'}</p>
                         </div>
                         
-                        <div className="flex items-center gap-3">
+                        <div className="cm-header-actions">
                             <div className="relative" ref={filterRef}>
-                                <button 
-                                    onClick={() => setFilterMenuOpen(!filterMenuOpen)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all shadow-sm text-sm font-medium"
-                                >
-                                    <Filter size={16} className={includeInactive ? "text-blue-600" : "text-gray-500"} />
-                                    Filtros
+                                <button onClick={() => setFilterMenuOpen(!filterMenuOpen)} className="cm-btn-ghost flex items-center gap-2">
+                                    <Filter size={14} className={includeInactive ? "text-[var(--url-navy)]" : ""} /> Filtros
                                 </button>
-
                                 {filterMenuOpen && (
-                                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in duration-100">
-                                        <div className="p-2 border-b border-gray-100 bg-gray-50">
-                                            <span className="text-[10px] font-bold text-gray-400 uppercase px-2">Estado</span>
+                                    <div className="cm-filter-dropdown">
+                                        <div className="p-2 border-b border-gray-100 bg-[var(--url-surface)]">
+                                            <span className="text-[10px] font-bold text-[var(--url-text-muted)] uppercase px-2 tracking-wider">Estado</span>
                                         </div>
-                                        <button 
-                                            onClick={() => { setIncludeInactive(false); setFilterMenuOpen(false); }}
-                                            className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 transition-colors"
-                                        >
-                                            Solo Activos
-                                            {!includeInactive && <Check size={14} className="text-blue-600" />}
+                                        <button onClick={() => { setIncludeInactive(false); setFilterMenuOpen(false); }}>
+                                            Solo Activos {!includeInactive && <Check size={14} className="text-[var(--url-navy)] float-right" />}
                                         </button>
-                                        <button 
-                                            onClick={() => { setIncludeInactive(true); setFilterMenuOpen(false); }}
-                                            className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 transition-colors"
-                                        >
-                                            Mostrar Todos
-                                            {includeInactive && <Check size={14} className="text-blue-600" />}
+                                        <button onClick={() => { setIncludeInactive(true); setFilterMenuOpen(false); }}>
+                                            Mostrar Todos {includeInactive && <Check size={14} className="text-[var(--url-navy)] float-right" />}
                                         </button>
                                     </div>
                                 )}
                             </div>
 
-                            <button className="add-button-management" onClick={handleOpenAdd}>
-                                <Plus size={20} /> Añadir Coordinador
+                            <div className="cm-search-box">
+                                <IconSearch />
+                                <input 
+                                    type="text" 
+                                    placeholder="Búsqueda por nombre..." 
+                                    className="cm-search-input"
+                                    value={searchTerm}
+                                    onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+                                />
+                                {searchTerm && (
+                                    <button type="button" className="cm-search-clear" onClick={() => setSearchTerm('')} title="Limpiar">
+                                        <IconClose />
+                                    </button>
+                                )}
+                            </div>
+
+                            <button className="cm-btn-primary" onClick={handleOpenAdd}>
+                                <Plus size={16} /> Añadir Coordinador
                             </button>
                         </div>
                     </div>
 
-                    <div className='user-management-content'>
-                        <div className='search-management-section-wrapper'>
-                            <div className='search-section-management'>
-                                <Search size={18} />
-                                <input 
-                                    type="text" 
-                                    placeholder="Buscar por nombre..." 
-                                    className='search-management-input'
-                                    value={searchTerm}
-                                    onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
-                                />
-                            </div>
-                        </div>
-
-                        {loading ? (
-                            <div className="text-center py-10"><div className="spinner"></div><p>Cargando...</p></div>
-                        ) : (
-                            <div className='user-management-table'>
-                                <table className="w-full">
-                                    <thead>
-                                        <tr>
-                                            <th className="text-left pl-6">Nombre Completo</th>
-                                            <th className="text-center">Código</th>
-                                            <th className="text-center">Estado</th>
-                                            <th className="text-center">Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {paginatedCoords.map((c) => (
-                                            <tr key={c.coordinator_id} className={c.status === 'inactive' ? 'opacity-60 bg-gray-50/50' : ''}>
-                                                <td className="text-left pl-6 font-medium">
-                                                    {c.first_name} {c.last_name}
-                                                    {c.status === 'inactive' && <span className="ml-2 text-[10px] bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full uppercase tracking-tighter">Inactivo</span>}
-                                                </td>
-                                                <td className="text-center">{c.code || '-'}</td>
-                                                <td className="text-center">
-                                                    <button 
-                                                        className={`status-toggle-btn ${c.status === 'active' ? 'status-active-btn' : 'status-inactive-btn'}`}
-                                                        onClick={() => toggleStatus(c)}
-                                                    >
-                                                        {c.status === 'active' ? 'Activo' : 'Inactivo'}
-                                                    </button>
-                                                </td>
-                                                <td className="text-center">
-                                                    <div className="action-buttons-table justify-center">
-                                                        <button className="action-btn-circle" title="Info" onClick={() => handleViewDetails(c)}><Info size={18}/></button>
-                                                        <button className="action-btn-circle" title="Editar" onClick={() => handleOpenEdit(c)}><Edit3 size={18}/></button>
-                                                        <button className="action-btn-circle delete" title="Eliminar" onClick={() => { setSelectedCoord(c); setConfirmOpen(true); }}><Trash2 size={18}/></button>
+                    <div className="cm-table-wrap">
+                        <table className="cm-table">
+                            <thead>
+                                <tr>
+                                    <th className="cm-th">Nombre Completo</th>
+                                    <th className="cm-th">Código</th>
+                                    <th className="cm-th">Estado</th>
+                                    <th className="cm-th text-right" style={{ textAlign: 'right' }}>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan={4} style={{ padding: '32px', textAlign: 'center', color: 'var(--url-text-muted)' }}>
+                                            Cargando registros...
+                                        </td>
+                                    </tr>
+                                ) : paginatedCoords.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={4} style={{ padding: '32px', textAlign: 'center', color: 'var(--url-text-muted)' }}>
+                                            No hay resultados para la búsqueda
+                                        </td>
+                                    </tr>
+                                ) : paginatedCoords.map((c) => (
+                                    <tr key={c.coordinator_id} className="cm-tr">
+                                        <td className="cm-td" style={{ fontWeight: 600 }}>{c.first_name} {c.last_name}</td>
+                                        <td className="cm-td">{c.code || '-'}</td>
+                                        <td className="cm-td">
+                                            <button 
+                                                className={`cm-status-pill ${c.status}`}
+                                                onClick={() => toggleStatus(c)}
+                                                title="Cambiar estado"
+                                            >
+                                                {c.status === 'active' ? 'Activo' : 'Inactivo'}
+                                            </button>
+                                        </td>
+                                        <td className="cm-td">
+                                            <div className="cm-action-buttons">
+                                                <button className="cm-btn-ghost !w-8 !h-8 !p-0 flex items-center justify-center" title="Ver Detalles" onClick={() => handleViewDetails(c)}>
+                                                    <Info size={14}/>
+                                                </button>
+                                                <button className="cm-btn-edit" title="Modificar Registro" onClick={() => handleOpenEdit(c)}>
+                                                    <div className="edit-pencil-wrapper">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="edit-pencil-icon">
+                                                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm2.92 2.83H5v-.92l8.06-8.06.92.92L5.92 20.08zM20.71 7.04a1.003 1.003 0 000-1.42L18.37 3.29a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.83z" />
+                                                        </svg>
+                                                        <svg className="edit-writing-line" viewBox="0 0 30 10">
+                                                            <path d="M2 6 Q6 2 10 6 T18 6 T26 6" className="edit-writing-path" />
+                                                        </svg>
                                                     </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
+                                                </button>
+                                                <button className="cm-btn-delete" title="Eliminar Registro" onClick={() => { setSelectedCoord(c); setConfirmOpen(true); }}>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 69 14" className="delete-bin-icon delete-bin-top">
+                                                        <g clipPath="url(#clip-bin-top)">
+                                                            <path fill="currentColor" d="M20.8232 2.62734L19.9948 4.21304C19.8224 4.54309 19.4808 4.75 19.1085 4.75H4.92857C2.20246 4.75 0 6.87266 0 9.5C0 12.1273 2.20246 14.25 4.92857 14.25H64.0714C66.7975 14.25 69 12.1273 69 9.5C69 6.87266 66.7975 4.75 64.0714 4.75H49.8915C49.5192 4.75 49.1776 4.54309 49.0052 4.21305L48.1768 2.62734C47.3451 1.00938 45.6355 0 43.7719 0H25.2281C23.3645 0 21.6549 1.00938 20.8232 2.62734Z" />
+                                                        </g>
+                                                        <defs><clipPath id="clip-bin-top"><rect fill="white" height="14" width="69" /></clipPath></defs>
+                                                    </svg>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 69 57" className="delete-bin-icon delete-bin-bottom">
+                                                        <g clipPath="url(#clip-bin-bottom)">
+                                                            <path fill="currentColor" d="M20.8232 -16.3727L19.9948 -14.787C19.8224 -14.4569 19.4808 -14.25 19.1085 -14.25H4.92857C2.20246 -14.25 0 -12.1273 0 -9.5C0 -6.8727 2.20246 -4.75 4.92857 -4.75H64.0714C66.7975 -4.75 69 -6.8727 69 -9.5C69 -12.1273 66.7975 -14.25 64.0714 -14.25H49.8915C49.5192 -14.25 49.1776 -14.4569 49.0052 -14.787L48.1768 -16.3727C47.3451 -17.9906 45.6355 -19 43.7719 -19H25.2281C23.3645 -19 21.6549 -17.9906 20.8232 -16.3727ZM64.0023 1.0648C64.0397 0.4882 63.5822 0 63.0044 0H5.99556C5.4178 0 4.96025 0.4882 4.99766 1.0648L8.19375 50.3203C8.44018 54.0758 11.6746 57 15.5712 57H53.4288C57.3254 57 60.5598 54.0758 60.8062 50.3203L64.0023 1.0648Z" />
+                                                        </g>
+                                                        <defs><clipPath id="clip-bin-bottom"><rect fill="white" height="57" width="69" /></clipPath></defs>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
-                        {totalItems > 0 && (
+                    <div className="cm-card-footer">
+                        {!loading && totalItems > 0 && (
                             <Pagination 
                                 page={page} 
                                 pageSize={pageSize} 
                                 totalItems={totalItems} 
-                                onPageChange={setPage} 
-                                onPageSizeChange={(s) => { setPageSize(s); setPage(1); }} 
+                                onPageChange={(newPage) => {
+                                    const totalPages = Math.ceil(totalItems / pageSize) || 1;
+                                    if (newPage < 1 || newPage > totalPages) return;
+                                    setPage(newPage);
+                                }} 
+                                onPageSizeChange={(size) => {
+                                    const safeSize = size > 0 ? size : 10;
+                                    setPageSize(safeSize);
+                                    setPage(1);
+                                }} 
                             />
                         )}
                     </div>
                 </div>
-            </div>
+            </main>
 
-            <SidebarDropDown open={open} onClose={() => setOpen(false)} title={viewMode ? "Detalles" : isEditing ? "Editar" : "Nuevo Coordinador"} width={550}>
+            <Modal open={open} title={viewMode ? "Detalles del Coordinador" : isEditing ? "Actualizar Coordinador" : "Nuevo Coordinador"} onClose={() => setOpen(false)} width={viewMode ? 800 : 560}>
                 {viewMode ? (
-                    <div className="details-grid p-4">
-                        <div className="detail-item"><span className="detail-label">Nombre</span><span className="detail-value">{draft.first_name} {draft.last_name}</span></div>
-                        <div className="detail-item"><span className="detail-label">Código</span><span className="detail-value">{draft.code || '-'}</span></div>
-                        <div className="detail-item"><span className="detail-label">Departamento</span><span className="detail-value">{draft.department || '-'}</span></div>
-                        <div className="detail-item"><span className="detail-label">Email</span><span className="detail-value">{draft.email || '-'}</span></div>
-                        <button onClick={() => setOpen(false)} className="btn-modal-secondary w-full mt-5">Cerrar</button>
-                    </div>
-                ) : (
-                    <form className="sdd-form-container px-6 py-4" onSubmit={handleSubmit}>
-                        <div className="mb-8">
-                            <h3 className="text-blue-600 font-bold border-b pb-2 mb-4 uppercase text-xs tracking-wider">Datos Personales</h3>
-                            <div className="sdd-form-grid">
-                                <div className="sdd-field-group">
-                                    <label className="sdd-label">Nombre *</label>
-                                    <input type="text" className="sdd-input-underline" value={draft.first_name || ''} onChange={(e) => setDraft({...draft, first_name: e.target.value})} required />
-                                </div>
-                                <div className="sdd-field-group">
-                                    <label className="sdd-label">Apellido *</label>
-                                    <input type="text" className="sdd-input-underline" value={draft.last_name || ''} onChange={(e) => setDraft({...draft, last_name: e.target.value})} required />
-                                </div>
-                                <div className="sdd-field-group full-width">
-                                    <label className="sdd-label">Nombre de Usuario *</label>
-                                    <input type="text" className="sdd-input-underline" value={draft.username || ''} onChange={(e) => setDraft({...draft, username: e.target.value})} required disabled={isEditing} />
-                                </div>
-                                {!isEditing && (
-                                    <div className="sdd-field-group full-width">
-                                        <label className="sdd-label">Contraseña Temporal *</label>
-                                        <input type="text" className="sdd-input-underline" value={draft.password || ''} onChange={(e) => setDraft({...draft, password: e.target.value})} required placeholder="Asigne una clave inicial" />
+                    <div className="p-6">
+                        <div className="grid grid-cols-2 gap-6 mb-6">
+                            <div className="bg-[var(--url-surface)] p-5 rounded-lg border border-[var(--url-border-soft)]">
+                                <h3 className="text-[11px] font-bold text-[var(--url-text-muted)] uppercase tracking-wider mb-4 border-b border-[var(--url-border-soft)] pb-2 flex items-center gap-2">
+                                    <User size={14}/> Datos Personales
+                                </h3>
+                                <div className="space-y-4">
+                                    <div><span className="block text-[11px] font-bold text-[var(--url-text-faint)] uppercase">Nombre Completo</span><span className="text-[13.5px] text-[var(--url-text-pri)] font-medium">{draft.first_name} {draft.last_name}</span></div>
+                                    <div><span className="block text-[11px] font-bold text-[var(--url-text-faint)] uppercase">Estado</span>
+                                        <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${draft.status === 'active' ? 'bg-[#e6fcf5] text-[#0ca678]' : 'bg-[#fff5f5] text-[#fa5252]'}`}>
+                                            {draft.status === 'active' ? 'Activo' : 'Inactivo'}
+                                        </span>
                                     </div>
-                                )}
+                                </div>
+                            </div>
+                            <div className="bg-[var(--url-surface)] p-5 rounded-lg border border-[var(--url-border-soft)]">
+                                <h3 className="text-[11px] font-bold text-[var(--url-text-muted)] uppercase tracking-wider mb-4 border-b border-[var(--url-border-soft)] pb-2 flex items-center gap-2">
+                                    <BookOpen size={14}/> Info. Académica
+                                </h3>
+                                <div className="space-y-4">
+                                    <div><span className="block text-[11px] font-bold text-[var(--url-text-faint)] uppercase">Código</span><span className="text-[13.5px] text-[var(--url-text-pri)]">{draft.code || 'N/A'}</span></div>
+                                    <div><span className="block text-[11px] font-bold text-[var(--url-text-faint)] uppercase">Departamento</span><span className="text-[13.5px] text-[var(--url-text-pri)]">{draft.department || 'N/A'}</span></div>
+                                    <div><span className="block text-[11px] font-bold text-[var(--url-text-faint)] uppercase">Email</span><span className="text-[13.5px] text-[var(--url-text-pri)]">{draft.email || 'N/A'}</span></div>
+                                </div>
                             </div>
                         </div>
+                        <div className="cm-modal-actions">
+                            <button onClick={() => setOpen(false)} className="cm-btn-primary">Cerrar Detalles</button>
+                        </div>
+                    </div>
+                ) : (
+                    <form className="cm-form px-6 py-4" onSubmit={handleSubmit}>
+                        <div className="cm-form-grid">
+                            <div className="cm-form-field">
+                                <label className="cm-form-label">Nombres *</label>
+                                <input type="text" className="cm-form-input" value={draft.first_name || ''} onChange={(e) => setDraft({...draft, first_name: e.target.value})} required />
+                            </div>
+                            <div className="cm-form-field">
+                                <label className="cm-form-label">Apellidos *</label>
+                                <input type="text" className="cm-form-input" value={draft.last_name || ''} onChange={(e) => setDraft({...draft, last_name: e.target.value})} required />
+                            </div>
+                            
+                            <div className="cm-form-field" style={{ gridColumn: 'span 2' }}>
+                                <label className="cm-form-label">Nombre de Usuario *</label>
+                                <input type="text" className="cm-form-input" value={draft.username || ''} onChange={(e) => setDraft({...draft, username: e.target.value})} required disabled={isEditing} />
+                            </div>
 
-                        <div className="mb-4">
-                            <h3 className="text-blue-600 font-bold border-b pb-2 mb-4 uppercase text-xs tracking-wider">Información Académica y Contacto</h3>
-                            <div className="sdd-form-grid">
-                                <div className="sdd-field-group full-width">
-                                    <label className="sdd-label">Correo Electrónico</label>
-                                    <input type="email" className="sdd-input-underline" value={draft.email || ''} onChange={(e) => setDraft({...draft, email: e.target.value})} />
+                            {!isEditing && (
+                                <div className="cm-form-field" style={{ gridColumn: 'span 2' }}>
+                                    <label className="cm-form-label">Contraseña Temporal *</label>
+                                    <input type="text" className="cm-form-input" value={draft.password || ''} onChange={(e) => setDraft({...draft, password: e.target.value})} required placeholder="Asigne una clave inicial" />
                                 </div>
-                                <div className="sdd-field-group">
-                                    <label className="sdd-label">Código</label>
-                                    <input type="text" className="sdd-input-underline" value={draft.code || ''} onChange={(e) => setDraft({...draft, code: e.target.value})} />
-                                </div>
-                                <div className="sdd-field-group">
-                                    <label className="sdd-label">Teléfono</label>
-                                    <input type="text" className="sdd-input-underline" value={draft.phone || ''} onChange={(e) => setDraft({...draft, phone: e.target.value})} />
-                                </div>
-                                <div className="sdd-field-group">
-                                    <label className="sdd-label">Departamento</label>
-                                    <input type="text" className="sdd-input-underline" value={draft.department || ''} onChange={(e) => setDraft({...draft, department: e.target.value})} />
-                                </div>
-                                <div className="sdd-field-group">
-                                    <label className="sdd-label">Rol</label>
-                                    <input type="text" className="sdd-input-underline" value={draft.role || ''} onChange={(e) => setDraft({...draft, role: e.target.value})} />
-                                </div>
+                            )}
+
+                            <div className="cm-form-field">
+                                <label className="cm-form-label">Código</label>
+                                <input type="text" className="cm-form-input" value={draft.code || ''} onChange={(e) => setDraft({...draft, code: e.target.value})} />
+                            </div>
+                            <div className="cm-form-field">
+                                <label className="cm-form-label">Correo Institucional</label>
+                                <input type="email" className="cm-form-input" value={draft.email || ''} onChange={(e) => setDraft({...draft, email: e.target.value})} />
+                            </div>
+                            <div className="cm-form-field">
+                                <label className="cm-form-label">Departamento</label>
+                                <input type="text" className="cm-form-input" value={draft.department || ''} onChange={(e) => setDraft({...draft, department: e.target.value})} />
+                            </div>
+                            <div className="cm-form-field">
+                                <label className="cm-form-label">Rol</label>
+                                <input type="text" className="cm-form-input" value={draft.role || ''} onChange={(e) => setDraft({...draft, role: e.target.value})} />
                             </div>
                         </div>
 
                         {isEditing && (
-                            <div className="security-box-draft mt-6">
-                                <button type="button" className="btn-reset-password" onClick={handleResetPassword}>
-                                    <RotateCcw size={14} /> Resetear Seguridad
+                            <div className="bg-red-50 p-4 rounded-lg border border-red-100 flex items-center justify-between mb-2 mt-4">
+                                <div className="flex items-center gap-3">
+                                    <ShieldAlert size={18} className="text-red-500" />
+                                    <div>
+                                        <p className="text-[12px] font-bold text-red-800">Seguridad de la Cuenta</p>
+                                        <p className="text-[11px] text-red-600">Restablece la contraseña si el usuario perdió acceso.</p>
+                                    </div>
+                                </div>
+                                <button type="button" className="cm-btn-ghost !text-red-600 !border-red-200 hover:!bg-red-100 flex items-center gap-2" onClick={handleResetPassword}>
+                                    <RotateCcw size={14} /> Resetear Clave
                                 </button>
                             </div>
                         )}
-                        <div className="modal-btn-group mt-8">
-                            <button type="button" onClick={() => setOpen(false)} className="btn-modal-secondary">Cancelar</button>
-                            <button type="submit" className="add-button-management flex-1 justify-center">Guardar Cambios</button>
+                        <div className="cm-modal-actions mt-4">
+                            <button type="button" onClick={() => setOpen(false)} className="cm-btn-ghost">Cancelar</button>
+                            <button type="submit" className="cm-btn-primary">Guardar Cambios</button>
                         </div>
                     </form>
                 )}
-            </SidebarDropDown>
+            </Modal>
 
-            <Modal open={confirmOpen} title="Desactivar" onClose={() => setConfirmOpen(false)} width={400}>
-                <div className="text-center p-5">
-                    <AlertTriangle size={40} className="mx-auto mb-4 text-orange-500" />
-                    <p>¿Desactivar a <strong>{selectedCoord?.first_name}</strong>?</p>
-                    <div className="modal-btn-group mt-5">
-                        <button onClick={() => setConfirmOpen(false)} className="btn-modal-secondary">No, volver</button>
-                        <button onClick={handleDelete} className="btn-modal-danger">Sí, desactivar</button>
+            <Modal open={confirmOpen} title="Confirmar Baja de Registro" onClose={() => setConfirmOpen(false)} width={480}>
+                <div className="cm-confirm-content">
+                    <p className="cm-confirm-text">
+                        ¿Confirma que desea dar de baja el registro del coordinador{' '}
+                        <span style={{ fontWeight: 700, color: 'var(--url-navy)' }}>{selectedCoord?.first_name} {selectedCoord?.last_name}</span>?
+                        Esta acción desactivará su cuenta.
+                    </p>
+                    {selectedCoord && (
+                        <div className="cm-confirm-meta">
+                            <div><strong>Código:</strong> {selectedCoord.code || 'N/A'}</div>
+                            <div><strong>Correo:</strong> {selectedCoord.email || 'N/A'}</div>
+                        </div>
+                    )}
+                    <div className="cm-modal-actions">
+                        <button className="cm-btn-ghost" onClick={() => setConfirmOpen(false)}>Cancelar</button>
+                        <button className="cm-btn-danger" onClick={handleDelete}>Confirmar Baja</button>
                     </div>
                 </div>
             </Modal>
 
             <Modal open={resetPasswordConfirm} title="Clave Generada" onClose={() => setResetPasswordConfirm(false)} width={400}>
-                <div className="text-center p-5">
-                    <p className="mb-3">Nueva clave:</p>
-                    <div className="bg-gray-100 p-3 rounded font-mono text-lg font-bold text-blue-600">{newPassword}</div>
-                    <button onClick={() => setResetPasswordConfirm(false)} className="add-button-management w-full mt-4">Cerrar</button>
+                <div className="px-6 py-6 text-center">
+                    <p className="text-[13px] text-[var(--url-text-sec)] mb-3">Se ha generado una nueva contraseña temporal:</p>
+                    <div className="bg-[var(--url-surface)] border border-[var(--url-border)] p-4 rounded-lg font-mono text-xl tracking-widest font-bold text-[var(--url-navy)] mb-6">
+                        {newPassword}
+                    </div>
+                    <p className="text-[11.5px] text-[var(--url-text-muted)] mb-6">Por favor, copia esta clave y compártela de forma segura.</p>
+                    <button onClick={() => setResetPasswordConfirm(false)} className="cm-btn-primary w-full">Cerrar</button>
                 </div>
             </Modal>
         </div>

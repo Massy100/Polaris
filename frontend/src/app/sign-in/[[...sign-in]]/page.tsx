@@ -8,9 +8,9 @@ import './sign-in.css'
 
 const clerkAppearance = {
   variables: {
-    colorPrimary: '#0D1F4E',
-    colorText: '#0D1F4E',
-    colorTextSecondary: '#6E80A0',
+    colorPrimary: '#1c415c',
+    colorText: '#101b23',
+    colorTextSecondary: '#567080',
     colorBackground: 'transparent',
     fontFamily: '"DM Sans", system-ui, sans-serif',
     borderRadius: '10px',
@@ -56,15 +56,15 @@ export default function SignInPage() {
 
           <div className="login-left-inner">
             <span className="login-eyebrow">
-              Sistema De Gestión Académica • Universidad Rafael Landívar
+              Sistema De Gestión Académica &nbsp;·&nbsp; Universidad Rafael Landívar
             </span>
 
             <div className="login-logo-wrap">
               <Image
                 src="/login-logo.png"
                 alt="Logo Universidad Rafael Landívar"
-                width={240}
-                height={240}
+                width={220}
+                height={220}
                 priority
               />
             </div>
@@ -72,19 +72,27 @@ export default function SignInPage() {
             <div className="login-divider" />
 
             <h2 className="login-tagline">
-              Donde la <em>inteligencia</em><br />
-              y el <em>corazón</em> se forman<br />
-              para servir al mundo
+              El conocimiento<br />
+              no espera.<br />
+              <em>Tú tampoco.</em>
             </h2>
 
             <p className="login-sub">
-              Tradición jesuita de más de seis décadas formando líderes con valores, rigor académico y compromiso con Guatemala.
+              Accede a la plataforma académica de la comunidad landivariana y continúa construyendo el futuro desde hoy.
             </p>
 
             <div className="login-stats-carousel">
               <div className="login-stat-slide">
-                <span className="login-stat-num">+40</span>
-                <span className="login-stat-label">CARRERAS DE PREGRADO</span>
+                <span className="login-stat-num">+1,000</span>
+                <span className="login-stat-label">Catedráticos activos</span>
+              </div>
+              <div className="login-stat-slide">
+                <span className="login-stat-num">+20,000</span>
+                <span className="login-stat-label">Estudiantes formados</span>
+              </div>
+              <div className="login-stat-slide">
+                <span className="login-stat-num">75+</span>
+                <span className="login-stat-label">Años de excelencia</span>
               </div>
             </div>
           </div>
@@ -93,8 +101,7 @@ export default function SignInPage() {
         <div className="login-right">
           <div className="login-clerk-wrap">
             <SignIn
-              routing="path"
-              path="/sign-in"
+              routing="hash"
               signUpUrl="/sign-up"
               fallbackRedirectUrl="/top-of-page"
               appearance={clerkAppearance}

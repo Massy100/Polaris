@@ -47,7 +47,7 @@
   background: var(--url-white);
   border: 1px solid var(--url-border-soft);
   border-radius: var(--url-radius-lg);
-  box-shadow: var(--url-shadow-md);
+  box-shadow: var(--url-shadow-sm);
   display: flex;
   flex-direction: column;
 }
@@ -339,47 +339,27 @@
   border-color: var(--url-danger-bd);
 }
 
-/* ────────────────────────────────────────────────────────
-   NUEVO ESTADO VACÍO (INBOX ZERO)
-   ──────────────────────────────────────────────────────── */
 .nc-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80px 32px;
+  padding: 100px 32px;
   text-align: center;
+  gap: 16px;
   background: var(--url-white);
 }
 
-.nc-empty-icon {
-  width: 72px;
-  height: 72px;
-  background: var(--url-surface);
-  border: 1px solid var(--url-border-soft);
+.nc-empty svg {
   color: var(--url-text-muted);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 20px;
-  box-shadow: inset 0 2px 4px rgba(13,31,78,0.04);
-}
-
-.nc-empty h3 {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--url-navy);
-  margin: 0 0 8px;
-  letter-spacing: -0.01em;
+  opacity: 0.4;
 }
 
 .nc-empty p {
   color: var(--url-text-sec);
   font-size: 14.5px;
+  font-weight: 500;
   margin: 0;
-  max-width: 320px;
-  line-height: 1.5;
 }
 
 @media (max-width: 640px) {

@@ -23,43 +23,49 @@ const AddCategoryModal = ({ onClose, onAdd }: AddCategoryModalProps) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal-box">
-        <div className="modal-header">
+    <div className="cat-modal-overlay" onClick={handleOverlayClick}>
+      <div className="cat-modal-box">
+        <div className="cat-modal-header">
           <div>
-            <p className="modal-title">Agregar Nueva Categoría</p>
-            <p className="modal-subtitle">Crea un nuevo criterio de evaluación docente</p>
+            <h2 className="cat-modal-title">Agregar Nueva Categoría</h2>
+            <p className="cat-modal-subtitle">Crea un nuevo criterio de evaluación docente</p>
           </div>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <button className="cat-modal-close" onClick={onClose}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
         </div>
 
-        <div className="modal-body">
-          <div className="modal-field">
-            <label className="modal-label">Nombre de la categoría</label>
+        <div className="cat-modal-body">
+          <div className="cat-modal-field">
+            <label className="cat-modal-label">Nombre de la categoría *</label>
             <input
               type="text"
-              className="modal-input"
+              className="cat-modal-input"
               placeholder="Ej: Publicaciones científicas"
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoFocus
             />
           </div>
-          <div className="modal-field">
-            <label className="modal-label">Descripción</label>
+          <div className="cat-modal-field">
+            <label className="cat-modal-label">Descripción</label>
             <textarea
-              className="modal-textarea"
-              placeholder="Describe el criterio de evaluación"
+              className="cat-modal-textarea"
+              placeholder="Describe en qué consiste este criterio de evaluación"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
         </div>
 
-        <div className="modal-footer">
-          <button className="btn-cancel" onClick={onClose}>Cancelar</button>
-          <button className="btn-confirm" onClick={handleAdd} disabled={!name.trim()}>
-            Agregar
+        <div className="cat-modal-footer">
+          <button className="cat-btn-ghost" onClick={onClose}>Cancelar</button>
+          <button 
+            className={`cat-btn-primary ${!name.trim() ? 'disabled' : ''}`} 
+            onClick={handleAdd} 
+            disabled={!name.trim()}
+          >
+            Agregar Categoría
           </button>
         </div>
       </div>

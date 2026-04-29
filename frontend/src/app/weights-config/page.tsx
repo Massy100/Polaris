@@ -73,7 +73,6 @@ export default function WeightsConfig() {
     try {
       setIsLoading(true);
       setError(null);
-
       const response = await fetch(`${API_URL}/assessment-360/weight-configs/active/`);
 
       if (!response.ok) {
@@ -106,7 +105,6 @@ export default function WeightsConfig() {
         setNextId(1);
       }
     } catch (err) {
-      console.error('Error loading criteria:', err);
       setError(err instanceof Error ? err.message : 'Error al cargar la configuración');
       setActiveConfigId(null);
     } finally {
@@ -159,21 +157,11 @@ export default function WeightsConfig() {
 
   const handleSave = async () => {
     if (!isValid || isSaving) return;
-
     setIsSaving(true);
     setError(null);
 
     try {
       let configId = activeConfigId;
-
-      const buildErrorMessage = async (response: Response): Promise<string> => {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          return JSON.stringify(data);
-        }
-        return `Error ${response.status}: ${response.statusText}`;
-      };
 
       if (!configId) {
         const createResponse = await fetch(`${API_URL}/assessment-360/weight-configs/`, {
@@ -187,10 +175,7 @@ export default function WeightsConfig() {
           }),
         });
 
-        if (!createResponse.ok) {
-          throw new Error(await buildErrorMessage(createResponse));
-        }
-
+        if (!createResponse.ok) throw new Error('Error al crear la configuración');
         const newConfig = await createResponse.json();
         setActiveConfigId(newConfig.weight_config_id);
         addToast("Configuración guardada y activada correctamente.", "success");
@@ -207,16 +192,11 @@ export default function WeightsConfig() {
           }),
         });
 
-        if (!updateResponse.ok) {
-          const errorData = await updateResponse.json();
-          throw new Error(JSON.stringify(errorData));
-        }
-
+        if (!updateResponse.ok) throw new Error('Error al actualizar la configuración');
         addToast("Configuración guardada y activada correctamente.", "success");
         await loadCriteria();
       }
     } catch (err) {
-      console.error('Error saving criteria:', err);
       setError(err instanceof Error ? err.message : 'Error al guardar la configuración');
       addToast("Error al guardar. Intenta de nuevo.", "error");
     } finally {
@@ -229,9 +209,7 @@ export default function WeightsConfig() {
       addToast("La suma de porcentajes debe ser 100% antes de crear una nueva configuración.", "warning");
       return;
     }
-
     if (isSaving) return;
-
     setIsSaving(true);
     setError(null);
 
@@ -247,17 +225,12 @@ export default function WeightsConfig() {
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(JSON.stringify(errorData));
-      }
-
+      if (!response.ok) throw new Error('Error al crear la configuración');
       const newConfig = await response.json();
       setActiveConfigId(newConfig.weight_config_id);
       addToast("Nueva configuración creada y activada correctamente.", "success");
       await loadCriteria();
     } catch (err) {
-      console.error('Error creating config:', err);
       setError(err instanceof Error ? err.message : 'Error al crear la configuración');
       addToast("Error al crear la configuración.", "error");
     } finally {
@@ -267,16 +240,14 @@ export default function WeightsConfig() {
 
   if (!isMounted || isLoading) {
     return (
-      <div className="weights-page bg-gray-50 min-h-screen flex-1">
-        <div className="weights-inner">
-          <div className="weights-loading">Cargando configuración...</div>
-        </div>
+      <div className="wc-layout">
+        <div className="wc-loading">Cargando configuración...</div>
       </div>
     );
   }
 
   return (
-    <div className="weights-page bg-gray-50 min-h-screen flex-1 relative">
+    <div className="wc-layout">
       <div className="toast-container">
         {toasts.map((t) => (
           <div key={t.id} className={`toast toast--${t.type}`}>
@@ -311,108 +282,104 @@ export default function WeightsConfig() {
         ))}
       </div>
 
-      <div className="weights-inner">
-        {error && (
-          <div className="error-message" style={{
-            backgroundColor: 'var(--url-danger-bg)',
-            color: 'var(--url-danger)',
-            padding: '1rem',
-            borderRadius: 'var(--url-radius-sm)',
-            marginBottom: '1rem',
-            border: '1px solid var(--url-danger-bd)'
-          }}>
-            <strong>Error:</strong> {error}
-            <button
-              onClick={() => setError(null)}
-              style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer', color: 'inherit' }}
-            >
-              ✕
-            </button>
-          </div>
-        )}
+      <div className="wc-header">
+        <div className="wc-eyebrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          ADMINISTRACIÓN / EVALUACIONES
+        </div>
+        <h1 className="wc-title">Sistema de Evaluación Docente</h1>
+        <p className="wc-subtitle">Módulo de administración para configurar los criterios de evaluación y fórmulas del sistema.</p>
+      </div>
 
-        <div className="weights-page-header">
-          <h1 className="weights-title">Sistema de Evaluación Docente</h1>
-          <p className="weights-subtitle">Módulo de administración para configurar los criterios de evaluación</p>
+      {error && (
+        <div className="wc-danger-zone">
+          <div className="wc-danger-info">
+            <h3>Error del Sistema</h3>
+            <p>{error}</p>
+          </div>
+          <button className="wc-btn-ghost" onClick={() => setError(null)}>Cerrar</button>
+        </div>
+      )}
+
+      <div className="wc-panel">
+        <div className="wc-panel-header">
+          <div className="wc-panel-title">
+            <div className="wc-card-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M3 9h18" />
+                <path d="M9 21V9" />
+              </svg>
+            </div>
+            <div>
+              <h2>Configuración de Pesos y Fórmulas</h2>
+              <p>Define los porcentajes que componen la evaluación final del docente</p>
+            </div>
+          </div>
+          {activeConfigId && (
+            <span className="wc-status-badge success">Configuración Activa</span>
+          )}
         </div>
 
-        <div className="weights-card header-card">
-          <div className="header-card-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <path d="M3 9h18" />
-              <path d="M9 21V9" />
-            </svg>
-          </div>
-          <div>
-            <p className="header-card-title">Configuración de Pesos y Fórmulas</p>
-            <p className="header-card-desc">Define los porcentajes que componen la evaluación final del docente</p>
-            {activeConfigId && (
-              <p className="config-status" style={{ fontSize: '13px', color: 'var(--url-success)', marginTop: '6px', fontWeight: 600 }}>
-                ✓ Configuración activa cargada
-              </p>
+        <div className="wc-summary-section">
+          <p className="wc-summary-text">La suma de los porcentajes debe ser exactamente 100%. Porcentaje actual configurado:</p>
+          <div className="wc-summary-value-wrapper">
+            <span className={`wc-summary-value ${isValid ? "correct" : "incorrect"}`}>
+              {totalPercentage}%
+            </span>
+            {!isValid && (
+              <span className="wc-summary-hint">
+                {diff > 0 ? `(Falta ${diff}%)` : `(Sobra ${Math.abs(diff)}%)`}
+              </span>
             )}
           </div>
         </div>
 
-        <div className="weights-card summary-card">
-          <p className="summary-text">La suma de los porcentajes debe ser 100%. Actualmente:</p>
-          <span className={`summary-value ${isValid ? "correct" : "incorrect"}`}>
-            {totalPercentage}%
-          </span>
-          {!isValid && (
-            <p className="summary-hint">
-              {diff > 0 ? `(Falta ${diff}%)` : `(Sobra ${Math.abs(diff)}%)`}
-            </p>
-          )}
-        </div>
-
-        <div className="weights-card criteria-card">
-          <div className="criteria-top">
-            <div>
-              <p className="criteria-title">Criterios de Evaluación</p>
-              <p className="criteria-desc">Ajusta los porcentajes usando los controles deslizantes o ingresando valores directamente</p>
+        <div className="wc-panel-body">
+          <div className="wc-criteria-top">
+            <div className="wc-category-label">
+              <div className="wc-category-dot" />
+              Criterios de Evaluación
             </div>
-            <button className="btn-add" onClick={() => setShowModal(true)}>
-              + Agregar Categoría
+            <button className="wc-btn-ghost" onClick={() => setShowModal(true)}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Agregar Categoría
             </button>
           </div>
 
-          {criteria.length === 0 ? (
-            <div className="empty-state" style={{ textAlign: 'center', padding: '3rem', color: 'var(--url-text-muted)' }}>
-              No hay criterios de evaluación. Agrega uno para comenzar.
-            </div>
-          ) : (
-            criteria.map((criterion) => {
-              const totalOthers = criteria
-                .filter((c) => c.criterion_id !== criterion.criterion_id)
-                .reduce((acc, c) => acc + c.percentage, 0);
-              return (
-                <CriterionItem
-                  key={criterion.criterion_id}
-                  id={criterion.criterion_id}        
-                  name={criterion.name}
-                  description={criterion.description}
-                  percentage={criterion.percentage}
-                  totalOthers={totalOthers}
-                  onPercentageChange={handlePercentageChange}
-                  onDelete={handleDelete}
-                />
-              );
-            })
-          )}
+          <div className="wc-criteria-list">
+            {criteria.length === 0 ? (
+              <div className="wc-empty-state">No hay criterios de evaluación configurados. Agrega uno para comenzar.</div>
+            ) : (
+              criteria.map((criterion) => {
+                const totalOthers = criteria
+                  .filter((c) => c.criterion_id !== criterion.criterion_id)
+                  .reduce((acc, c) => acc + c.percentage, 0);
+                return (
+                  <CriterionItem
+                    key={criterion.criterion_id}
+                    id={criterion.criterion_id}        
+                    name={criterion.name}
+                    description={criterion.description}
+                    percentage={criterion.percentage}
+                    totalOthers={totalOthers}
+                    onPercentageChange={handlePercentageChange}
+                    onDelete={handleDelete}
+                  />
+                );
+              })
+            )}
+          </div>
         </div>
 
-        {criteria.length > 0 && (
-          <>
-            <VisualDistribution criteria={criteria.map(c => ({ ...c, id: c.criterion_id }))} />
-            <CalcExample criteria={criteria.map(c => ({ ...c, id: c.criterion_id }))} />
-          </>
-        )}
-
-        <div className="weights-footer">
-          <div className="footer-left">
-            <button className="btn-reset" onClick={handleResetRequest}>
+        <div className="wc-panel-footer">
+          <div className="wc-footer-left">
+            <button className="wc-btn-ghost" onClick={handleResetRequest}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
                 <path d="M3 3v5h5" />
@@ -420,68 +387,40 @@ export default function WeightsConfig() {
               Restablecer
             </button>
             {!activeConfigId && criteria.length > 0 && isValid && (
-              <button className="btn-create" onClick={handleCreateNew} disabled={isSaving}>
-                {isSaving ? 'Creando...' : 'Crear Nueva Configuración'}
+              <button className="wc-btn-ghost" onClick={handleCreateNew} disabled={isSaving}>
+                {isSaving ? 'Procesando...' : 'Crear Nueva Configuración'}
               </button>
             )}
           </div>
           <button
-            className={`btn-save ${isValid && !isSaving ? "enabled" : ""}`}
+            className={`wc-btn-primary ${isValid && !isSaving ? "enabled" : "disabled"}`}
             onClick={handleSave}
             disabled={!isValid || isSaving}
           >
-            {isSaving ? (
-              <>
-                <svg className="spin" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                </svg>
-                Guardando...
-              </>
-            ) : (
-              <>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                  <polyline points="17 21 17 13 7 13 7 21" />
-                  <polyline points="7 3 7 8 15 8" />
-                </svg>
-                Guardar Configuración
-              </>
-            )}
+            {isSaving ? 'Guardando...' : 'Guardar Configuración'}
           </button>
         </div>
       </div>
 
-      {showResetConfirm && (
-        <Modal
-          open={showResetConfirm}
-          title="Revertir configuración"
-          onClose={() => setShowResetConfirm(false)}
-          width={480}
-        >
-          <div className="modal-content">
-            <p className="modal-text">
-              Esta acción restablecerá todos los criterios y porcentajes a sus <strong>valores predeterminados</strong>.
-              Los cambios no guardados se perderán.
-            </p>
-            <div className="modal-actions">
-              <button
-                className="modal-btn modal-btn-ghost"
-                type="button"
-                onClick={() => setShowResetConfirm(false)}
-              >
-                Cancelar
-              </button>
-              <button
-                className="modal-btn modal-btn-danger"
-                type="button"
-                onClick={handleResetConfirm}
-              >
-                Sí, restablecer
-              </button>
-            </div>
-          </div>
-        </Modal>
+      {criteria.length > 0 && (
+        <div className="wc-visuals-grid">
+          <VisualDistribution criteria={criteria.map(c => ({ ...c, id: c.criterion_id }))} />
+          <CalcExample criteria={criteria.map(c => ({ ...c, id: c.criterion_id }))} />
+        </div>
       )}
+
+      <Modal open={showResetConfirm} title="Revertir configuración" onClose={() => setShowResetConfirm(false)} width={480}>
+        <div className="wc-confirm-content">
+          <p className="wc-confirm-text">
+            Esta acción restablecerá todos los criterios y porcentajes a sus <strong>valores predeterminados</strong>.
+            Cualquier cambio no guardado se perderá irremediablemente.
+          </p>
+          <div className="wc-modal-actions">
+            <button className="wc-btn-ghost" type="button" onClick={() => setShowResetConfirm(false)}>Cancelar</button>
+            <button className="wc-btn-danger" type="button" onClick={handleResetConfirm}>Sí, restablecer</button>
+          </div>
+        </div>
+      </Modal>
 
       {showModal && (
         <AddCategoryModal

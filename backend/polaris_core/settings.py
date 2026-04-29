@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'corsheaders', 
     'dj_database_url',
     'apps.pensum',
+    'apps.profile',
 ]
 
 MIDDLEWARE = [
