@@ -11,6 +11,7 @@ type Coordinador = {
     first_name: string;
     last_name: string;
     email?: string;
+    username?: string;
     code?: string;
     department?: string;
     phone?: string;
@@ -18,6 +19,12 @@ type Coordinador = {
     status: string;
     created_at?: string;
     updated_at?: string;
+    user?: {  
+        user_id: number;
+        username: string;
+        email: string;
+        status: string;
+    };
 };
 
 const API_URL = 'http://localhost:8000/api/accounts';
@@ -152,14 +159,23 @@ export default function CoordManagementPage() {
         setIsEditing(true);
         setViewMode(false);
         setSelectedCoord(coord);
-        setDraft({ ...coord, username: '' });
+        setDraft({ 
+            ...coord, 
+            username: coord.username || '',    
+            email: coord.email || '',          
+            password: ''                       
+        });
         setOpen(true);
     };
 
     const handleViewDetails = (coord: Coordinador) => {
         setViewMode(true);
         setIsEditing(false);
-        setDraft(coord);
+        setDraft({
+            ...coord,
+            username: coord.username || '',
+            email: coord.email || ''
+        });
         setOpen(true);
     };
 
@@ -430,10 +446,18 @@ export default function CoordManagementPage() {
                                 <input type="text" className="cm-form-input" value={draft.username || ''} onChange={(e) => setDraft({...draft, username: e.target.value})} required disabled={isEditing} />
                             </div>
 
-                            {!isEditing && (
+                            {isEditing && (
                                 <div className="cm-form-field" style={{ gridColumn: 'span 2' }}>
-                                    <label className="cm-form-label">Contraseña Temporal *</label>
-                                    <input type="text" className="cm-form-input" value={draft.password || ''} onChange={(e) => setDraft({...draft, password: e.target.value})} required placeholder="Asigne una clave inicial" />
+                                    <label className="cm-form-label">Nombre de Usuario</label>
+                                    <input 
+                                        type="text" 
+                                        className="cm-form-input" 
+                                        value={draft.username || ''} 
+                                        disabled  
+                                    />
+                                    <small className="text-[11px] text-[var(--url-text-muted)]">
+                                        El nombre de usuario no se puede modificar
+                                    </small>
                                 </div>
                             )}
 
