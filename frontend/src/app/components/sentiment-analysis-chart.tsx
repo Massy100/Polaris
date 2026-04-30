@@ -19,8 +19,6 @@ export type SentimentChartItem = {
     subject: string;
     positiveReal: number;
     negativeReal: number;
-    falsePositive: number;
-    falseNegative: number;
 };
 
 type SentimentAnalysisChartProps = {
@@ -42,8 +40,6 @@ type CustomTooltipProps = {
 const BAR_COLORS = {
     positiveReal: '#3B82F6',
     negativeReal: '#FBBF24',
-    falsePositive: '#60A5FA',
-    falseNegative: '#FCD34D',
 };
 
 // Custom tooltip component for the chart to display detailed information on hover
@@ -62,16 +58,10 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
         <div className="sentiment-chart-tooltip">
             <p className="sentiment-chart-tooltip-title">{label}</p>
             <p className="sentiment-chart-tooltip-item positive-real">
-                Positivos Reales : {currentData.positiveReal}
+                Positivos : {currentData.positiveReal}
             </p>
             <p className="sentiment-chart-tooltip-item negative-real">
-                Negativos Reales : {currentData.negativeReal}
-            </p>
-            <p className="sentiment-chart-tooltip-item false-positive">
-                Falsos Positivos : {currentData.falsePositive}
-            </p>
-            <p className="sentiment-chart-tooltip-item false-negative">
-                Falsos Negativos : {currentData.falseNegative}
+                Negativos : {currentData.negativeReal}
             </p>
         </div>
     );
@@ -134,29 +124,15 @@ export default function SentimentAnalysisChart({
 
                         <Bar
                             dataKey="positiveReal"
-                            name="Positivos Reales"
+                            name="Positivos"
                             fill={BAR_COLORS.positiveReal}
                             radius={[0, 0, 0, 0]}
                         />
 
                         <Bar
                             dataKey="negativeReal"
-                            name="Negativos Reales"
+                            name="Negativos"
                             fill={BAR_COLORS.negativeReal}
-                            radius={[0, 0, 0, 0]}
-                        />
-
-                        <Bar
-                            dataKey="falsePositive"
-                            name="Falsos Positivos"
-                            fill={BAR_COLORS.falsePositive}
-                            radius={[0, 0, 0, 0]}
-                        />
-
-                        <Bar
-                            dataKey="falseNegative"
-                            name="Falsos Negativos"
-                            fill={BAR_COLORS.falseNegative}
                             radius={[0, 0, 0, 0]}
                         />
                     </BarChart>
