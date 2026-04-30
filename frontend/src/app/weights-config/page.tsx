@@ -130,8 +130,36 @@ export default function WeightsConfig() {
     setCriteria((prev) => prev.filter((c) => c.criterion_id !== id));
   };
 
+  const normalizeText = (value: string) =>
+  value
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ");
+
   const handleAddCategory = (name: string, description: string) => {
-    setCriteria((prev) => [...prev, { criterion_id: nextId, name, description, percentage: 0 }]);
+    const categoryName = name.trim();
+
+    const alreadyExists = criteria.some(
+      (c) => normalizeText(c.name) === normalizeText(categoryName)
+    );
+
+    if (alreadyExists) {
+      addToast("Ya existe una categoría con ese nombre.", "warning");
+      return;
+    }
+
+    setCriteria((prev) => [
+      ...prev,
+      {
+        criterion_id: nextId,
+        name: categoryName,
+        description,
+        percentage: 0,
+      },
+    ]);
+
     setNextId((prev) => prev + 1);
   };
 

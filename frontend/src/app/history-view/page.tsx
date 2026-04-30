@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import "./history-view.css";
+import Pagination from "../components/pagination";
 
 export interface HistoricalRecord {
   id: string;
@@ -187,15 +188,11 @@ export default function HistoryView() {
   const [errorProfessors, setErrorProfessors] = useState<string | null>(null);
   const [errorCourses, setErrorCourses] = useState<string | null>(null);
 
-  const [editingRecord, setEditingRecord] = useState<HistoricalRecord | null>(null);
-  const [editForm, setEditForm] = useState<EditFormData>({
-    term: "",
-    studentsTotal: "",
-    studentsPassed: "",
-    studentsFailed: "",
-    hours: "",
-    approvalRate: "",
-  });
+  const [professorsPage, setProfessorsPage] = useState(1);
+  const [professorsPageSize, setProfessorsPageSize] = useState(10);
+
+  const [coursesPage, setCoursesPage] = useState(1);
+  const [coursesPageSize, setCoursesPageSize] = useState(10);
 
   const handleTabSwitch = (tab: "professors" | "courses") => {
     setActiveTab(tab);
@@ -284,6 +281,16 @@ export default function HistoryView() {
   const isLoading = activeTab === "professors" ? loadingProfessors : loadingCourses;
   const activeError = activeTab === "professors" ? errorProfessors : errorCourses;
 
+  const paginatedProfessors = useMemo(() => {
+    const start = (professorsPage - 1) * professorsPageSize;
+    return professors.slice(start, start + professorsPageSize);
+  }, [professors, professorsPage, professorsPageSize]);
+
+  const paginatedCourses = useMemo(() => {
+    const start = (coursesPage - 1) * coursesPageSize;
+    return courses.slice(start, start + coursesPageSize);
+  }, [courses, coursesPage, coursesPageSize]);
+
   return (
     <div className="hv-layout flex-1">
       <div className="hv-header-main">
@@ -347,42 +354,83 @@ export default function HistoryView() {
           )}
 
           {!isLoading && !activeError && (
-            <div className="hv-list">
-              {activeTab === "professors" &&
-                professors.map((prof) => (
-                  <div
-                    key={prof.id}
-                    className={`hv-list-card ${selectedProfId === prof.id ? "selected" : ""}`}
-                    onClick={() => setSelectedProfId(prof.id)}
-                  >
-                    <h3>{prof.name}</h3>
-                    <p>{prof.department}</p>
-                    <div className="hv-badges">
-                      <span className="hv-badge-gray">
-                        <IconCourses />
-                        {prof.courseCount} cursos
-                      </span>
+            <>
+              <div className="hv-list">
+                {activeTab === "professors" &&
+                  paginatedProfessors.map((prof) => (
+                    <div
+                      key={prof.id}
+                      className={`hv-list-card ${selectedProfId === prof.id ? "selected" : ""}`}
+                      onClick={() => setSelectedProfId(prof.id)}
+                    >
+                      <h3>{prof.name}</h3>
+                      <p>{prof.department}</p>
+                      <div className="hv-badges">
+                        <span className="hv-badge-gray">
+                          <IconCourses />
+                          {prof.courseCount} cursos
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
 
-              {activeTab === "courses" &&
-                courses.map((course) => (
-                  <div
-                    key={course.id}
-                    className={`hv-list-card ${selectedCourseId === course.id ? "selected" : ""}`}
-                    onClick={() => setSelectedCourseId(course.id)}
-                  >
-                    <h3>{course.name}</h3>
-                    <div className="hv-badges">
-                      <span className="hv-badge-gray">
-                        <IconProfessors />
-                        {course.professorCount} profesores
-                      </span>
+                {activeTab === "courses" &&
+                  paginatedCourses.map((course) => (
+                    <div
+                      key={course.id}
+                      className={`hv-list-card ${selectedCourseId === course.id ? "selected" : ""}`}
+                      onClick={() => setSelectedCourseId(course.id)}
+                    >
+                      <h3>{course.name}</h3>
+                      <div className="hv-badges">
+                        <span className="hv-badge-gray">
+                          <IconProfessors />
+                          {course.professorCount} profesores
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-            </div>
+                  ))}
+              </div>
+              {activeTab === "professors" && (
+                <div className="hv-sidebar-pagination">
+                  <Pagination
+                    page={professorsPage}
+                    pageSize={professorsPageSize}
+                    totalItems={professors.length}
+                    onPageChange={(newPage) => {
+                      const totalPages = Math.ceil(professors.length / professorsPageSize) || 1;
+                      if (newPage < 1 || newPage > totalPages) return;
+                      setProfessorsPage(newPage);
+                    }}
+                    onPageSizeChange={(size) => {
+                      const safeSize = size > 0 ? size : 10;
+                      setProfessorsPageSize(safeSize);
+                      setProfessorsPage(1);
+                    }}
+                  />
+                </div>
+              )}
+
+              {activeTab === "courses" && (
+                <div className="hv-sidebar-pagination">
+                  <Pagination
+                    page={coursesPage}
+                    pageSize={coursesPageSize}
+                    totalItems={courses.length}
+                    onPageChange={(newPage) => {
+                      const totalPages = Math.ceil(courses.length / coursesPageSize) || 1;
+                      if (newPage < 1 || newPage > totalPages) return;
+                      setCoursesPage(newPage);
+                    }}
+                    onPageSizeChange={(size) => {
+                      const safeSize = size > 0 ? size : 10;
+                      setCoursesPageSize(safeSize);
+                      setCoursesPage(1);
+                    }}
+                  />
+                </div>
+              )}
+            </>
           )}
         </aside>
 

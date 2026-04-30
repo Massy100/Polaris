@@ -84,6 +84,12 @@
     stroke: var(--url-border-soft);
 }
 
+.recharts-default-legend {
+    display: flex !important;
+    justify-content: center;
+    flex-direction: row-reverse;
+}
+
 @media (max-width: 600px) {
     .sentiment-chart-wrapper {
         height: 320px !important;
