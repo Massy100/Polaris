@@ -78,6 +78,20 @@ FILE_KIND_TO_BATCH_CATEGORY = {
     "comentarios": "encuestas",
 }
 
+_TABLE_COLUMNS_CACHE = {}
+_TEACHER_CACHE = {}
+_COURSE_CACHE = {}
+_PERIOD_CACHE = {}
+_SECTION_CACHE = {}
+
+
+def _reset_request_caches() -> None:
+    _TABLE_COLUMNS_CACHE.clear()
+    _TEACHER_CACHE.clear()
+    _COURSE_CACHE.clear()
+    _PERIOD_CACHE.clear()
+    _SECTION_CACHE.clear()
+
 
 def _normalize_key(value: str) -> str:
     normalized = unicodedata.normalize("NFKD", (value or "").strip().lower())
@@ -211,6 +225,9 @@ def _get_or_create_teacher(row: dict) -> Teacher:
     code = _clean_code(row.get("codigo_docente", "") or row.get("code", ""))
     first_name, last_name = _split_full_name(row.get("nombre_profesor", ""))
     now = timezone.now()
+    cache_key = (code.lower(), email, first_name.lower(), last_name.lower())
+    if cache_key in _TEACHER_CACHE:
+        return _TEACHER_CACHE[cache_key]
 
     defaults = {
         "first_name": first_name,
@@ -239,6 +256,7 @@ def _get_or_create_teacher(row: dict) -> Teacher:
             teacher.updated_at = now
             updated_fields.append("updated_at")
             teacher.save(update_fields=updated_fields)
+        _TEACHER_CACHE[cache_key] = teacher
         return teacher
 
     if email:
@@ -257,13 +275,15 @@ def _get_or_create_teacher(row: dict) -> Teacher:
             teacher.updated_at = now
             updated_fields.append("updated_at")
             teacher.save(update_fields=updated_fields)
+        _TEACHER_CACHE[cache_key] = teacher
         return teacher
 
     teacher = Teacher.objects.filter(first_name__iexact=first_name, last_name__iexact=last_name).first()
     if teacher:
+        _TEACHER_CACHE[cache_key] = teacher
         return teacher
 
-    return Teacher.objects.create(
+    teacher = Teacher.objects.create(
         first_name=first_name,
         last_name=last_name,
         status="ACTIVE",
@@ -271,12 +291,17 @@ def _get_or_create_teacher(row: dict) -> Teacher:
         created_at=now,
         updated_at=now,
     )
+    _TEACHER_CACHE[cache_key] = teacher
+    return teacher
 
 
 def _get_or_create_course(row: dict) -> Course | None:
     course_name = _normalize_value(row.get("curso", ""))
     if not course_name:
         return None
+    course_cache_key = _normalize_match_text(course_name)
+    if course_cache_key in _COURSE_CACHE:
+        return _COURSE_CACHE[course_cache_key]
 
     faculty_name = _normalize_value(row.get("facultad", "")) or "Carga masiva"
     career_name = _normalize_value(row.get("carrera", "")) or "General"
@@ -293,6 +318,7 @@ def _get_or_create_course(row: dict) -> Course | None:
 
     course = Course.objects.filter(name__iexact=course_name).order_by("course_id").first()
     if course:
+        _COURSE_CACHE[course_cache_key] = course
         return course
 
     course, _ = Course.objects.get_or_create(
@@ -303,6 +329,7 @@ def _get_or_create_course(row: dict) -> Course | None:
             "status": "active",
         },
     )
+    _COURSE_CACHE[course_cache_key] = course
     return course
 
 
@@ -344,9 +371,14 @@ def _sync_pending_comment_ratings(teacher: Teacher, course: Course | None, secti
 
 
 def _get_table_columns(table_name: str) -> set[str]:
+    if table_name in _TABLE_COLUMNS_CACHE:
+        return _TABLE_COLUMNS_CACHE[table_name]
+
     with connection.cursor() as cursor:
         description = connection.introspection.get_table_description(cursor, table_name)
-    return {column.name for column in description}
+    columns = {column.name for column in description}
+    _TABLE_COLUMNS_CACHE[table_name] = columns
+    return columns
 
 
 def _get_comment_table_columns() -> set[str]:
@@ -361,10 +393,22 @@ def _get_or_create_workload_section(
     if not course:
         return None
 
-    period, _ = Period.objects.get_or_create(
-        name="Carga masiva",
-        defaults={"status": "active"},
+    period = _PERIOD_CACHE.get("Carga masiva")
+    if period is None:
+        period, _ = Period.objects.get_or_create(
+            name="Carga masiva",
+            defaults={"status": "active"},
+        )
+        _PERIOD_CACHE["Carga masiva"] = period
+
+    section_cache_key = (
+        course.course_id,
+        period.period_id,
+        section_code or "",
+        teacher.teacher_id if teacher else None,
     )
+    if section_cache_key in _SECTION_CACHE:
+        return _SECTION_CACHE[section_cache_key]
 
     section_columns = _get_table_columns("section")
     if "name" in section_columns:
@@ -390,7 +434,9 @@ def _get_or_create_workload_section(
             )
             existing = cursor.fetchone()
             if existing:
-                return Section.objects.get(section_id=existing[0])
+                section = Section.objects.get(section_id=existing[0])
+                _SECTION_CACHE[section_cache_key] = section
+                return section
 
             insert_columns = ["course_id", "period_id", "section_code", "status", "name"]
             insert_values = ["%s", "%s", "%s", "%s", "%s"]
@@ -432,7 +478,9 @@ def _get_or_create_workload_section(
                 insert_params,
             )
             section_id = cursor.fetchone()[0]
-        return Section.objects.get(section_id=section_id)
+        section = Section.objects.get(section_id=section_id)
+        _SECTION_CACHE[section_cache_key] = section
+        return section
 
     section, _ = Section.objects.get_or_create(
         course=course,
@@ -443,6 +491,7 @@ def _get_or_create_workload_section(
             "status": "active",
         },
     )
+    _SECTION_CACHE[section_cache_key] = section
     return section
 
 
@@ -1339,6 +1388,8 @@ def _process_single_descriptor(category: str, descriptor: dict) -> dict:
 
 
 def process_bulk_upload(category: str, files) -> dict:
+    _reset_request_caches()
+
     if category not in ALLOWED_CATEGORIES and category not in GROUP_CATEGORIES:
         raise BulkUploadServiceError(
             "Categoria invalida. Usa: titulos, meritos, opiniones, encuestas, credenciales o evaluaciones."
