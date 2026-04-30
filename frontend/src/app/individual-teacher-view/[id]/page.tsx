@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import "../individual-teacher-view.css";
 import SentimentAnalysisChart, { SentimentChartItem } from "../../components/sentiment-analysis-chart";
+import Modal from "../../components/modal";
 
 type CourseFromAPI = {
     course_id: number;
@@ -23,8 +24,8 @@ type TeacherFromAPI = {
     since: string;
     status: string;
     code: string;
-    courses: number[];          
-    courses_detail: CourseFromAPI[]; 
+    courses: number[];
+    courses_detail: CourseFromAPI[];
 };
 
 type CommentGroup = {
@@ -124,7 +125,7 @@ const IconCalendar = () => (
     <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
 );
 const IconTrending = () => (
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em"><path d="M23 6L13.5 15.5L8.5 10.5L1 18"/><path d="M17 6H23V12"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em"><path d="M23 6L13.5 15.5L8.5 10.5L1 18" /><path d="M17 6H23V12" /></svg>
 );
 const IconBook = () => (
     <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
@@ -136,6 +137,54 @@ const IconNegative = () => (
     <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M20,3h-3H6.693C5.864,3,5.112,3.521,4.82,4.298l-2.757,7.351C2.021,11.761,2,11.88,2,12v2c0,1.103,0.897,2,2,2h5.612 L8.49,19.367c-0.203,0.608-0.101,1.282,0.274,1.802C9.14,21.689,9.746,22,10.388,22H12c0.297,0,0.578-0.132,0.769-0.36l4.7-5.64 H20c1.103,0,2-0.897,2-2V5C22,3.897,21.103,3,20,3z M11.531,20h-1.145l1.562-4.684c0.103-0.305,0.051-0.64-0.137-0.901 C11.623,14.154,11.321,14,11,14H4v-1.819L6.693,5H16v9.638L11.531,20z M18,14V5h2l0.001,9H18z"></path></svg>
 );
 
+type CourseNoteProps = {
+    noteId: string;
+    score?: number | string | null;
+    visibleNotes: Record<string, boolean>;
+    onToggle: (noteId: string) => void;
+};
+
+function CourseNote({
+    noteId,
+    score,
+    visibleNotes,
+    onToggle,
+}: CourseNoteProps) {
+    const isVisible = visibleNotes[noteId];
+
+    return (
+        <div className="itv-class-score">
+            <p className="itv-note-label">Nota:</p>
+
+            <p className={`itv-note-value ${!isVisible ? "hidden" : ""}`}>
+                {isVisible ? score ?? "Sin nota" : "••••"}
+            </p>
+
+            <button
+                type="button"
+                className="itv-note-eye-btn"
+                onClick={() => onToggle(noteId)}
+                aria-label={isVisible ? "Ocultar nota" : "Mostrar nota"}
+            >
+                {isVisible ? (
+                    // closed eye
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C7 20 2.73 16.89 1 12a11.55 11.55 0 0 1 5.06-5.94" />
+                        <path d="M9.9 4.24A10.8 10.8 0 0 1 12 4c5 0 9.27 3.11 11 8a11.44 11.44 0 0 1-2.18 3.19" />
+                        <path d="M14.12 14.12A3 3 0 0 1 9.88 9.88" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                ) : (
+                    // open eye
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
+                )}
+            </button>
+        </div>
+    );
+}
 
 export default function IndividualTeacherView() {
     const router = useRouter();
@@ -146,6 +195,32 @@ export default function IndividualTeacherView() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [openClassId, setOpenClassId] = useState<string | null>(null);
+
+    const [visibleNotes, setVisibleNotes] = useState<Record<string, boolean>>({});
+
+    const toggleNoteVisibility = (noteId: string) => {
+        setVisibleNotes((prev) => ({
+            ...prev,
+            [noteId]: !prev[noteId],
+        }));
+    };
+
+    const [processingModalOpen, setProcessingModalOpen] = useState(false);
+    const [processingText, setProcessingText] = useState("");
+
+    const handleAnalyzeAction = async (action: "weights" | "comments") => {
+        setProcessingText(
+            action === "weights"
+                ? "Se está realizando el análisis de pesos..."
+                : "Se están analizando los comentarios..."
+        );
+
+        setProcessingModalOpen(true);
+
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        setProcessingModalOpen(false);
+    };
 
     useEffect(() => {
         if (!teacherId) return;
@@ -188,7 +263,7 @@ export default function IndividualTeacherView() {
         return (
             <div className="itv-layout">
                 <div className="itv-empty-state">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--url-danger)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: "16px" }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--url-danger)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: "16px" }}><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
                     <h3 style={{ color: 'var(--url-danger)' }}>{error ?? "Docente no encontrado"}</h3>
                     <button className="itv-btn-primary" onClick={() => router.back()} style={{ marginTop: '16px' }}>
                         Volver al listado
@@ -203,8 +278,6 @@ export default function IndividualTeacherView() {
         subject: teacherClass.name,
         positiveReal: teacherClass.sentiment.positiveReal,
         negativeReal: teacherClass.sentiment.negativeReal,
-        falsePositive: teacherClass.sentiment.falsePositive,
-        falseNegative: teacherClass.sentiment.falseNegative,
     }));
 
     return (
@@ -243,7 +316,6 @@ export default function IndividualTeacherView() {
                             </div>
                         </div>
                     </div>
-                    
                     <div className="itv-score-container">
                         <div className="itv-score-card">
                             <div className="itv-score-icon">
@@ -260,20 +332,43 @@ export default function IndividualTeacherView() {
                     <div className="itv-section-header">
                         <h2 className="itv-section-title">Clases Asignadas</h2>
                     </div>
-                    
                     <div className="itv-classes-list">
                         {teacherClasses.map((teacherClass) => {
                             const isOpen = openClassId === teacherClass.id;
                             return (
                                 <div className="itv-class-card" key={teacherClass.id}>
-                                    <div className="itv-class-header" onClick={() => toggleComments(teacherClass.id)}>
+                                    <div className="itv-class-header" >
                                         <div className="itv-class-title">
                                             <span className="itv-class-icon"><IconBook /></span>
-                                            <h3>{teacherClass.name}</h3>
+                                            <h3>{teacherClass.name} - {teacherClass.id}</h3> {/* change teacherClass.id to .section */}
                                         </div>
-                                        <button type="button" className="itv-comments-toggle">
-                                            {isOpen ? "Ocultar comentarios" : "Ver comentarios"}
-                                        </button>
+
+                                        <CourseNote
+                                            noteId="test-course"
+                                            score={3}
+                                            visibleNotes={visibleNotes}
+                                            onToggle={toggleNoteVisibility}
+                                        />
+
+                                        {/* Example to use with the backend connection */}
+                                        {/* <CourseNote
+                                            noteId={String(course.id)}
+                                            score={course.note}
+                                            visibleNotes={visibleNotes}
+                                            onToggle={toggleNoteVisibility}
+                                        /> */}
+
+                                        <div className="itv-action-buttons">
+                                            <button
+                                                className="itv-analyze-btn"
+                                                onClick={() => handleAnalyzeAction("comments")}
+                                            >
+                                                Analizar comentarios
+                                            </button>
+                                            <button type="button" className="itv-comments-toggle" onClick={() => toggleComments(teacherClass.id)}>
+                                                {isOpen ? "Ocultar comentarios" : "Ver comentarios"}
+                                            </button>
+                                        </div>
                                     </div>
 
                                     {isOpen && (
@@ -328,6 +423,24 @@ export default function IndividualTeacherView() {
                     />
                 </div>
             </div>
+            <Modal
+                open={processingModalOpen}
+                title="Procesando"
+                onClose={() => { }}
+                width={420}
+            >
+                <div className="modal-content processing-modal-content">
+                    <div className="processing-spinner" />
+
+                    <p className="modal-text">
+                        {processingText}
+                    </p>
+
+                    <p className="modal-text">
+                        Por favor espere un momento.
+                    </p>
+                </div>
+            </Modal>
         </div>
     );
 }
