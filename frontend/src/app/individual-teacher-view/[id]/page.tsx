@@ -5,6 +5,8 @@ import { useRouter, useParams } from "next/navigation";
 import "../individual-teacher-view.css";
 import SentimentAnalysisChart, { SentimentChartItem } from "../../components/sentiment-analysis-chart";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+
 type CourseFromAPI = {
     course_id: number;
     name: string;
@@ -23,8 +25,9 @@ type TeacherFromAPI = {
     since: string;
     status: string;
     code: string;
-    courses: number[];          
-    courses_detail: CourseFromAPI[]; 
+    score: number | null;
+    courses: number[];
+    courses_detail: CourseFromAPI[];
 };
 
 type CommentGroup = {
@@ -64,15 +67,11 @@ function formatRole(role: string): string {
         asociado: "Profesor Asociado",
         auxiliar: "Profesor Auxiliar",
     };
-    const normalized = role?.toLowerCase().trim();
-    return roles[normalized] || role;
+    return roles[role?.toLowerCase().trim()] || role;
 }
 
 function formatSince(dateStr: string): string {
-    const months = [
-        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
-    ];
+    const months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
     if (!dateStr || !dateStr.includes("-")) return dateStr;
     const [year, month] = dateStr.split("-");
     return `${months[parseInt(month) - 1]} ${year}`;
@@ -87,7 +86,7 @@ function mapTeacher(data: TeacherFromAPI): Teacher {
         phone: data.phone ?? "",
         role: data.role ? formatRole(data.role) : "",
         since: data.since ? formatSince(data.since) : "",
-        finalScore: 0,
+        finalScore: data.score ? Math.round(data.score * 10) / 10 : 0,
         classes: (data.courses_detail ?? []).map((course) => ({
             id: String(course.course_id),
             name: course.name,
@@ -97,7 +96,6 @@ function mapTeacher(data: TeacherFromAPI): Teacher {
     };
 }
 
-// --- Íconos Extraídos ---
 const IconBack = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -115,7 +113,7 @@ const IconMail = () => (
     <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 1024 1024" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M928 160H96c-17.7 0-32 14.3-32 32v640c0 17.7 14.3 32 32 32h832c17.7 0 32-14.3 32-32V192c0-17.7-14.3-32-32-32zm-40 110.8V792H136V270.8l-27.6-21.5 39.3-50.5 42.8 33.3h643.1l42.8-33.3 39.3 50.5-27.7 21.5zM833.6 232L512 482 190.4 232l-42.8-33.3-39.3 50.5 27.6 21.5 341.6 265.6a55.99 55.99 0 0 0 68.7 0L888 270.8l27.6-21.5-39.3-50.5-42.7 33.2z"></path></svg>
 );
 const IconPhone = () => (
-    <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M17.707,12.293c-0.391-0.391-1.023-0.391-1.414,0l-1.594,1.594c-0.739-0.22-2.118-0.72-2.992-1.594 s-1.374-2.253-1.594-2.992l1.594-1.594c0.391-0.391,0.391-1.023,0-1.414l-4-4c-0.391-0.391-1.023-0.391-1.414,0L3.581,5.005 c-0.38,0.38-0.594,0.902-0.586,1.435c0.023,1.424,0.4,6.37,4.298,10.268s8.844,4.274,10.269,4.298c0.005,0,0.023,0,0.028,0 c0.528,0,1.027-0.208,1.405-0.586l2.712-2.712c0.391-0.391,0.391-1.023,0-1.414L17.707,12.293z M17.58,19.005 c-1.248-0.021-5.518-0.356-8.873-3.712c-3.366-3.366-3.692-7.651-3.712-8.874L7,4.414L9.586,7L8.293,8.293 C8.054,8.531,7.952,8.875,8.021,9.205c0.024,0.115,0.611,2.842,2.271,4.502s4.387,2.247,4.502,2.271 c0.333,0.071,0.674-0.032,0.912-0.271L17,14.414L19.586,17L17.58,19.005z"></path></svg>
+    <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M17.707,12.293c-0.391-0.391-1.023-0.391-1.414,0l-1.594,1.594c-0.739-0.22-2.118-0.72-2.992-1.594s-1.374-2.253-1.594-2.992l1.594-1.594c0.391-0.391,0.391-1.023,0-1.414l-4-4c-0.391-0.391-1.023-0.391-1.414,0L3.581,5.005c-0.38,0.38-0.594,0.902-0.586,1.435c0.023,1.424,0.4,6.37,4.298,10.268s8.844,4.274,10.269,4.298c0.005,0,0.023,0,0.028,0c0.528,0,1.027-0.208,1.405-0.586l2.712-2.712c0.391-0.391,0.391-1.023,0-1.414L17.707,12.293z M17.58,19.005c-1.248-0.021-5.518-0.356-8.873-3.712c-3.366-3.366-3.692-7.651-3.712-8.874L7,4.414L9.586,7L8.293,8.293C8.054,8.531,7.952,8.875,8.021,9.205c0.024,0.115,0.611,2.842,2.271,4.502s4.387,2.247,4.502,2.271c0.333,0.071,0.674-0.032,0.912-0.271L17,14.414L19.586,17L17.58,19.005z"></path></svg>
 );
 const IconRole = () => (
     <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><g><path fill="none" d="M0 0h24v24H0z"></path><path fillRule="nonzero" d="M12 7a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm0 1.5l1.323 2.68 2.957.43-2.14 2.085.505 2.946L12 17.25l-2.645 1.39.505-2.945-2.14-2.086 2.957-.43L12 10.5zM18 2v3l-1.363 1.138A9.935 9.935 0 0 0 13 5.049L13 2 18 2zm-7-.001v3.05a9.935 9.935 0 0 0-3.636 1.088L6 5V2l5-.001z"></path></g></svg>
@@ -133,9 +131,8 @@ const IconPositive = () => (
     <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 1024 1024" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M885.9 533.7c16.8-22.2 26.1-49.4 26.1-77.7 0-44.9-25.1-87.4-65.5-111.1a67.67 67.67 0 0 0-34.3-9.3H572.4l6-122.9c1.4-29.7-9.1-57.9-29.5-79.4A106.62 106.62 0 0 0 471 99.9c-52 0-98 35-111.8 85.1l-85.9 311H144c-17.7 0-32 14.3-32 32v364c0 17.7 14.3 32 32 32h601.3c9.2 0 18.2-1.8 26.5-5.4 47.6-20.3 78.3-66.8 78.3-118.4 0-12.6-1.8-25-5.4-37 16.8-22.2 26.1-49.4 26.1-77.7 0-12.6-1.8-25-5.4-37 16.8-22.2 26.1-49.4 26.1-77.7-.2-12.6-2-25.1-5.6-37.1zM184 852V568h81v284h-81zm636.4-353l-21.9 19 13.9 25.4a56.2 56.2 0 0 1 6.9 27.3c0 16.5-7.2 32.2-19.6 43l-21.9 19 13.9 25.4a56.2 56.2 0 0 1 6.9 27.3c0 16.5-7.2 32.2-19.6 43l-21.9 19 13.9 25.4a56.2 56.2 0 0 1 6.9 27.3c0 22.4-13.2 42.6-33.6 51.8H329V564.8l99.5-360.5a44.1 44.1 0 0 1 42.2-32.3c7.6 0 15.1 2.2 21.1 6.7 9.9 7.4 15.2 18.6 14.6 30.5l-9.6 198.4h314.4C829 418.5 840 436.9 840 456c0 16.5-7.2 32.1-19.6 43z"></path></svg>
 );
 const IconNegative = () => (
-    <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M20,3h-3H6.693C5.864,3,5.112,3.521,4.82,4.298l-2.757,7.351C2.021,11.761,2,11.88,2,12v2c0,1.103,0.897,2,2,2h5.612 L8.49,19.367c-0.203,0.608-0.101,1.282,0.274,1.802C9.14,21.689,9.746,22,10.388,22H12c0.297,0,0.578-0.132,0.769-0.36l4.7-5.64 H20c1.103,0,2-0.897,2-2V5C22,3.897,21.103,3,20,3z M11.531,20h-1.145l1.562-4.684c0.103-0.305,0.051-0.64-0.137-0.901 C11.623,14.154,11.321,14,11,14H4v-1.819L6.693,5H16v9.638L11.531,20z M18,14V5h2l0.001,9H18z"></path></svg>
+    <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M20,3h-3H6.693C5.864,3,5.112,3.521,4.82,4.298l-2.757,7.351C2.021,11.761,2,11.88,2,12v2c0,1.103,0.897,2,2,2h5.612L8.49,19.367c-0.203,0.608-0.101,1.282,0.274,1.802C9.14,21.689,9.746,22,10.388,22H12c0.297,0,0.578-0.132,0.769-0.36l4.7-5.64H20c1.103,0,2-0.897,2-2V5C22,3.897,21.103,3,20,3z M11.531,20h-1.145l1.562-4.684c0.103-0.305,0.051-0.64-0.137-0.901C11.623,14.154,11.321,14,11,14H4v-1.819L6.693,5H16v9.638L11.531,20z M18,14V5h2l0.001,9H18z"></path></svg>
 );
-
 
 export default function IndividualTeacherView() {
     const router = useRouter();
@@ -146,31 +143,73 @@ export default function IndividualTeacherView() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [openClassId, setOpenClassId] = useState<string | null>(null);
+    const [loadingComments, setLoadingComments] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
         if (!teacherId) return;
-
         setLoading(true);
         setError(null);
 
-        fetch(`http://localhost:8000/api/academic-career/teachers/${teacherId}/`)
+        fetch(`${API_URL}/academic-career/teachers/${teacherId}/`)
             .then((res) => {
                 if (!res.ok) throw new Error(`Error ${res.status}: no se pudo cargar el docente`);
                 return res.json();
             })
-            .then((data: TeacherFromAPI) => {
-                setTeacher(mapTeacher(data));
-            })
-            .catch((err) => {
-                setError(err.message);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+            .then((data: TeacherFromAPI) => setTeacher(mapTeacher(data)))
+            .catch((err) => setError(err.message))
+            .finally(() => setLoading(false));
     }, [teacherId]);
 
-    const toggleComments = (classId: string): void => {
-        setOpenClassId((prev) => (prev === classId ? null : classId));
+    const toggleComments = async (classId: string) => {
+        if (openClassId === classId) {
+            setOpenClassId(null);
+            return;
+        }
+
+        setOpenClassId(classId);
+
+        const alreadyLoaded = teacher?.classes.find(
+            (c) => c.id === classId && (c.comments.positive.length > 0 || c.comments.negative.length > 0)
+        );
+        if (alreadyLoaded) return;
+
+        setLoadingComments((prev) => ({ ...prev, [classId]: true }));
+
+        try {
+            const res = await fetch(
+                `${API_URL}/academic-workload/comments/?teacher_id=${teacherId}&course_id=${classId}`
+            );
+            if (!res.ok) throw new Error('Error al cargar comentarios');
+            const data = await res.json();
+
+            setTeacher((prev) => {
+                if (!prev) return prev;
+                return {
+                    ...prev,
+                    classes: prev.classes.map((c) =>
+                        c.id === classId
+                            ? {
+                                ...c,
+                                comments: {
+                                    positive: data.positive ?? [],
+                                    negative: data.negative ?? [],
+                                },
+                                sentiment: {
+                                    positiveReal: data.positive?.length ?? 0,
+                                    negativeReal: data.negative?.length ?? 0,
+                                    falsePositive: 0,
+                                    falseNegative: 0,
+                                },
+                            }
+                            : c
+                    ),
+                };
+            });
+        } catch {
+            // si falla simplemente no muestra comentarios
+        } finally {
+            setLoadingComments((prev) => ({ ...prev, [classId]: false }));
+        }
     };
 
     if (loading) {
@@ -198,13 +237,12 @@ export default function IndividualTeacherView() {
         );
     }
 
-    const teacherClasses = teacher.classes;
-    const sentimentData: SentimentChartItem[] = teacherClasses.map((teacherClass) => ({
-        subject: teacherClass.name,
-        positiveReal: teacherClass.sentiment.positiveReal,
-        negativeReal: teacherClass.sentiment.negativeReal,
-        falsePositive: teacherClass.sentiment.falsePositive,
-        falseNegative: teacherClass.sentiment.falseNegative,
+    const sentimentData: SentimentChartItem[] = teacher.classes.map((c) => ({
+        subject: c.name,
+        positiveReal: c.sentiment.positiveReal,
+        negativeReal: c.sentiment.negativeReal,
+        falsePositive: c.sentiment.falsePositive,
+        falseNegative: c.sentiment.falseNegative,
     }));
 
     return (
@@ -243,14 +281,14 @@ export default function IndividualTeacherView() {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="itv-score-container">
                         <div className="itv-score-card">
                             <div className="itv-score-icon">
                                 <IconTrending />
                             </div>
                             <p className="itv-score-title">Nota Final</p>
-                            <h2 className="itv-score-value">{teacher.finalScore}</h2>
+                            <h2 className="itv-score-value">{(teacher.finalScore / 2).toFixed(2)}</h2>
                             <p className="itv-score-subtitle">Promedio ponderado</p>
                         </div>
                     </div>
@@ -260,10 +298,11 @@ export default function IndividualTeacherView() {
                     <div className="itv-section-header">
                         <h2 className="itv-section-title">Clases Asignadas</h2>
                     </div>
-                    
+
                     <div className="itv-classes-list">
-                        {teacherClasses.map((teacherClass) => {
+                        {teacher.classes.map((teacherClass) => {
                             const isOpen = openClassId === teacherClass.id;
+                            const isLoadingThis = loadingComments[teacherClass.id];
                             return (
                                 <div className="itv-class-card" key={teacherClass.id}>
                                     <div className="itv-class-header" onClick={() => toggleComments(teacherClass.id)}>
@@ -278,38 +317,42 @@ export default function IndividualTeacherView() {
 
                                     {isOpen && (
                                         <div className="itv-comments-container">
-                                            <div className="itv-comments-col positive">
-                                                <h4 className="itv-comments-title positive">
-                                                    <IconPositive />
-                                                    Comentarios Positivos
-                                                </h4>
-                                                <div className="itv-comments-scrollable">
-                                                    {teacherClass.comments.positive.length > 0
-                                                        ? teacherClass.comments.positive.map((comment, index) => (
-                                                            <div className="itv-comment positive" key={`${teacherClass.id}-positive-${index}`}>
-                                                                {comment}
-                                                            </div>
-                                                        ))
-                                                        : <p className="itv-comment-empty">Sin comentarios aún</p>
-                                                    }
+                                            {isLoadingThis ? (
+                                                <div className="itv-empty-state" style={{ padding: '24px' }}>
+                                                    <div className="itv-loading-spinner"></div>
                                                 </div>
-                                            </div>
-                                            <div className="itv-comments-col negative">
-                                                <h4 className="itv-comments-title negative">
-                                                    <IconNegative />
-                                                    Comentarios Negativos
-                                                </h4>
-                                                <div className="itv-comments-scrollable">
-                                                    {teacherClass.comments.negative.length > 0
-                                                        ? teacherClass.comments.negative.map((comment, index) => (
-                                                            <div className="itv-comment negative" key={`${teacherClass.id}-negative-${index}`}>
-                                                                {comment}
-                                                            </div>
-                                                        ))
-                                                        : <p className="itv-comment-empty">Sin comentarios aún</p>
-                                                    }
-                                                </div>
-                                            </div>
+                                            ) : (
+                                                <>
+                                                    <div className="itv-comments-col positive">
+                                                        <h4 className="itv-comments-title positive">
+                                                            <IconPositive />
+                                                            Comentarios Positivos
+                                                        </h4>
+                                                        <div className="itv-comments-scrollable">
+                                                            {teacherClass.comments.positive.length > 0
+                                                                ? teacherClass.comments.positive.map((comment, index) => (
+                                                                    <div className="itv-comment positive" key={index}>{comment}</div>
+                                                                ))
+                                                                : <p className="itv-comment-empty">Sin comentarios aún</p>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                    <div className="itv-comments-col negative">
+                                                        <h4 className="itv-comments-title negative">
+                                                            <IconNegative />
+                                                            Comentarios Negativos
+                                                        </h4>
+                                                        <div className="itv-comments-scrollable">
+                                                            {teacherClass.comments.negative.length > 0
+                                                                ? teacherClass.comments.negative.map((comment, index) => (
+                                                                    <div className="itv-comment negative" key={index}>{comment}</div>
+                                                                ))
+                                                                : <p className="itv-comment-empty">Sin comentarios aún</p>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -322,10 +365,7 @@ export default function IndividualTeacherView() {
                     <div className="itv-section-header" style={{ marginBottom: '20px' }}>
                         <h2 className="itv-section-title">Análisis por Sentimiento</h2>
                     </div>
-                    <SentimentAnalysisChart
-                        data={sentimentData}
-                        height={500}
-                    />
+                    <SentimentAnalysisChart data={sentimentData} height={500} />
                 </div>
             </div>
         </div>

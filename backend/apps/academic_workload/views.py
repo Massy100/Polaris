@@ -115,3 +115,31 @@ class TeacherAIAnalysisView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class TeacherCommentsView(APIView):
+
+    def get(self, request):
+        teacher_id = request.query_params.get('teacher_id')
+        course_id = request.query_params.get('course_id')
+
+        if not teacher_id or not course_id:
+            return Response(
+                {'detail': 'teacher_id y course_id son requeridos.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        comments_qs = Comment.objects.filter(
+            section__teacher_id=teacher_id,
+            section__course_id=course_id,
+        ).values('text', 'sentiment_type')
+
+        positive = [c['text'] for c in comments_qs if c['sentiment_type'] == 'positive' and c['text']]
+        negative = [c['text'] for c in comments_qs if c['sentiment_type'] == 'negative' and c['text']]
+
+        return Response({
+            'teacher_id': int(teacher_id),
+            'course_id': int(course_id),
+            'positive': positive,
+            'negative': negative,
+        })
