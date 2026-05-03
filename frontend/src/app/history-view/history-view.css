@@ -92,7 +92,7 @@
   border: 1px solid var(--url-border-soft);
   border-radius: var(--url-radius-md);
   height: calc(100vh - 220px);
-  overflow-y: auto;
+  overflow: hidden;
   box-shadow: var(--url-shadow-sm);
   display: flex;
   flex-direction: column;
@@ -121,10 +121,13 @@
 }
 
 .hv-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 14px 14px;
+  padding: 14px;
 }
 
 .hv-list-card {
@@ -185,7 +188,8 @@
   background: var(--url-white);
   border: 1px solid var(--url-border-soft);
   border-radius: var(--url-radius-md);
-  min-height: calc(100vh - 220px);
+  height: calc(100vh - 220px);
+  min-height: unset;
   display: flex;
   flex-direction: column;
   box-shadow: var(--url-shadow-sm);
@@ -322,17 +326,79 @@
   margin: 0;
 }
 
+.hv-sidebar-pagination {
+  flex-shrink: 0;
+  border-top: 1px solid var(--url-border-soft);
+  padding: 8px;
+  background: var(--url-white);
+}
+
+.hv-sidebar-pagination .pagination {
+  padding: 8px;
+  gap: 8px;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.hv-sidebar-pagination .pagination-options {
+  width: 100%;
+  gap: 6px;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+}
+
+.hv-sidebar-pagination .pagination-button {
+  padding: 7px 8px;
+  font-size: 12px;
+  flex: 1;
+  white-space: nowrap;
+}
+
+.hv-sidebar-pagination .pagination-info {
+  min-width: 86px;
+  padding: 7px 8px;
+  flex: 1.2;
+}
+
+.hv-sidebar-pagination .pagination-info-text {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.hv-sidebar-pagination .pagination-size {
+  width: 100%;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.hv-sidebar-pagination .pagination-label {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.hv-sidebar-pagination .pagination-input {
+  width: 52px;
+  height: 32px;
+  padding: 0 6px;
+  font-size: 12px;
+}
+
+
+
 @media (max-width: 900px) {
   .hv-sidebar {
     max-width: 100%;
     flex: 1 1 100%;
-    height: auto;
-    max-height: 340px;
+    height: 520px;
+    max-height: none;
   }
 
   .hv-detail-panel {
     flex: 1 1 100%;
-    min-height: auto;
+    height: 520px;
+    min-height: unset;
   }
 }
 
