@@ -40,35 +40,24 @@ class Course(models.Model):
 
 class Teacher(models.Model):
     teacher_id = models.BigAutoField(primary_key=True)
-
     first_name = models.CharField(max_length=120, blank=True, null=True)
     last_name = models.CharField(max_length=120, blank=True, null=True)
-
     email = models.EmailField(max_length=254, blank=True, null=True, unique=True)
     code = models.CharField(max_length=20, blank=True, null=True, unique=True)
-
     phone = models.CharField(max_length=20, blank=True, null=True)
     department = models.CharField(max_length=120, blank=True, null=True)
     since = models.DateField(blank=True, null=True)
-
     role = models.CharField(max_length=50, blank=True, null=True)
-
     courses = models.ManyToManyField(
         'Course',
         through='TeacherCourse',
         blank=True
     )
-
-    status = models.CharField(
-        max_length=20,
-        blank=True,
-        null=True,
-        default='active'
-    )
-
+    status = models.CharField(max_length=20, blank=True, null=True, default='active')
+    score = models.FloatField(blank=True, null=True)
+    manual_status = models.CharField(max_length=30, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
 
     class Meta:
         db_table = 'teacher'
@@ -171,6 +160,8 @@ class TeacherStudentSurvey(models.Model):
 
     def __str__(self):
         return f"{self.teacher.full_name} - Encuesta estudiante"
+
+
 class TeacherCourse(models.Model):
     id = models.BigAutoField(primary_key=True)
     teacher = models.ForeignKey('Teacher', models.DO_NOTHING, db_column='teacher_id')

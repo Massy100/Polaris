@@ -18,17 +18,9 @@ class TeacherTitleSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeacherTitle
         fields = [
-            'title_id',
-            'teacher',
-            'teacher_name',
-            'phone',
-            'specialty',
-            'academic_degree',
-            'experience_years',
-            'current_institution',
-            'status',
-            'created_at',
-            'updated_at',
+            'title_id', 'teacher', 'teacher_name', 'phone', 'specialty',
+            'academic_degree', 'experience_years', 'current_institution',
+            'status', 'created_at', 'updated_at',
         ]
 
 
@@ -38,16 +30,8 @@ class TeacherMeritSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeacherMerit
         fields = [
-            'merit_id',
-            'teacher',
-            'teacher_name',
-            'merit_type',
-            'description',
-            'obtained_at',
-            'granting_institution',
-            'status',
-            'created_at',
-            'updated_at',
+            'merit_id', 'teacher', 'teacher_name', 'merit_type', 'description',
+            'obtained_at', 'granting_institution', 'status', 'created_at', 'updated_at',
         ]
 
 
@@ -57,16 +41,8 @@ class TeacherCoordinatorOpinionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeacherCoordinatorOpinion
         fields = [
-            'coordinator_opinion_id',
-            'teacher',
-            'teacher_name',
-            'author',
-            'opinion',
-            'rating',
-            'opinion_date',
-            'status',
-            'created_at',
-            'updated_at',
+            'coordinator_opinion_id', 'teacher', 'teacher_name', 'author',
+            'opinion', 'rating', 'opinion_date', 'status', 'created_at', 'updated_at',
         ]
 
 
@@ -77,31 +53,25 @@ class TeacherStudentSurveySerializer(serializers.ModelSerializer):
     class Meta:
         model = TeacherStudentSurvey
         fields = [
-            'survey_id',
-            'teacher',
-            'teacher_name',
-            'course',
-            'course_name',
-            'section',
-            'author',
-            'opinion',
-            'rating',
-            'opinion_date',
-            'status',
-            'created_at',
-            'updated_at',
+            'survey_id', 'teacher', 'teacher_name', 'course', 'course_name',
+            'section', 'author', 'opinion', 'rating', 'opinion_date',
+            'status', 'created_at', 'updated_at',
         ]
+
 
 class CourseSerializer(serializers.ModelSerializer):
     career_name = serializers.CharField(source='career.name', read_only=True)
+
     class Meta:
         model = Course
         fields = ['course_id', 'career', 'career_name', 'name', 'credits', 'status']
+
 
 class FacultySerializer(serializers.ModelSerializer):
     class Meta:
         model = Faculty
         fields = ['faculty_id', 'name', 'status']
+
 
 class CareerSerializer(serializers.ModelSerializer):
     faculty_name = serializers.CharField(source='faculty.name', read_only=True)
@@ -120,46 +90,25 @@ class TeacherSerializer(serializers.ModelSerializer):
     coordinator_opinions = TeacherCoordinatorOpinionSerializer(many=True, read_only=True)
     student_surveys = TeacherStudentSurveySerializer(many=True, read_only=True)
     courses = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=Course.objects.all(),
-        write_only=True,
-        required=False
+        many=True, queryset=Course.objects.all(), write_only=True, required=False
     )
-
     courses_detail = CourseSerializer(source='courses', many=True, read_only=True)
 
     class Meta:
         model = Teacher
         fields = [
-            'teacher_id',
-            'first_name',
-            'last_name',
-            'full_name',
-            'code',
-            'email',
-            'phone',
-            'department',
-            'since',
-            'role',
-            'courses',          
-            'courses_detail',   
-            'courses_taught',
-            'specialties',
-            'titles',
-            'merits',
-            'coordinator_opinions',
-            'student_surveys',
-            'status',
-            'created_at',
-            'updated_at'
+            'teacher_id', 'first_name', 'last_name', 'full_name', 'code', 'email',
+            'phone', 'department', 'since', 'role', 'courses', 'courses_detail',
+            'courses_taught', 'specialties', 'titles', 'merits', 'coordinator_opinions',
+            'student_surveys', 'status', 'score', 'manual_status', 'created_at', 'updated_at',
         ]
         read_only_fields = ['created_at', 'updated_at']
-    
+
     def get_full_name(self, obj):
         if obj.first_name and obj.last_name:
             return f"{obj.first_name} {obj.last_name}"
         return obj.first_name or obj.last_name or f"Docente {obj.teacher_id}"
-    
+
     def get_courses_taught(self, obj):
         courses = obj.courses.all()
         return ", ".join([course.name for course in courses]) if courses.exists() else ""
@@ -167,7 +116,8 @@ class TeacherSerializer(serializers.ModelSerializer):
     def get_specialties(self, obj):
         specialties = obj.titles.filter(status='active').values_list('specialty', flat=True).distinct()
         return list(specialties) if specialties else []
-    
+
+
 class TeacherListSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     courses_taught = serializers.SerializerMethodField()
@@ -177,16 +127,9 @@ class TeacherListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Teacher
         fields = [
-            'teacher_id',
-            'first_name',
-            'last_name',
-            'full_name',
-            'code',
-            'email',
-            'courses_taught',
-            'specialties',
-            'rating',
-            'status'
+            'teacher_id', 'first_name', 'last_name', 'full_name', 'code',
+            'email', 'courses_taught', 'specialties', 'rating', 'status',
+            'score', 'manual_status',
         ]
 
     def get_full_name(self, obj):
@@ -197,28 +140,29 @@ class TeacherListSerializer(serializers.ModelSerializer):
     def get_courses_taught(self, obj):
         courses = obj.courses.all()
         return ", ".join([course.name for course in courses]) if courses.exists() else ""
-    
+
     def get_specialties(self, obj):
         specialties = obj.titles.filter(status='active').values_list('specialty', flat=True)
         return list(specialties)
-    
-    def get_rating(self, obj):  
+
+    def get_rating(self, obj):
+        if obj.score is not None:
+            return round(float(obj.score), 2)
+
         total_ratings = 0
         count = 0
-        
+
         student_surveys = obj.student_surveys.filter(status='active', rating__isnull=False)
         if student_surveys.exists():
             total_ratings += sum(s.rating for s in student_surveys)
             count += student_surveys.count()
-        
+
         coordinator_opinions = obj.coordinator_opinions.filter(status='active')
         if coordinator_opinions.exists():
             total_ratings += sum(o.rating for o in coordinator_opinions)
             count += coordinator_opinions.count()
-        
+
         if count == 0:
             return 0.0
-        
-        rating = total_ratings / count
-        
-        return round(rating, 2)
+
+        return round(total_ratings / count, 2)
