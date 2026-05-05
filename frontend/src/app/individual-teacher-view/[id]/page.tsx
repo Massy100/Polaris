@@ -7,6 +7,7 @@ import SentimentAnalysisChart, { SentimentChartItem } from "../../components/sen
 import Modal from "../../components/modal";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const WEIGHT_CONFIG_ID = 8;
 
 type CourseFromAPI = {
     course_id: number;
@@ -160,15 +161,48 @@ export default function IndividualTeacherView() {
         setVisibleNotes((prev) => ({ ...prev, [noteId]: !prev[noteId] }));
     };
 
-    const handleAnalyzeAction = async (action: "weights" | "comments") => {
-        setProcessingText(
-            action === "weights"
-                ? "Se está realizando el análisis de pesos..."
-                : "Se están analizando los comentarios..."
-        );
+    const handleAnalyzeComments = async (courseId: string) => {
+        setProcessingText("Se están analizando los comentarios con IA...");
         setProcessingModalOpen(true);
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        setProcessingModalOpen(false);
+
+        try {
+            const res = await fetch(`${API_URL}/academic-workload/ai-analysis/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    teacher_id: parseInt(teacherId),
+                    course_id: parseInt(courseId),
+                }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.detail || 'Error en el análisis');
+
+            // Actualizar score del teacher
+            setTeacher((prev) => {
+                if (!prev) return prev;
+                return { ...prev, finalScore: Math.round((data.final_score ?? prev.finalScore) * 10) / 10 };
+            });
+
+            // Recargar comentarios del curso analizado
+            setTeacher((prev) => {
+                if (!prev) return prev;
+                return {
+                    ...prev,
+                    classes: prev.classes.map((c) =>
+                        c.id === courseId
+                            ? { ...c, comments: { positive: [], negative: [] } }
+                            : c
+                    ),
+                };
+            });
+
+        } catch (err) {
+            console.error('Error al analizar:', err);
+        } finally {
+            setProcessingModalOpen(false);
+        }
     };
 
     useEffect(() => {
@@ -321,7 +355,10 @@ export default function IndividualTeacherView() {
                                             onToggle={toggleNoteVisibility}
                                         />
                                         <div className="itv-action-buttons">
-                                            <button className="itv-analyze-btn" onClick={() => handleAnalyzeAction("comments")}>
+                                            <button
+                                                className="itv-analyze-btn"
+                                                onClick={() => handleAnalyzeComments(teacherClass.id)}
+                                            >
                                                 Analizar comentarios
                                             </button>
                                             <button type="button" className="itv-comments-toggle" onClick={() => toggleComments(teacherClass.id)}>

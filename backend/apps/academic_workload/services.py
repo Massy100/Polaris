@@ -71,7 +71,7 @@ def call_ai(prompt: str) -> str:
 def parse_ai_response(raw: str) -> tuple[list[str], list[float]]:
     raw = raw.strip()
     close_bracket = raw.index('][')
-    sentiments_part = raw[1:close_bracket]           # sin los corchetes externos
+    sentiments_part = raw[1:close_bracket]           
     scores_part = raw[close_bracket + 2:-1]
 
     sentiments = [s.strip().strip('"') for s in sentiments_part.split(',')]
@@ -114,7 +114,7 @@ def analyze_teacher(
             'weighted_score': weighted,
         })
 
-    final_score = round(sum(c['weighted_score'] for c in criteria_scores), 2)
+    final_score = round(sum(c['weighted_score'] for c in criteria_scores)/20, 2)
     positive_count = sentiments.count('P')
     negative_count = sentiments.count('N')
 

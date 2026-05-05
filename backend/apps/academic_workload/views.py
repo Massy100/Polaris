@@ -20,13 +20,10 @@ class TeacherAIAnalysisView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         teacher_id = serializer.validated_data['teacher_id']
-        period_id = serializer.validated_data['period_id']
         course_id = serializer.validated_data['course_id']
-        weight_config_id = serializer.validated_data['weight_config_id']
 
         comments_qs = Comment.objects.filter(
             section__teacher_id=teacher_id,
-            section__period_id=period_id,
             section__course_id=course_id,
         ).values('comment_id', 'text')
 
@@ -38,18 +35,18 @@ class TeacherAIAnalysisView(APIView):
 
         if not comments:
             return Response(
-                {'detail': 'No hay comentarios para analizar con ese docente, curso y período.'},
+                {'detail': 'No hay comentarios para analizar con ese docente y curso.'},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        try:
-            weight_config = Weightconfig.objects.get(
-                weight_config_id=weight_config_id,
-                is_deleted=False,
-            )
-        except Weightconfig.DoesNotExist:
+        weight_config = Weightconfig.objects.filter(
+            status=Weightconfig.Status.ACTIVE,
+            is_deleted=False,
+        ).first()
+
+        if not weight_config:
             return Response(
-                {'detail': 'Configuración de pesos no encontrada.'},
+                {'detail': 'No hay una configuración de pesos activa.'},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
@@ -62,7 +59,7 @@ class TeacherAIAnalysisView(APIView):
 
         if not criteria_qs.exists():
             return Response(
-                {'detail': 'La configuración de pesos no tiene criterios activos.'},
+                {'detail': 'La configuración de pesos activa no tiene criterios.'},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
@@ -92,10 +89,10 @@ class TeacherAIAnalysisView(APIView):
         TeacherCourseScore.objects.update_or_create(
             teacher_id=teacher_id,
             course_id=course_id,
-            period_id=period_id,
             defaults={
                 'final_score': result['final_score'],
                 'criteria_scores': result['criteria_scores'],
+                'period_id': 1,
             }
         )
 
@@ -108,9 +105,8 @@ class TeacherAIAnalysisView(APIView):
         return Response(
             {
                 'teacher_id': teacher_id,
-                'period_id': period_id,
                 'course_id': course_id,
-                'weight_config_id': weight_config_id,
+                'weight_config_id': weight_config.weight_config_id,
                 **result,
             },
             status=status.HTTP_200_OK,
