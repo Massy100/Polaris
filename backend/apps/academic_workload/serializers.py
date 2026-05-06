@@ -28,4 +28,5 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class AIAnalysisRequestSerializer(serializers.Serializer):
     teacher_id = serializers.IntegerField()
+    period_id = serializers.IntegerField()
     course_id = serializers.IntegerField()
