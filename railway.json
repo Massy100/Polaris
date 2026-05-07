@@ -1,3 +1,7 @@
 {
-  "dockerComposePath": "docker-compose.yml"
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "type": "dockerCompose",
+    "dockerComposePath": "docker-compose.yml"
+  }
 }
