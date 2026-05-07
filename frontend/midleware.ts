@@ -2,17 +2,13 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-  
-  if (pathname.startsWith('/api/')) {
-    const backendUrl = `https://polaris-backend-yjn8.onrender.com${pathname}${request.nextUrl.search}`
-    
-    return NextResponse.rewrite(backendUrl)
+  // Solo para peticiones API
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    const url = request.nextUrl.pathname + request.nextUrl.search
+    const newUrl = `https://polaris-backend-yjn8.onrender.com${url}`
+    return NextResponse.rewrite(newUrl)
   }
-  
-  return NextResponse.next()
 }
-
 
 export const config = {
   matcher: '/api/:path*',
