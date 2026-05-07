@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Users,
   TrendingDown,
@@ -22,6 +22,18 @@ interface Teacher {
   status: Status;
 }
 
+interface TeacherFromAPI {
+  teacher_id: number;
+  full_name: string;
+  first_name: string;
+  last_name: string;
+  courses_taught: string;
+  rating: number;
+  score: number | null;
+}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+
 function getScoreColorClass(score: number): string {
   if (score <= 50) return "stat-red";
   if (score <= 65) return "stat-yellow";
@@ -34,18 +46,11 @@ const STATUS_LABELS: Record<Status, string> = {
   good: "Buen Desempeño",
 };
 
-const INITIAL_TEACHERS: Teacher[] = [
-  { id: "t1",  name: "María García López",    subject: "Matemáticas",      score: 45, studentEval: 2.3, status: "danger"  },
-  { id: "t2",  name: "Juan Pérez Martínez",   subject: "Física",           score: 88, studentEval: 4.5, status: "good"    },
-  { id: "t3",  name: "Ana Rodríguez Silva",   subject: "Química",          score: 72, studentEval: 3.8, status: "warning" },
-  { id: "t4",  name: "Carlos Sánchez Ruiz",   subject: "Historia",         score: 38, studentEval: 1.9, status: "danger"  },
-  { id: "t5",  name: "Laura Fernández Costa", subject: "Literatura",       score: 91, studentEval: 4.7, status: "good"    },
-  { id: "t6",  name: "Roberto Jiménez Mora",  subject: "Biología",         score: 60, studentEval: 3.2, status: "warning" },
-  { id: "t7",  name: "Sofía Torres Vega",     subject: "Arte",             score: 48, studentEval: 2.1, status: "danger"  },
-  { id: "t8",  name: "Miguel Castro León",    subject: "Inglés",           score: 77, studentEval: 4.0, status: "warning" },
-  { id: "t9",  name: "Elena Vargas Díaz",     subject: "Música",           score: 82, studentEval: 4.3, status: "good"    },
-  { id: "t10", name: "Andrés Morales Ríos",   subject: "Educación Física", score: 50, studentEval: 2.6, status: "danger"  },
-];
+function getStatusFromScore(score: number): Status {
+  if (score <= 50) return "danger";
+  if (score <= 65) return "warning";
+  return "good";
+}
 
 const IconEyebrow = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -141,9 +146,60 @@ function TeacherCard({
 }
 
 export default function PerformanceAlertPage() {
-  const [teachers, setTeachers]   = useState<Teacher[]>(INITIAL_TEACHERS);
+  const [teachers, setTeachers]   = useState<Teacher[]>([]);
   const [search, setSearch]       = useState("");
   const [filterStatus, setFilter] = useState<"all" | Status>("all");
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState<string | null>(null);
+
+  const fetchAllTeachers = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      let allResults: TeacherFromAPI[] = [];
+      let page = 1;
+      let hasMore = true;
+
+      while (hasMore) {
+        const queryParams = new URLSearchParams();
+        queryParams.append('page', page.toString());
+        queryParams.append('page_size', '100');
+
+        const response = await fetch(`${API_URL}/academic-career/teachers/?${queryParams.toString()}`);
+        if (!response.ok) throw new Error('Error al cargar los docentes');
+
+        const data = await response.json();
+        allResults = allResults.concat(data.results);
+        hasMore = data.next !== null;
+        page++;
+      }
+
+      const mapped: Teacher[] = allResults.map((teacher: TeacherFromAPI) => {
+        const ratingValue = teacher.rating ?? 0;
+        const score100 = Math.round(ratingValue * 20);
+        const name = teacher.full_name || `${teacher.first_name} ${teacher.last_name}` || `Docente ${teacher.teacher_id}`;
+        return {
+          id: String(teacher.teacher_id),
+          name,
+          subject: teacher.courses_taught || "Sin asignatura",
+          score: score100,
+          studentEval: ratingValue,
+          status: getStatusFromScore(score100),
+        };
+      });
+
+      setTeachers(mapped);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAllTeachers();
+  }, [fetchAllTeachers]);
 
   const handleStatusChange = (id: string, newStatus: Status) => {
     setTeachers((prev) =>
@@ -219,13 +275,21 @@ export default function PerformanceAlertPage() {
         </div>
 
         <div className="pa-grid">
-          {filtered.map((teacher) => (
-            <TeacherCard
-              key={teacher.id}
-              teacher={teacher}
-              onStatusChange={handleStatusChange}
-            />
-          ))}
+          {loading ? (
+            <div className="pa-loading">Cargando docentes...</div>
+          ) : error ? (
+            <div className="pa-error">{error}</div>
+          ) : filtered.length === 0 ? (
+            <div className="pa-empty">No se encontraron docentes.</div>
+          ) : (
+            filtered.map((teacher) => (
+              <TeacherCard
+                key={teacher.id}
+                teacher={teacher}
+                onStatusChange={handleStatusChange}
+              />
+            ))
+          )}
         </div>
       </main>
     </div>
