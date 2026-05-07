@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: polaris-backend
+    runtime: image
+    repo: https://github.com/Massy100/Polaris
+    plan: free
+    dockerComposePath: docker-compose.yml
+    envVars:
+      - key: DOPPLER_TOKEN
+        sync: false
+
+  - type: web
+    name: polaris-frontend
+    runtime: image
+    repo: https://github.com/Massy100/Polaris
+    plan: free
+    dockerComposePath: docker-compose.yml
+    envVars:
+      - key: DOPPLER_TOKEN
+        sync: false
+
+  - type: web
+    name: polaris-adminer
+    runtime: image
+    repo: https://github.com/Massy100/Polaris
+    plan: free
+    dockerComposePath: docker-compose.yml
+    envVars:
+      - key: DOPPLER_TOKEN
+        sync: false
