@@ -1,0 +1,16 @@
+{
+  "experimentalServices": [
+    {
+      "name": "frontend",
+      "entrypoint": "frontend",
+      "routePrefix": "/",
+      "framework": "nextjs"
+    },
+    {
+      "name": "backend",
+      "entrypoint": "backend",
+      "routePrefix": "api",
+      "framework": null
+    }
+  ]
+}
