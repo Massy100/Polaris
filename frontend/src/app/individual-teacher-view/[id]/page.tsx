@@ -95,6 +95,7 @@ export default function IndividualTeacherView() {
 
     const [courses, setCourses] = useState<TeacherClass[]>([]);
     const [loadingCourses, setLoadingCourses] = useState(false);
+    const [courseScores, setCourseScores] = useState<Record<string, number>>({});
 
     const [openClassId, setOpenClassId] = useState<string | null>(null);
     const [loadingComments, setLoadingComments] = useState<Record<string, boolean>>({});
@@ -106,7 +107,6 @@ export default function IndividualTeacherView() {
         setVisibleNotes((prev) => ({ ...prev, [noteId]: !prev[noteId] }));
     };
 
-    // Cargar teacher
     useEffect(() => {
         if (!teacherId) return;
         setLoading(true);
@@ -117,7 +117,6 @@ export default function IndividualTeacherView() {
             .finally(() => setLoading(false));
     }, [teacherId]);
 
-    // Cargar períodos del teacher
     useEffect(() => {
         if (!teacherId) return;
         setLoadingPeriods(true);
@@ -130,24 +129,28 @@ export default function IndividualTeacherView() {
             .finally(() => setLoadingPeriods(false));
     }, [teacherId]);
 
-    // Cargar materias cuando cambia el período
     useEffect(() => {
         if (!teacherId || !selectedPeriod) return;
         setLoadingCourses(true);
         setCourses([]);
+        setCourseScores({});
         setOpenClassId(null);
-        fetch(`${API_URL}/academic-workload/teacher-courses/?teacher_id=${teacherId}&period_id=${selectedPeriod.period_id}`)
-            .then((res) => res.json())
-            .then((data) => {
-                const mapped: TeacherClass[] = (data.courses ?? []).map((c: CourseInPeriod) => ({
-                    id: String(c.course_id),
-                    name: c.name,
-                    comments: { positive: [], negative: [] },
-                    sentiment: { positiveReal: 0, negativeReal: 0, falsePositive: 0, falseNegative: 0 },
-                }));
-                setCourses(mapped);
-            })
-            .finally(() => setLoadingCourses(false));
+
+        const periodId = selectedPeriod.period_id;
+
+        Promise.all([
+            fetch(`${API_URL}/academic-workload/teacher-courses/?teacher_id=${teacherId}&period_id=${periodId}`).then((r) => r.json()),
+            fetch(`${API_URL}/academic-workload/course-scores/?teacher_id=${teacherId}&period_id=${periodId}`).then((r) => r.json()),
+        ]).then(([coursesData, scoresData]) => {
+            const mapped: TeacherClass[] = (coursesData.courses ?? []).map((c: CourseInPeriod) => ({
+                id: String(c.course_id),
+                name: c.name,
+                comments: { positive: [], negative: [] },
+                sentiment: { positiveReal: 0, negativeReal: 0, falsePositive: 0, falseNegative: 0 },
+            }));
+            setCourses(mapped);
+            setCourseScores(scoresData.scores ?? {});
+        }).finally(() => setLoadingCourses(false));
     }, [teacherId, selectedPeriod]);
 
     const handleAnalyzeComments = async (courseId: string) => {
@@ -169,8 +172,8 @@ export default function IndividualTeacherView() {
             if (!res.ok) throw new Error(data.detail || 'Error en el análisis');
 
             setTeacher((prev) => prev ? { ...prev, finalScore: Math.round((data.final_score ?? prev.finalScore) * 10) / 10 } : prev);
+            setCourseScores((prev) => ({ ...prev, [courseId]: data.final_score }));
 
-            // Limpiar comentarios del curso para que se recarguen frescos
             setCourses((prev) => prev.map((c) =>
                 c.id === courseId ? { ...c, comments: { positive: [], negative: [] } } : c
             ));
@@ -183,7 +186,6 @@ export default function IndividualTeacherView() {
 
     const toggleComments = async (classId: string) => {
         if (!selectedPeriod) return;
-
         if (openClassId === classId) { setOpenClassId(null); return; }
         setOpenClassId(classId);
 
@@ -264,13 +266,12 @@ export default function IndividualTeacherView() {
                         <div className="itv-score-card">
                             <div className="itv-score-icon"><IconTrending /></div>
                             <p className="itv-score-title">Nota Final</p>
-                            <h2 className="itv-score-value">{(teacher.finalScore / 2).toFixed(2)}</h2>
+                            <h2 className="itv-score-value">{teacher.finalScore.toFixed(2)}</h2>
                             <p className="itv-score-subtitle">Promedio ponderado</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Selector de períodos */}
                 <div className="itv-section-card">
                     <div className="itv-section-header">
                         <h2 className="itv-section-title">Semestre</h2>
@@ -295,7 +296,6 @@ export default function IndividualTeacherView() {
                     )}
                 </div>
 
-                {/* Materias del período seleccionado */}
                 <div className="itv-section-card">
                     <div className="itv-section-header">
                         <h2 className="itv-section-title">
@@ -312,6 +312,7 @@ export default function IndividualTeacherView() {
                             {courses.map((teacherClass) => {
                                 const isOpen = openClassId === teacherClass.id;
                                 const isLoadingThis = loadingComments[teacherClass.id];
+                                const courseScore = courseScores[teacherClass.id] ?? null;
                                 return (
                                     <div className="itv-class-card" key={teacherClass.id}>
                                         <div className="itv-class-header">
@@ -319,7 +320,12 @@ export default function IndividualTeacherView() {
                                                 <span className="itv-class-icon"><IconBook /></span>
                                                 <h3>{teacherClass.name}</h3>
                                             </div>
-                                            <CourseNote noteId={teacherClass.id} score={null} visibleNotes={visibleNotes} onToggle={toggleNoteVisibility} />
+                                            <CourseNote
+                                                noteId={teacherClass.id}
+                                                score={courseScore}
+                                                visibleNotes={visibleNotes}
+                                                onToggle={toggleNoteVisibility}
+                                            />
                                             <div className="itv-action-buttons">
                                                 <button className="itv-analyze-btn" onClick={() => handleAnalyzeComments(teacherClass.id)}>
                                                     Analizar comentarios

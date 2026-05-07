@@ -16,12 +16,8 @@ class TeacherPeriodsView(APIView):
 
     def get(self, request):
         teacher_id = request.query_params.get('teacher_id')
-
         if not teacher_id:
-            return Response(
-                {'detail': 'teacher_id es requerido.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({'detail': 'teacher_id es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
 
         periods = (
             Period.objects
@@ -31,10 +27,7 @@ class TeacherPeriodsView(APIView):
             .values('period_id', 'name', 'start_date', 'end_date', 'status')
         )
 
-        return Response({
-            'teacher_id': int(teacher_id),
-            'periods': list(periods),
-        })
+        return Response({'teacher_id': int(teacher_id), 'periods': list(periods)})
 
 
 class TeacherCoursesInPeriodView(APIView):
@@ -44,10 +37,7 @@ class TeacherCoursesInPeriodView(APIView):
         period_id = request.query_params.get('period_id')
 
         if not teacher_id or not period_id:
-            return Response(
-                {'detail': 'teacher_id y period_id son requeridos.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({'detail': 'teacher_id y period_id son requeridos.'}, status=status.HTTP_400_BAD_REQUEST)
 
         sections = (
             Section.objects
@@ -62,10 +52,29 @@ class TeacherCoursesInPeriodView(APIView):
             for s in sections
         ]
 
+        return Response({'teacher_id': int(teacher_id), 'period_id': int(period_id), 'courses': courses})
+
+
+class TeacherCourseScoresView(APIView):
+
+    def get(self, request):
+        teacher_id = request.query_params.get('teacher_id')
+        period_id = request.query_params.get('period_id')
+
+        if not teacher_id or not period_id:
+            return Response({'detail': 'teacher_id y period_id son requeridos.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        scores_qs = TeacherCourseScore.objects.filter(
+            teacher_id=teacher_id,
+            period_id=period_id,
+        ).values('course_id', 'final_score')
+
+        scores = {str(s['course_id']): round(s['final_score'], 2) for s in scores_qs}
+
         return Response({
             'teacher_id': int(teacher_id),
             'period_id': int(period_id),
-            'courses': courses,
+            'scores': scores,
         })
 
 
@@ -104,10 +113,7 @@ class TeacherAIAnalysisView(APIView):
         ).first()
 
         if not weight_config:
-            return Response(
-                {'detail': 'No hay una configuración de pesos activa.'},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            return Response({'detail': 'No hay una configuración de pesos activa.'}, status=status.HTTP_404_NOT_FOUND)
 
         criteria_qs = (
             WeightconfigCriterion.objects
@@ -117,10 +123,7 @@ class TeacherAIAnalysisView(APIView):
         )
 
         if not criteria_qs.exists():
-            return Response(
-                {'detail': 'La configuración de pesos activa no tiene criterios.'},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            return Response({'detail': 'La configuración de pesos activa no tiene criterios.'}, status=status.HTTP_404_NOT_FOUND)
 
         criteria = [
             {
@@ -135,10 +138,7 @@ class TeacherAIAnalysisView(APIView):
         try:
             result = analyze_teacher(comments, criteria)
         except Exception as e:
-            return Response(
-                {'detail': f'Error al procesar la IA: {str(e)}'},
-                status=status.HTTP_502_BAD_GATEWAY,
-            )
+            return Response({'detail': f'Error al procesar la IA: {str(e)}'}, status=status.HTTP_502_BAD_GATEWAY)
 
         for comment_result in result['comments']:
             Comment.objects.filter(comment_id=comment_result['comment_id']).update(
@@ -181,10 +181,7 @@ class TeacherCommentsView(APIView):
         period_id = request.query_params.get('period_id')
 
         if not teacher_id or not course_id or not period_id:
-            return Response(
-                {'detail': 'teacher_id, course_id y period_id son requeridos.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({'detail': 'teacher_id, course_id y period_id son requeridos.'}, status=status.HTTP_400_BAD_REQUEST)
 
         comments_qs = Comment.objects.filter(
             section__teacher_id=teacher_id,
