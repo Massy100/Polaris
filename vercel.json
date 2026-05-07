@@ -2,12 +2,12 @@
   "experimentalServices": {
     "frontend": {
       "entrypoint": "frontend",
-      "route": "/",
+      "routePrefix": "/",
       "framework": "nextjs"
     },
     "backend": {
       "entrypoint": "backend",
-      "route": "api",
+      "routePrefix": "api",
       "framework": null
     }
   }
