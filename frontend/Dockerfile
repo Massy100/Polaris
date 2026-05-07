@@ -1,18 +1,19 @@
-FROM node:20-alpine
-
+# frontend/Dockerfile (CORREGIDO para producción)
+FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Copy package files
+# Copiar package.json y lock file
 COPY package*.json ./
+RUN npm ci --only=production
 
-# Install dependencies
-RUN npm install
-
-# Copy all source code
+# Copiar el resto del código
 COPY . .
 
-# Expose port
+# Construir la aplicación
+RUN npm run build
+
+# Exponer el puerto
 EXPOSE 3000
 
-# Start in development mode with host configurated
-CMD ["npm", "run", "dev", "--", "-H", "0.0.0.0"]
+# Comando para PRODUCCIÓN 
+CMD ["npm", "start"]
