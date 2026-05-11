@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import './notifications.css';
 
@@ -27,6 +27,19 @@ interface TeacherDanger {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 const DANGER_THRESHOLD = 50;
+const LS_READ_IDS = 'notifications_read_ids';
+const LS_DELETED_IDS = 'notifications_deleted_ids';
+
+function getStoredIds(key: string): number[] {
+  try {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : [];
+  } catch { return []; }
+}
+
+function saveStoredIds(key: string, ids: number[]) {
+  try { localStorage.setItem(key, JSON.stringify(ids)); } catch {}
+}
 
 const IconBack = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -77,6 +90,13 @@ export default function NotificationsPage() {
   const [deletingIds, setDeletingIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [readIds, setReadIds] = useState<number[]>(() => getStoredIds(LS_READ_IDS));
+  const [deletedIds, setDeletedIds] = useState<number[]>(() => getStoredIds(LS_DELETED_IDS));
+
+  const readIdsRef = useRef(readIds);
+  readIdsRef.current = readIds;
+  const deletedIdsRef = useRef(deletedIds);
+  deletedIdsRef.current = deletedIds;
 
   const fetchAllTeachers = useCallback(async () => {
     try {
@@ -101,24 +121,29 @@ export default function NotificationsPage() {
         page++;
       }
 
+      const currentReadIds = readIdsRef.current;
+      const currentDeletedIds = deletedIdsRef.current;
+
       const dangerTeachers: TeacherDanger[] = allResults
         .filter((teacher: TeacherFromAPI) => {
-          const ratingValue = teacher.rating ?? 0;
-          const score100 = Math.round(ratingValue * 20);
-          return score100 <= DANGER_THRESHOLD;
+          if (currentDeletedIds.includes(teacher.teacher_id)) return false;
+          if (teacher.score === null || teacher.score === undefined) return true;
+          return teacher.score <= DANGER_THRESHOLD;
         })
-        .map((teacher: TeacherFromAPI, index: number) => {
-          const ratingValue = teacher.rating ?? 0;
-          const score100 = Math.round(ratingValue * 20);
+        .map((teacher: TeacherFromAPI) => {
+          const scoreValue = teacher.score ?? 0;
+          const isNullScore = teacher.score === null || teacher.score === undefined;
           const name = teacher.full_name || `${teacher.first_name} ${teacher.last_name}` || `Docente ${teacher.teacher_id}`;
           return {
             id: teacher.teacher_id,
             name,
-            score: score100,
-            message: `El docente ${name} tiene una puntuación de ${score100}%, por debajo del umbral mínimo.`,
+            score: scoreValue,
+            message: isNullScore
+              ? `El docente ${name} no tiene una puntuación asignada.`
+              : `El docente ${name} tiene una puntuación de ${scoreValue}%, por debajo del umbral mínimo.`,
             time: 'Recién detectado',
-            type: score100 <= 30 ? 'error' as const : 'warning' as const,
-            read: false,
+            type: isNullScore ? 'error' as const : scoreValue <= 30 ? 'error' as const : 'warning' as const,
+            read: currentReadIds.includes(teacher.teacher_id),
           };
         });
 
@@ -138,31 +163,45 @@ export default function NotificationsPage() {
 
   const markAsRead = (id: number, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
+    setReadIds(prev => {
+      const next = prev.includes(id) ? prev : [...prev, id];
+      saveStoredIds(LS_READ_IDS, next);
+      return next;
+    });
     setNotifications(prev =>
       prev.map(n => n.id === id ? { ...n, read: true } : n)
     );
   };
 
   const markAllAsRead = () => {
+    const allIds = notifications.map(n => n.id);
+    setReadIds(prev => {
+      const next = [...new Set([...prev, ...allIds])];
+      saveStoredIds(LS_READ_IDS, next);
+      return next;
+    });
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   };
 
   const deleteNotification = (id: number, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setDeletingIds(prev => [...prev, id]);
-    setTimeout(() => {
-      setNotifications(prev => prev.filter(n => n.id !== id));
-      setDeletingIds(prev => prev.filter(delId => delId !== id));
-    }, 300);
+    setNotifications(prev => prev.filter(n => n.id !== id));
+    setDeletedIds(prev => {
+      const next = prev.includes(id) ? prev : [...prev, id];
+      saveStoredIds(LS_DELETED_IDS, next);
+      return next;
+    });
   };
 
   const deleteAllNotifications = () => {
     const allIds = notifications.map(n => n.id);
-    setDeletingIds(allIds);
-    setTimeout(() => {
-      setNotifications([]);
-      setDeletingIds([]);
-    }, 300);
+    setNotifications([]);
+    setDeletedIds(prev => {
+      const next = [...new Set([...prev, ...allIds])];
+      saveStoredIds(LS_DELETED_IDS, next);
+      return next;
+    });
   };
 
   return (

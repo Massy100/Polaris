@@ -9,6 +9,7 @@ import {
   Search,
   Filter,
 } from "lucide-react";
+import Pagination from "../components/pagination";
 import "./add-category.css";
 
 type Status = "danger" | "warning" | "good";
@@ -33,6 +34,18 @@ interface TeacherFromAPI {
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const LS_STATUS_KEY = 'performance_alert_statuses';
+
+function getStoredStatuses(): Record<string, Status> {
+  try {
+    const stored = localStorage.getItem(LS_STATUS_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch { return {}; }
+}
+
+function saveStoredStatuses(statuses: Record<string, Status>) {
+  try { localStorage.setItem(LS_STATUS_KEY, JSON.stringify(statuses)); } catch {}
+}
 
 function getScoreColorClass(score: number): string {
   if (score <= 50) return "stat-red";
@@ -98,7 +111,7 @@ function TeacherCard({
   onStatusChange: (id: string, s: Status) => void;
 }) {
   const scoreColor = getScoreColorClass(teacher.score);
-  const evalColor  = getScoreColorClass(teacher.studentEval * 20);
+  const evalColor  = getScoreColorClass(teacher.score);
 
   const BadgeIcon =
     teacher.status === "danger"  ? TrendingDown  :
@@ -151,60 +164,63 @@ export default function PerformanceAlertPage() {
   const [filterStatus, setFilter] = useState<"all" | Status>("all");
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState<string | null>(null);
+  const [page, setPage]           = useState(1);
+  const [pageSize, setPageSize]   = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const fetchAllTeachers = useCallback(async () => {
+  const fetchTeachers = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      let allResults: TeacherFromAPI[] = [];
-      let page = 1;
-      let hasMore = true;
+      const queryParams = new URLSearchParams();
+      queryParams.append('page', page.toString());
+      queryParams.append('page_size', pageSize.toString());
 
-      while (hasMore) {
-        const queryParams = new URLSearchParams();
-        queryParams.append('page', page.toString());
-        queryParams.append('page_size', '100');
+      const response = await fetch(`${API_URL}/academic-career/teachers/?${queryParams.toString()}`);
+      if (!response.ok) throw new Error('Error al cargar los docentes');
 
-        const response = await fetch(`${API_URL}/academic-career/teachers/?${queryParams.toString()}`);
-        if (!response.ok) throw new Error('Error al cargar los docentes');
+      const data = await response.json();
 
-        const data = await response.json();
-        allResults = allResults.concat(data.results);
-        hasMore = data.next !== null;
-        page++;
-      }
-
-      const mapped: Teacher[] = allResults.map((teacher: TeacherFromAPI) => {
+      const mapped: Teacher[] = data.results.map((teacher: TeacherFromAPI) => {
+        const scoreValue = teacher.score ?? 0;
         const ratingValue = teacher.rating ?? 0;
-        const score100 = Math.round(ratingValue * 20);
         const name = teacher.full_name || `${teacher.first_name} ${teacher.last_name}` || `Docente ${teacher.teacher_id}`;
         return {
           id: String(teacher.teacher_id),
           name,
           subject: teacher.courses_taught || "Sin asignatura",
-          score: score100,
+          score: scoreValue,
           studentEval: ratingValue,
-          status: getStatusFromScore(score100),
+          status: getStatusFromScore(scoreValue),
         };
       });
 
-      setTeachers(mapped);
+      const storedStatuses = getStoredStatuses();
+      const merged = mapped.map(t => ({
+        ...t,
+        status: storedStatuses[t.id] ?? t.status,
+      }));
+      setTeachers(merged);
+      setTotalItems(data.count);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, pageSize]);
 
   useEffect(() => {
-    fetchAllTeachers();
-  }, [fetchAllTeachers]);
+    fetchTeachers();
+  }, [fetchTeachers]);
 
   const handleStatusChange = (id: string, newStatus: Status) => {
     setTeachers((prev) =>
       prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t))
     );
+    const stored = getStoredStatuses();
+    stored[id] = newStatus;
+    saveStoredStatuses(stored);
   };
 
   const filtered = useMemo(() => {
@@ -291,6 +307,23 @@ export default function PerformanceAlertPage() {
             ))
           )}
         </div>
+
+        {!loading && totalItems > 0 && (
+          <Pagination
+            page={page}
+            pageSize={pageSize}
+            totalItems={totalItems}
+            onPageChange={(newPage) => {
+              const totalPages = Math.ceil(totalItems / pageSize) || 1;
+              if (newPage < 1 || newPage > totalPages) return;
+              setPage(newPage);
+            }}
+            onPageSizeChange={(size) => {
+              setPageSize(size > 0 ? size : 10);
+              setPage(1);
+            }}
+          />
+        )}
       </main>
     </div>
   );
