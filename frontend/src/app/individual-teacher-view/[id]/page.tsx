@@ -102,6 +102,7 @@ export default function IndividualTeacherView() {
     const [visibleNotes, setVisibleNotes] = useState<Record<string, boolean>>({});
     const [processingModalOpen, setProcessingModalOpen] = useState(false);
     const [processingText, setProcessingText] = useState("");
+    const [analyzeError, setAnalyzeError] = useState<string | null>(null);
 
     const toggleNoteVisibility = (noteId: string) => {
         setVisibleNotes((prev) => ({ ...prev, [noteId]: !prev[noteId] }));
@@ -171,14 +172,14 @@ export default function IndividualTeacherView() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.detail || 'Error en el análisis');
 
+            setAnalyzeError(null);
             setTeacher((prev) => prev ? { ...prev, finalScore: Math.round((data.final_score ?? prev.finalScore) * 10) / 10 } : prev);
             setCourseScores((prev) => ({ ...prev, [courseId]: data.final_score }));
-
             setCourses((prev) => prev.map((c) =>
                 c.id === courseId ? { ...c, comments: { positive: [], negative: [] } } : c
             ));
         } catch (err) {
-            console.error('Error al analizar:', err);
+            setAnalyzeError(err instanceof Error ? err.message : 'No se pudo analizar este curso.');
         } finally {
             setProcessingModalOpen(false);
         }
@@ -388,6 +389,14 @@ export default function IndividualTeacherView() {
                     <div className="processing-spinner" />
                     <p className="modal-text">{processingText}</p>
                     <p className="modal-text">Por favor espere un momento.</p>
+                </div>
+            </Modal>
+
+            <Modal open={!!analyzeError} title="Error en el análisis" onClose={() => setAnalyzeError(null)} width={420}>
+                <div className="modal-content processing-modal-content">
+                    <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--url-danger)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '12px' }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <p className="modal-text">{analyzeError}</p>
+                    <button className="itv-btn-primary" onClick={() => setAnalyzeError(null)} style={{ marginTop: '16px' }}>Cerrar</button>
                 </div>
             </Modal>
         </div>

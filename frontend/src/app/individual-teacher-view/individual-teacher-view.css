@@ -260,6 +260,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   padding: 16px 22px;
   background: var(--url-surface);
   transition: background var(--url-transition);
@@ -273,6 +274,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex: 1;
+  min-width: 0;
 }
 
 .itv-class-title h3 {
@@ -281,6 +284,9 @@
   font-weight: 700;
   color: var(--url-navy);
   letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .itv-class-icon {
