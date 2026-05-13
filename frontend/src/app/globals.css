@@ -320,17 +320,41 @@ img, svg { display: block; max-width: 100%; }
 
 .url-page-title {
   font-family: var(--url-font-sans);
-  font-size: clamp(22px, 3.5vw, 32px);
-  font-weight: 700;
+  font-size: clamp(24px, 3.5vw, 28px);
+  font-weight: 800;
   color: var(--url-navy);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  margin-bottom: 8px;
 }
 
 .url-page-sub {
-  font-size: clamp(13px, 1.5vw, 15px);
+  font-size: 15px;
   color: var(--url-text-sec);
-  line-height: 1.6;
-  max-width: 540px;
+  line-height: 1.5;
+  max-width: 600px;
+}
+
+.url-page-main {
+  padding: 40px 0 60px;
+}
+
+.url-back-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--url-navy-light);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 0;
+  transition: color var(--url-transition);
+  margin-bottom: 24px;
+}
+
+.url-back-btn:hover {
+  color: var(--url-navy);
 }
 
 /* ─── Divider ────────────────────────────────────────────────────── */

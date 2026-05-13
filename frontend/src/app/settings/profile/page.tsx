@@ -222,18 +222,16 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <main className="url-container" style={{ paddingTop: '80px', paddingBottom: '60px' }}>
-        <header className="settings-header" style={{ marginBottom: '32px' }}>
-          <div>
-            <button onClick={() => router.push('/settings')} className="settings-back-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-              </svg>
-              Configuración
-            </button>
-            <h1 className="url-title" style={{ fontSize: '28px', marginBottom: '4px' }}>Mi Perfil</h1>
-            <p className="settings-subtitle">Gestiona tu información personal, credenciales y preferencias del sistema.</p>
-          </div>
+      <main className="url-container url-page-main">
+        <header style={{ marginBottom: '32px' }}>
+          <button onClick={() => router.push('/settings')} className="url-back-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Configuración
+          </button>
+          <h1 className="url-page-title">Mi Perfil</h1>
+          <p className="url-page-sub">Gestiona tu información personal, credenciales y preferencias del sistema.</p>
         </header>
 
         <div className="profile-layout">

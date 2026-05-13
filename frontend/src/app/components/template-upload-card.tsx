@@ -3,21 +3,27 @@
 import { useState, useRef } from 'react';
 import '../pensum/pensum-upload.css';
 
-interface PensumUploadCardProps {
+interface TemplateUploadCardProps {
   onSuccess?: () => void;
 }
 
-const PensumUploadCard: React.FC<PensumUploadCardProps> = ({ onSuccess }) => {
+const TemplateUploadCard: React.FC<TemplateUploadCardProps> = ({ onSuccess }) => {
   const [dragging, setDragging] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [templateName, setTemplateName] = useState('');
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
   const handleFile = async (file: File) => {
-    if (!file.name.match(/\.(xlsx|xls)$/)) {
-      setMessage({ text: 'Solo se aceptan archivos Excel (.xlsx o .xls)', type: 'error' });
+    if (!templateName.trim()) {
+      setMessage({ text: 'Por favor, asigne un nombre a la plantilla antes de subirla.', type: 'error' });
+      return;
+    }
+
+    if (!file.name.match(/\.(xlsx|xls|csv)$/)) {
+      setMessage({ text: 'Formato inválido. Usa Excel (.xlsx, .xls) o CSV.', type: 'error' });
       return;
     }
 
@@ -25,25 +31,28 @@ const PensumUploadCard: React.FC<PensumUploadCardProps> = ({ onSuccess }) => {
     setMessage(null);
 
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('category', 'encuestas'); 
+    formData.append('files', file);
+    formData.append('batch_name', templateName);
 
     try {
-      const res = await fetch(`${API_URL}/pensum/upload/`, {
+      const res = await fetch(`${API_URL}/integrations/bulk-upload/`, {
         method: 'POST',
         body: formData,
       });
 
       const data = await res.json();
 
-      if (res.ok) {
-        setMessage({ text: data.message || 'Pensum cargado exitosamente', type: 'success' });
+      if (res.ok && data.ok) {
+        setMessage({ text: `Plantilla "${templateName}" cargada exitosamente`, type: 'success' });
+        setTemplateName('');
         
         setTimeout(() => {
           onSuccess?.();
         }, 2000);
 
       } else {
-        setMessage({ text: data.error || 'Ocurrió un error al procesar el archivo.', type: 'error' });
+        setMessage({ text: data.message || 'Ocurrió un error al procesar el archivo.', type: 'error' });
       }
     } catch {
       setMessage({ text: 'No se pudo conectar con el servidor.', type: 'error' });
@@ -60,12 +69,37 @@ const PensumUploadCard: React.FC<PensumUploadCardProps> = ({ onSuccess }) => {
   };
 
   return (
-    <div className="puc-card">
-      <h2 className="puc-title">Carga de Pensum</h2>
-      <p className="puc-subtitle">Sube el archivo Excel oficial con la estructura de cursos.</p>
+    <div className="puc-card" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <h2 className="puc-title">Carga de Plantilla</h2>
+      <p className="puc-subtitle">Sube el archivo de encuestas y observaciones docentes.</p>
+
+      <div style={{ marginBottom: '20px' }}>
+        <label htmlFor="template-name" style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 600, color: '#4b5563' }}>
+          Nombre de la Plantilla
+        </label>
+        <input 
+          id="template-name"
+          type="text" 
+          placeholder="Ej: Plantilla evaluación Compiladores"
+          value={templateName}
+          onChange={(e) => setTemplateName(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            borderRadius: '8px',
+            border: '1px solid #d1d5db',
+            fontSize: '14px',
+            outline: 'none',
+            transition: 'border-color 0.2s'
+          }}
+          onFocus={(e) => e.target.style.borderColor = 'var(--url-navy)'}
+          onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+        />
+      </div>
 
       <div
         className={`puc-dropzone ${dragging ? 'puc-dropzone--dragging' : ''}`}
+        style={{ flex: 1, minHeight: '150px' }}
         onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
@@ -73,20 +107,19 @@ const PensumUploadCard: React.FC<PensumUploadCardProps> = ({ onSuccess }) => {
       >
         <div className="puc-dropzone-icon">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-            <polyline points="14 2 14 8 20 8" />
-            <line x1="12" y1="18" x2="12" y2="12" />
-            <line x1="9" y1="15" x2="15" y2="15" />
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
           </svg>
         </div>
         <p className="puc-dropzone-title">
-          {loading ? 'Procesando archivo...' : 'Arrastra tu archivo aquí'}
+          {loading ? 'Procesando plantilla...' : 'Arrastra tu archivo aquí'}
         </p>
-        <p className="puc-dropzone-hint">o haz clic para seleccionarlo desde tu equipo</p>
+        <p className="puc-dropzone-hint">o haz clic para seleccionar (Excel o CSV)</p>
         <input
           ref={inputRef}
           type="file"
-          accept=".xlsx,.xls"
+          accept=".xlsx,.xls,.csv"
           style={{ display: 'none' }}
           onChange={(e) => {
             const file = e.target.files?.[0];
@@ -109,4 +142,4 @@ const PensumUploadCard: React.FC<PensumUploadCardProps> = ({ onSuccess }) => {
   );
 };
 
-export default PensumUploadCard;
+export default TemplateUploadCard;

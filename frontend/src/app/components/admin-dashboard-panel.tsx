@@ -46,7 +46,7 @@ const navItems = [
   { id: 3, label: 'Ranking Institucional', icon: 'TrendingUp',    path: '/institutional-ranking' },
   { id: 5, label: 'Alertas de Desempeño',  icon: 'AlertTriangle', path: '/performance-alert' },
   { id: 6, label: 'Cursos Históricos',     icon: 'History',       path: '/history-view' },
-  { id: 7, label: 'Carga Masiva',          icon: 'Upload',        path: '/bulk-upload' },
+  { id: 7, label: 'Carga Masiva',          icon: 'Upload',        path: '/pensum' },
 ];
 
 interface AdminDashboardPanelProps {
