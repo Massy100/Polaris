@@ -195,6 +195,47 @@
   letter-spacing: -0.015em;
 }
 
+/* Períodos */
+.itv-periods-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.itv-period-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--url-border-soft);
+  background: var(--url-surface);
+  color: var(--url-text-sec);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--url-font-sans);
+  cursor: pointer;
+  transition: background var(--url-transition), color var(--url-transition), border-color var(--url-transition), box-shadow var(--url-transition);
+}
+
+.itv-period-btn:hover {
+  background: var(--url-surface-2);
+  border-color: var(--url-border);
+  color: var(--url-navy);
+}
+
+.itv-period-btn.active {
+  background: var(--url-navy);
+  border-color: var(--url-navy);
+  color: #ffffff;
+  box-shadow: var(--url-shadow-xs);
+}
+
+.itv-period-btn.active svg {
+  color: var(--url-gold);
+}
+
+/* Clases */
 .itv-classes-list {
   display: flex;
   flex-direction: column;
@@ -219,6 +260,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   padding: 16px 22px;
   background: var(--url-surface);
   transition: background var(--url-transition);
@@ -232,6 +274,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex: 1;
+  min-width: 0;
 }
 
 .itv-class-title h3 {
@@ -240,6 +284,9 @@
   font-weight: 700;
   color: var(--url-navy);
   letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .itv-class-icon {
@@ -377,7 +424,6 @@
   font-style: italic;
 }
 
-/* Empty & Loading States */
 .itv-empty-state {
   display: flex;
   flex-direction: column;
@@ -443,18 +489,7 @@
 }
 
 @keyframes processing-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.itv-class-score {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--url-navy);
+  to { transform: rotate(360deg); }
 }
 
 .itv-class-score {
@@ -499,11 +534,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition:
-    background var(--url-transition),
-    color var(--url-transition),
-    transform var(--url-transition),
-    box-shadow var(--url-transition);
+  transition: background var(--url-transition), color var(--url-transition), transform var(--url-transition), box-shadow var(--url-transition);
 }
 
 .itv-note-eye-btn:hover {
@@ -517,7 +548,6 @@
   transform: scale(0.94);
 }
 
-/* Responsive */
 @media (max-width: 1100px) {
   .itv-meta-grid {
     grid-template-columns: repeat(2, minmax(160px, 1fr));
@@ -556,6 +586,10 @@
   .itv-comments-col.positive {
     border-right: none;
     border-bottom: 1px solid var(--url-border-soft);
+  }
+
+  .itv-periods-list {
+    gap: 8px;
   }
 }
 
@@ -602,5 +636,10 @@
   .itv-comments-col {
     padding: 16px;
     min-height: auto;
+  }
+
+  .itv-period-btn {
+    font-size: 12px;
+    padding: 7px 13px;
   }
 }
