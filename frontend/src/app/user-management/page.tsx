@@ -1,5 +1,7 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
 import { useEffect, useState, useCallback } from 'react';
 import Modal from '../components/modal';
 import Pagination from '../components/pagination';
@@ -64,6 +66,7 @@ const IconClose = () => (
 );
 
 export default function UserManagementPage() {
+  const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -92,7 +95,7 @@ export default function UserManagementPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       let url = `${API_URL}/academic-career/teachers/`;
       const queryParams = new URLSearchParams();
       queryParams.append('page', page.toString());
@@ -101,14 +104,14 @@ export default function UserManagementPage() {
         queryParams.append('search', searchTerm);
       }
       url += `?${queryParams.toString()}`;
-      
+
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Error al cargar los docentes');
       }
-      
+
       const data = await response.json();
-      
+
       const transformedDocentes = data.results.map((teacher: any) => ({
         teacher_id: teacher.teacher_id,
         first_name: teacher.first_name,
@@ -119,7 +122,7 @@ export default function UserManagementPage() {
         email: teacher.email || '',
         status: teacher.status,
       }));
-      
+
       setDocentes(transformedDocentes);
       setTotalItems(data.count);
     } catch (err) {
@@ -158,11 +161,11 @@ export default function UserManagementPage() {
       const response = await fetch(`${API_URL}/academic-career/teachers/${id}/`, {
         method: 'DELETE',
       });
-      
+
       if (!response.ok) {
         throw new Error('Error al eliminar el docente');
       }
-      
+
       fetchTeachers();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al eliminar');
@@ -196,7 +199,7 @@ export default function UserManagementPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedId == null) return;
-    
+
     try {
       const response = await fetch(`${API_URL}/academic-career/teachers/${selectedId}/`, {
         method: 'PUT',
@@ -211,11 +214,11 @@ export default function UserManagementPage() {
           courses: draft.courses,
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error('Error al actualizar el docente');
       }
-      
+
       fetchTeachers();
       closeDrawer();
     } catch (err) {
@@ -260,18 +263,18 @@ export default function UserManagementPage() {
             </div>
             <div className="um-search-box">
               <IconSearch />
-              <input 
-                type="text" 
-                placeholder="Búsqueda por nombre..." 
-                className="um-search-input" 
-                value={searchTerm} 
-                onChange={(e) => setSearchTerm(e.target.value)} 
+              <input
+                type="text"
+                placeholder="Búsqueda por nombre..."
+                className="um-search-input"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
               {searchTerm && (
-                <button 
-                  type="button" 
-                  className="um-search-clear" 
-                  onClick={() => setSearchTerm('')} 
+                <button
+                  type="button"
+                  className="um-search-clear"
+                  onClick={() => setSearchTerm('')}
                   title="Limpiar"
                 >
                   <IconClose />
@@ -306,14 +309,26 @@ export default function UserManagementPage() {
                   </tr>
                 ) : (
                   docentes.map((c) => (
-                    <tr key={c.teacher_id} className="um-tr">
+                    <tr
+                      key={c.teacher_id}
+                      className="um-tr um-tr-clickable"
+                      title="Doble click para ver más detalles"
+                      onDoubleClick={() => router.push(`/individual-teacher-view/${c.teacher_id}`)}
+                    >
                       <td className="um-td" style={{ fontWeight: 600 }}>{c.full_name}</td>
                       <td className="um-td">{c.cursosImpartidos}</td>
                       <td className="um-td">{c.code}</td>
                       <td className="um-td">{c.email}</td>
                       <td className="um-td">
                         <div className="um-action-buttons">
-                          <button className="um-btn-edit" title="Modificar Registro" onClick={() => handleEdit(c)}>
+                          <button
+                            className="um-btn-edit"
+                            title="Modificar Registro"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(c);
+                            }}
+                          >
                             <div className="edit-pencil-wrapper">
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="edit-pencil-icon">
                                 <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm2.92 2.83H5v-.92l8.06-8.06.92.92L5.92 20.08zM20.71 7.04a1.003 1.003 0 000-1.42L18.37 3.29a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.83z" />
@@ -323,7 +338,14 @@ export default function UserManagementPage() {
                               </svg>
                             </div>
                           </button>
-                          <button className="um-btn-delete" title="Eliminar Registro" onClick={() => askDelete(c)}>
+                          <button
+                            className="um-btn-delete"
+                            title="Eliminar Registro"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              askDelete(c);
+                            }}
+                          >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 69 14" className="delete-bin-icon delete-bin-top">
                               <g clipPath="url(#clip-bin-top)">
                                 <path fill="currentColor" d="M20.8232 2.62734L19.9948 4.21304C19.8224 4.54309 19.4808 4.75 19.1085 4.75H4.92857C2.20246 4.75 0 6.87266 0 9.5C0 12.1273 2.20246 14.25 4.92857 14.25H64.0714C66.7975 14.25 69 12.1273 69 9.5C69 6.87266 66.7975 4.75 64.0714 4.75H49.8915C49.5192 4.75 49.1776 4.54309 49.0052 4.21305L48.1768 2.62734C47.3451 1.00938 45.6355 0 43.7719 0H25.2281C23.3645 0 21.6549 1.00938 20.8232 2.62734Z" />
@@ -353,77 +375,77 @@ export default function UserManagementPage() {
               </tbody>
             </table>
           </div>
-          
+
           <div className="um-card-footer">
             {!loading && totalItems > 0 && (
-              <Pagination 
-                page={page} 
-                pageSize={pageSize} 
-                totalItems={totalItems} 
+              <Pagination
+                page={page}
+                pageSize={pageSize}
+                totalItems={totalItems}
                 onPageChange={(newPage) => {
                   const totalPages = Math.ceil(totalItems / pageSize) || 1;
                   if (newPage < 1 || newPage > totalPages) return;
                   setPage(newPage);
-                }} 
+                }}
                 onPageSizeChange={(size) => {
                   const safeSize = size > 0 ? size : 10;
                   setPageSize(safeSize);
                   setPage(1);
-                }} 
+                }}
               />
             )}
           </div>
         </div>
       </main>
 
-      <Modal 
-        open={open} 
-        title="Actualizar Docente" 
-        onClose={closeDrawer} 
+      <Modal
+        open={open}
+        title="Actualizar Docente"
+        onClose={closeDrawer}
         width={560}
       >
         <form className="um-form" onSubmit={handleSubmit}>
           <div className="um-form-grid">
             <div className="um-form-field">
               <label className="um-form-label">Nombres</label>
-              <input 
-                type="text" 
-                className="um-form-input" 
-                placeholder="Nombres del docente" 
-                value={draft.first_name} 
-                onChange={(e) => setDraft((prev) => ({ ...prev, first_name: e.target.value }))} 
-                required 
+              <input
+                type="text"
+                className="um-form-input"
+                placeholder="Nombres del docente"
+                value={draft.first_name}
+                onChange={(e) => setDraft((prev) => ({ ...prev, first_name: e.target.value }))}
+                required
               />
             </div>
             <div className="um-form-field">
               <label className="um-form-label">Apellidos</label>
-              <input 
-                type="text" 
-                className="um-form-input" 
-                placeholder="Apellidos del docente" 
-                value={draft.last_name} 
-                onChange={(e) => setDraft((prev) => ({ ...prev, last_name: e.target.value }))} 
-                required 
+              <input
+                type="text"
+                className="um-form-input"
+                placeholder="Apellidos del docente"
+                value={draft.last_name}
+                onChange={(e) => setDraft((prev) => ({ ...prev, last_name: e.target.value }))}
+                required
               />
             </div>
             <div className="um-form-field">
               <label className="um-form-label">Código Institucional</label>
-              <input 
-                type="text" 
-                className="um-form-input" 
-                placeholder="Ej: DOC-001" 
-                value={draft.code} 
-                onChange={(e) => setDraft((prev) => ({ ...prev, code: e.target.value }))} 
+              <input
+                type="text"
+                className="um-form-input"
+                placeholder="Ej: DOC-001"
+                value={draft.code}
+                onChange={(e) => setDraft((prev) => ({ ...prev, code: e.target.value }))}
               />
             </div>
             <div className="um-form-field">
               <label className="um-form-label">Correo Institucional</label>
-              <input 
-                type="email" 
-                className="um-form-input" 
-                placeholder="ejemplo@universidad.edu" 
-                value={draft.email} 
-                onChange={(e) => setDraft((prev) => ({ ...prev, email: e.target.value }))} 
+              <input
+                type="email"
+                className="um-form-input"
+                placeholder="ejemplo@universidad.edu"
+                value={draft.email}
+                onChange={(e) => setDraft((prev) => ({ ...prev, email: e.target.value }))}
               />
             </div>
           </div>
@@ -438,13 +460,13 @@ export default function UserManagementPage() {
         </form>
       </Modal>
 
-      <Modal 
-        open={confirmOpen} 
+      <Modal
+        open={confirmOpen}
         title="Confirmar Baja de Registro"
         onClose={() => {
           setConfirmOpen(false);
           setSelectedDocente(null);
-        }} 
+        }}
         width={480}
       >
         <div className="um-confirm-content">
@@ -460,9 +482,9 @@ export default function UserManagementPage() {
             </div>
           )}
           <div className="um-modal-actions">
-            <button 
-              className="um-btn-ghost" 
-              type="button" 
+            <button
+              className="um-btn-ghost"
+              type="button"
               onClick={() => {
                 setConfirmOpen(false);
                 setSelectedDocente(null);
@@ -470,9 +492,9 @@ export default function UserManagementPage() {
             >
               Cancelar
             </button>
-            <button 
+            <button
               className="um-btn-danger"
-              type="button" 
+              type="button"
               onClick={handleConfirm}
             >
               Confirmar Baja

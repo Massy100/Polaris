@@ -195,6 +195,11 @@
   border-bottom: none;
 }
 
+.um-tr-clickable {
+  cursor: pointer;
+}
+
+
 .um-td {
   padding: clamp(12px, 1.4vw, 16px) clamp(16px, 2vw, 24px);
   color: var(--url-text-pri);
