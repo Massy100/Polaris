@@ -157,7 +157,6 @@ function TeacherCard({
     </div>
   );
 }
-
 export default function PerformanceAlertPage() {
   const [teachers, setTeachers]   = useState<Teacher[]>([]);
   const [search, setSearch]       = useState("");
