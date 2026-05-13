@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
-from datetime import datetime
 
 class User(models.Model):
     STATUS_CHOICES = [
@@ -19,6 +18,7 @@ class User(models.Model):
     
     class Meta:
         db_table = 'User'
+        managed = True
         verbose_name = 'Usuario'
         verbose_name_plural = 'Usuarios'
     
@@ -42,7 +42,12 @@ class Coordinator(models.Model):
     first_name = models.CharField(max_length=120, blank=True, null=True)
     last_name = models.CharField(max_length=120, blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', blank=True, null=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='coordinator')  # Cambiado a CASCADE
+    
+    user = models.OneToOneField(
+        User,  
+        on_delete=models.CASCADE, 
+        related_name='coordinator'
+    )
     
     code = models.CharField(max_length=50, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
@@ -59,15 +64,23 @@ class Coordinator(models.Model):
     
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+    
+    @property
+    def username(self):
+        return self.user.username if self.user else None
+    
+    @property
+    def email(self):
+        return self.user.email if self.user else None
 
 
 class CoordinatorCareer(models.Model):
     coordinator = models.OneToOneField(
         Coordinator,
-        on_delete=models.CASCADE,  
+        on_delete=models.CASCADE,
         primary_key=True,
     )
-    career = models.ForeignKey('academic_career.Career', on_delete=models.CASCADE)  # Cambiado
+    career = models.ForeignKey('academic_career.Career', on_delete=models.CASCADE)
     
     class Meta:
         db_table = 'coordinator_career'
@@ -82,10 +95,10 @@ class CoordinatorCareer(models.Model):
 class CoordinatorFaculty(models.Model):
     coordinator = models.OneToOneField(
         Coordinator,
-        on_delete=models.CASCADE, 
+        on_delete=models.CASCADE,
         primary_key=True,
     )
-    faculty = models.ForeignKey('academic_career.Faculty', on_delete=models.CASCADE)  # Cambiado
+    faculty = models.ForeignKey('academic_career.Faculty', on_delete=models.CASCADE)
     
     class Meta:
         db_table = 'coordinator_faculty'
