@@ -1,4 +1,3 @@
-# apps/academic_workload/serializers.py
 from rest_framework import serializers
 from .models import Period, Section, Academicload, Comment
 
@@ -31,4 +30,3 @@ class AIAnalysisRequestSerializer(serializers.Serializer):
     teacher_id = serializers.IntegerField()
     period_id = serializers.IntegerField()
     course_id = serializers.IntegerField()
-    weight_config_id = serializers.IntegerField()
