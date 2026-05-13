@@ -542,8 +542,8 @@
   right: 0;
   top: 100%;
   margin-top: 8px;
-  background: white;
-  border: 1px solid var(--url-border-soft);
+  background: var(--url-white);
+  border: 1px solid var(--url-border);
   border-radius: 8px;
   box-shadow: var(--url-shadow-md);
   z-index: 50;
@@ -556,14 +556,17 @@
   padding: 10px 16px;
   text-align: left;
   font-size: 13px;
-  background: none;
+  color: var(--url-text-pri);
+  background: var(--url-white);
   border: none;
   cursor: pointer;
   border-bottom: 1px solid var(--url-border-soft);
+  transition: background var(--url-transition), color var(--url-transition);
 }
 
 .cm-filter-dropdown button:hover {
-  background: #f8fafc;
+  background: var(--url-surface);
+  color: var(--url-navy);
 }
 
 @media (max-width: 768px) {
