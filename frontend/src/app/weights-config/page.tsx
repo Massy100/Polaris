@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import CriterionItem from "../components/criterion-item";
 import AddCategoryModal from "../components/add-category-modal";
 import VisualDistribution from "../components/visual-distribution";
@@ -43,6 +44,7 @@ const INITIAL_CRITERIA: Criterion[] = [
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 export default function WeightsConfig() {
+  const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const [criteria, setCriteria] = useState<Criterion[]>([]);
   const [nextId, setNextId] = useState<number>(5);
@@ -311,6 +313,12 @@ export default function WeightsConfig() {
       </div>
 
       <div className="wc-header">
+        <button onClick={() => router.push('/settings')} className="settings-back-btn" style={{ marginBottom: '16px', background: 'none', border: 'none', color: 'var(--url-navy)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '14px' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          Configuración
+        </button>
         <div className="wc-eyebrow">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>

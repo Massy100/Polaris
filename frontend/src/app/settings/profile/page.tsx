@@ -61,9 +61,6 @@ export default function ProfilePage() {
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   
-  const [coordinators, setCoordinators] = useState<any[]>([]);
-  const [selectedProfileId, setSelectedProfileId] = useState<string>('me');
-
   const [personalForm, setPersonalForm] = useState({
     first_name: '',
     last_name: '',
@@ -106,40 +103,10 @@ export default function ProfilePage() {
     };
   };
 
-  const loadCoordinators = async () => {
-    try {
-      const res = await fetch('http://localhost:8000/api/profile/list/', {
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) return;
-      const text = await res.text();
-      if (!text) return;
-      setCoordinators(JSON.parse(text));
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   useEffect(() => {
-    loadCoordinators();
-  }, []);
-
-  useEffect(() => {
-    if (selectedProfileId === 'new') {
-      setPersonalForm({
-        first_name: '', last_name: '', email: '', phone: '', role: 'Coordinador', department: ''
-      });
-      setPrefs({ email_notifications: true, system_alerts: true, weekly_report: false, two_factor: false });
-      setActiveSection('personal');
-      return;
-    }
-
     const fetchProfileData = async () => {
       try {
-        const endpoint = selectedProfileId === 'me' 
-          ? 'http://localhost:8000/api/profile/' 
-          : `http://localhost:8000/api/profile/${selectedProfileId}/`;
-          
+        const endpoint = 'http://localhost:8000/api/profile/';
         const res = await fetch(endpoint, {
           headers: getAuthHeaders(),
         });
@@ -174,32 +141,19 @@ export default function ProfilePage() {
       }
     };
     fetchProfileData();
-  }, [selectedProfileId]);
+  }, []);
 
   const handleSavePersonal = async () => {
     try {
-      const isNew = selectedProfileId === 'new';
-      const endpoint = isNew 
-        ? 'http://localhost:8000/api/profile/create/' 
-        : selectedProfileId === 'me' 
-          ? 'http://localhost:8000/api/profile/personal/' 
-          : `http://localhost:8000/api/profile/${selectedProfileId}/personal/`;
-
+      const endpoint = 'http://localhost:8000/api/profile/personal/';
       const res = await fetch(endpoint, {
-        method: isNew ? 'POST' : 'PATCH',
+        method: 'PATCH',
         headers: getAuthHeaders(),
         body: JSON.stringify(personalForm),
       });
 
       if (res.ok) {
-        const data = await res.json();
-        toast(isNew ? 'Perfil creado exitosamente' : 'Información personal actualizada');
-        if (isNew) {
-          await loadCoordinators();
-          if (data.coordinator_id) {
-            setSelectedProfileId(data.coordinator_id.toString());
-          }
-        }
+        toast('Información personal actualizada');
       } else {
         const errData = await res.json();
         toast(errData.error || errData.email?.[0] || 'Error al guardar la información');
@@ -210,14 +164,10 @@ export default function ProfilePage() {
   };
 
   const handleSavePassword = async () => {
-    if (selectedProfileId === 'new') return toast('Primero debes guardar la información personal');
     if (!passwordsMatch) return;
     
     try {
-      const endpoint = selectedProfileId === 'me' 
-        ? 'http://localhost:8000/api/profile/change-password/' 
-        : `http://localhost:8000/api/profile/${selectedProfileId}/change-password/`;
-
+      const endpoint = 'http://localhost:8000/api/profile/change-password/';
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: getAuthHeaders(),
@@ -239,13 +189,8 @@ export default function ProfilePage() {
   };
 
   const handleSavePrefs = async () => {
-    if (selectedProfileId === 'new') return toast('Primero debes guardar la información personal');
-    
     try {
-      const endpoint = selectedProfileId === 'me' 
-        ? 'http://localhost:8000/api/profile/preferences/' 
-        : `http://localhost:8000/api/profile/${selectedProfileId}/preferences/`;
-
+      const endpoint = 'http://localhost:8000/api/profile/preferences/';
       const res = await fetch(endpoint, {
         method: 'PATCH',
         headers: getAuthHeaders(),
@@ -278,7 +223,7 @@ export default function ProfilePage() {
       )}
 
       <main className="url-container" style={{ paddingTop: '80px', paddingBottom: '60px' }}>
-        <header className="settings-header" style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <header className="settings-header" style={{ marginBottom: '32px' }}>
           <div>
             <button onClick={() => router.push('/settings')} className="settings-back-btn">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -289,26 +234,6 @@ export default function ProfilePage() {
             <h1 className="url-title" style={{ fontSize: '28px', marginBottom: '4px' }}>Mi Perfil</h1>
             <p className="settings-subtitle">Gestiona tu información personal, credenciales y preferencias del sistema.</p>
           </div>
-          
-          <div className="profile-selector" style={{ minWidth: '250px' }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--url-text-muted)', marginBottom: '6px', textTransform: 'uppercase' }}>
-              Seleccionar Perfil a Editar
-            </label>
-            <select 
-              className="url-input" 
-              value={selectedProfileId} 
-              onChange={(e) => setSelectedProfileId(e.target.value)}
-              style={{ cursor: 'pointer' }}
-            >
-              <option value="me">Mi Perfil (Sesión Actual)</option>
-              <option value="new">+ Crear Nuevo Perfil</option>
-              {coordinators.map((coord) => (
-                <option key={coord.coordinator_id} value={coord.coordinator_id.toString()}>
-                  {coord.first_name || ''} {coord.last_name || ''} ({coord.department || 'Sin Depto'})
-                </option>
-              ))}
-            </select>
-          </div>
         </header>
 
         <div className="profile-layout">
@@ -316,7 +241,7 @@ export default function ProfilePage() {
             <div className="profile-sidebar-hero">
               <div className="profile-avatar-wrap">
                 <div className="profile-avatar">
-                  {getInitials(selectedProfileId === 'new' ? 'Nuevo Perfil' : `${personalForm.first_name || ''} ${personalForm.last_name || ''}`)}
+                  {getInitials(`${personalForm.first_name || ''} ${personalForm.last_name || ''}`)}
                 </div>
                 <button className="profile-avatar-edit" title="Cambiar foto">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -326,7 +251,7 @@ export default function ProfilePage() {
                 </button>
               </div>
               <p className="profile-sidebar-name">
-                {selectedProfileId === 'new' ? 'Nuevo Coordinador' : `${personalForm.first_name || ''} ${personalForm.last_name || ''}`}
+                {`${personalForm.first_name || ''} ${personalForm.last_name || ''}`}
               </p>
               <p className="profile-sidebar-role">{personalForm.role || 'Rol no asignado'} · {personalForm.department || 'Sin departamento'}</p>
             </div>
@@ -370,7 +295,7 @@ export default function ProfilePage() {
                       </svg>
                     </div>
                     <div>
-                      <h2>{selectedProfileId === 'new' ? 'Crear Nuevo Perfil' : 'Información Personal'}</h2>
+                      <h2>Información Personal</h2>
                       <p>Datos que aparecen en reportes y notificaciones del sistema.</p>
                     </div>
                   </div>
@@ -404,9 +329,7 @@ export default function ProfilePage() {
                         onChange={(e) => setPersonalForm((p) => ({ ...p, email: e.target.value }))}
                       />
                       <span className="profile-field-hint">
-                        {selectedProfileId === 'new' 
-                          ? 'Se generará una cuenta con contraseña temporal: PolarisPassword123!' 
-                          : 'Se usará para notificaciones y recuperación de cuenta.'}
+                        Se usará para notificaciones y recuperación de cuenta.
                       </span>
                     </div>
                     <div className="profile-field">
@@ -431,11 +354,10 @@ export default function ProfilePage() {
                       <input
                         className="url-input"
                         value={personalForm.role || ''}
-                        onChange={(e) => setPersonalForm((p) => ({ ...p, role: e.target.value }))}
-                        disabled={selectedProfileId !== 'new'}
+                        disabled
                       />
                       <span className="profile-field-hint">
-                        {selectedProfileId === 'new' ? 'Define el rol inicial' : 'El rol es asignado por el superadministrador.'}
+                        El rol es asignado por el superadministrador.
                       </span>
                     </div>
                   </div>
@@ -445,105 +367,96 @@ export default function ProfilePage() {
                   <button 
                     className="url-btn url-btn-primary url-btn-sm" 
                     onClick={handleSavePersonal}
-                    disabled={selectedProfileId === 'new' && !personalForm.email}
                   >
-                    {selectedProfileId === 'new' ? 'Crear Perfil' : 'Guardar cambios'}
+                    Guardar cambios
                   </button>
                 </div>
               </div>
             )}
 
             {activeSection === 'security' && (
-              <>
-                <div className="profile-panel">
-                  <div className="profile-panel-header">
-                    <div className="profile-panel-title">
-                      <div className="url-icon-chip url-icon-chip--navy">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <h2>Cambiar Contraseña</h2>
-                        <p>Se recomienda usar al menos 10 caracteres con mayúsculas y números.</p>
-                      </div>
+              <div className="profile-panel">
+                <div className="profile-panel-header">
+                  <div className="profile-panel-title">
+                    <div className="url-icon-chip url-icon-chip--navy">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h2>Cambiar Contraseña</h2>
+                      <p>Se recomienda usar al menos 10 caracteres con mayúsculas y números.</p>
                     </div>
                   </div>
+                </div>
 
-                  <div className="profile-panel-body">
-                    {selectedProfileId === 'new' ? (
-                      <p style={{ fontSize: '13.5px', color: 'var(--url-text-muted)', textAlign: 'center', padding: '20px' }}>
-                        Debes guardar la información personal para crear el perfil antes de configurar la contraseña.
-                      </p>
-                    ) : (
-                      <div className="profile-form-grid">
-                        <div className="profile-field full-width">
-                          <label>Contraseña actual</label>
-                          <input
-                            className="url-input"
-                            type="password"
-                            placeholder="••••••••"
-                            value={securityForm.currentPassword || ''}
-                            onChange={(e) => setSecurityForm((s) => ({ ...s, currentPassword: e.target.value }))}
-                          />
-                        </div>
-                        <div className="profile-field">
-                          <label>Nueva contraseña</label>
-                          <input
-                            className="url-input"
-                            type="password"
-                            placeholder="••••••••"
-                            value={securityForm.newPassword || ''}
-                            onChange={(e) => setSecurityForm((s) => ({ ...s, newPassword: e.target.value }))}
-                          />
-                          {securityForm.newPassword && (
-                            <>
-                              <div className="profile-password-strength">
-                                {[0, 1, 2].map((i) => (
-                                  <div key={i} className={`profile-strength-bar ${strengthBarClass(i)}`} />
-                                ))}
-                              </div>
-                              <span className="profile-strength-label">{strength.label}</span>
-                            </>
-                          )}
-                        </div>
-                        <div className="profile-field">
-                          <label>Confirmar nueva contraseña</label>
-                          <input
-                            className="url-input"
-                            type="password"
-                            placeholder="••••••••"
-                            value={securityForm.confirmPassword || ''}
-                            onChange={(e) => setSecurityForm((s) => ({ ...s, confirmPassword: e.target.value }))}
-                            style={
-                              securityForm.confirmPassword && !passwordsMatch
-                                ? { borderColor: 'var(--url-danger)' }
-                                : {}
-                            }
-                          />
-                          {securityForm.confirmPassword && !passwordsMatch && (
-                            <span className="profile-field-hint" style={{ color: 'var(--url-danger)' }}>
-                              Las contraseñas no coinciden.
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="profile-panel-footer">
-                    <button
-                      className="url-btn url-btn-primary url-btn-sm"
-                      onClick={handleSavePassword}
-                      disabled={selectedProfileId === 'new' || !passwordsMatch || !securityForm.currentPassword}
-                      style={{ opacity: (selectedProfileId === 'new' || !passwordsMatch || !securityForm.currentPassword) ? 0.5 : 1 }}
-                    >
-                      Actualizar contraseña
-                    </button>
+                <div className="profile-panel-body">
+                  <div className="profile-form-grid">
+                    <div className="profile-field full-width">
+                      <label>Contraseña actual</label>
+                      <input
+                        className="url-input"
+                        type="password"
+                        placeholder="••••••••"
+                        value={securityForm.currentPassword || ''}
+                        onChange={(e) => setSecurityForm((s) => ({ ...s, currentPassword: e.target.value }))}
+                      />
+                    </div>
+                    <div className="profile-field">
+                      <label>Nueva contraseña</label>
+                      <input
+                        className="url-input"
+                        type="password"
+                        placeholder="••••••••"
+                        value={securityForm.newPassword || ''}
+                        onChange={(e) => setSecurityForm((s) => ({ ...s, newPassword: e.target.value }))}
+                      />
+                      {securityForm.newPassword && (
+                        <>
+                          <div className="profile-password-strength">
+                            {[0, 1, 2].map((i) => (
+                              <div key={i} className={`profile-strength-bar ${strengthBarClass(i)}`} />
+                            ))}
+                          </div>
+                          <span className="profile-strength-label">{strength.label}</span>
+                        </>
+                      )}
+                    </div>
+                    <div className="profile-field">
+                      <label>Confirmar nueva contraseña</label>
+                      <input
+                        className="url-input"
+                        type="password"
+                        placeholder="••••••••"
+                        value={securityForm.confirmPassword || ''}
+                        onChange={(e) => setSecurityForm((s) => ({ ...s, confirmPassword: e.target.value }))}
+                        style={
+                          securityForm.confirmPassword && !passwordsMatch
+                            ? { borderColor: 'var(--url-danger)' }
+                            : {}
+                        }
+                      />
+                      {securityForm.confirmPassword && !passwordsMatch && (
+                        <span className="profile-field-hint" style={{ color: 'var(--url-danger)' }}>
+                          Las contraseñas no coinciden.
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </>
+
+                <div className="profile-panel-footer">
+                  <button
+                    className="url-btn url-btn-primary url-btn-sm"
+                    onClick={handleSavePassword}
+                    disabled={!passwordsMatch || !securityForm.currentPassword}
+                    style={{ opacity: (!passwordsMatch || !securityForm.currentPassword) ? 0.5 : 1 }}
+                  >
+                    Actualizar contraseña
+                  </button>
+                </div>
+              </div>
             )}
 
             {activeSection === 'preferences' && (
@@ -564,41 +477,33 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="profile-panel-body">
-                  {selectedProfileId === 'new' ? (
-                    <p style={{ fontSize: '13.5px', color: 'var(--url-text-muted)', textAlign: 'center', padding: '20px' }}>
-                      Crea el perfil primero para configurar sus preferencias del sistema.
-                    </p>
-                  ) : (
-                    [
-                      { key: 'email_notifications', label: 'Notificaciones por correo', desc: 'Recibe alertas de actividad relevante en tu bandeja de entrada.' },
-                      { key: 'system_alerts', label: 'Alertas del sistema', desc: 'Alertas dentro de Polaris sobre cambios en rankings y evaluaciones.' },
-                      { key: 'weekly_report', label: 'Reporte semanal', desc: 'Resumen automático cada lunes con las métricas del ciclo activo.' },
-                      { key: 'two_factor', label: 'Autenticación de dos factores', desc: 'Añade una capa extra de seguridad al iniciar sesión.' },
-                    ].map(({ key, label, desc }) => (
-                      <div className="profile-toggle-row" key={key}>
-                        <div className="profile-toggle-info">
-                          <h4>{label}</h4>
-                          <p>{desc}</p>
-                        </div>
-                        <label className="profile-toggle">
-                          <input
-                            type="checkbox"
-                            checked={prefs[key as keyof typeof prefs] || false}
-                            onChange={(e) => setPrefs((p) => ({ ...p, [key]: e.target.checked }))}
-                          />
-                          <span className="profile-toggle-track" />
-                        </label>
+                  {[
+                    { key: 'email_notifications', label: 'Notificaciones por correo', desc: 'Recibe alertas de actividad relevante en tu bandeja de entrada.' },
+                    { key: 'system_alerts', label: 'Alertas del sistema', desc: 'Alertas dentro de Polaris sobre cambios en rankings y evaluaciones.' },
+                    { key: 'weekly_report', label: 'Reporte semanal', desc: 'Resumen automático cada lunes con las métricas del ciclo activo.' },
+                    { key: 'two_factor', label: 'Autenticación de dos factores', desc: 'Añade una capa extra de seguridad al iniciar sesión.' },
+                  ].map(({ key, label, desc }) => (
+                    <div className="profile-toggle-row" key={key}>
+                      <div className="profile-toggle-info">
+                        <h4>{label}</h4>
+                        <p>{desc}</p>
                       </div>
-                    ))
-                  )}
+                      <label className="profile-toggle">
+                        <input
+                          type="checkbox"
+                          checked={prefs[key as keyof typeof prefs] || false}
+                          onChange={(e) => setPrefs((p) => ({ ...p, [key]: e.target.checked }))}
+                        />
+                        <span className="profile-toggle-track" />
+                      </label>
+                    </div>
+                  ))}
                 </div>
 
                 <div className="profile-panel-footer">
                   <button 
                     className="url-btn url-btn-primary url-btn-sm" 
                     onClick={handleSavePrefs}
-                    disabled={selectedProfileId === 'new'}
-                    style={{ opacity: selectedProfileId === 'new' ? 0.5 : 1 }}
                   >
                     Guardar preferencias
                   </button>
