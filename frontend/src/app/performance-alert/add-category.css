@@ -217,6 +217,39 @@
   gap: 20px;
 }
 
+.pa-loading {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--url-text-sec);
+  font-size: 15px;
+  background: var(--url-white);
+  border-radius: var(--url-radius-md);
+  border: 1px solid var(--url-border-soft);
+}
+
+.pa-error {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--url-danger);
+  font-size: 15px;
+  background: var(--url-white);
+  border-radius: var(--url-radius-md);
+  border: 1px solid var(--url-danger-bd);
+}
+
+.pa-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--url-text-sec);
+  font-size: 15px;
+  background: var(--url-white);
+  border-radius: var(--url-radius-md);
+  border: 1px solid var(--url-border-soft);
+}
+
 .pa-teacher-card {
   background: var(--url-white);
   border-radius: var(--url-radius-md);

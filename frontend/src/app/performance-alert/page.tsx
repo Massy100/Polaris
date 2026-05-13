@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Users,
   TrendingDown,
@@ -9,6 +9,7 @@ import {
   Search,
   Filter,
 } from "lucide-react";
+import Pagination from "../components/pagination";
 import "./add-category.css";
 
 type Status = "danger" | "warning" | "good";
@@ -20,6 +21,30 @@ interface Teacher {
   score: number;
   studentEval: number;
   status: Status;
+}
+
+interface TeacherFromAPI {
+  teacher_id: number;
+  full_name: string;
+  first_name: string;
+  last_name: string;
+  courses_taught: string;
+  rating: number;
+  score: number | null;
+}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const LS_STATUS_KEY = 'performance_alert_statuses';
+
+function getStoredStatuses(): Record<string, Status> {
+  try {
+    const stored = localStorage.getItem(LS_STATUS_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch { return {}; }
+}
+
+function saveStoredStatuses(statuses: Record<string, Status>) {
+  try { localStorage.setItem(LS_STATUS_KEY, JSON.stringify(statuses)); } catch {}
 }
 
 function getScoreColorClass(score: number): string {
@@ -34,18 +59,11 @@ const STATUS_LABELS: Record<Status, string> = {
   good: "Buen Desempeño",
 };
 
-const INITIAL_TEACHERS: Teacher[] = [
-  { id: "t1",  name: "María García López",    subject: "Matemáticas",      score: 45, studentEval: 2.3, status: "danger"  },
-  { id: "t2",  name: "Juan Pérez Martínez",   subject: "Física",           score: 88, studentEval: 4.5, status: "good"    },
-  { id: "t3",  name: "Ana Rodríguez Silva",   subject: "Química",          score: 72, studentEval: 3.8, status: "warning" },
-  { id: "t4",  name: "Carlos Sánchez Ruiz",   subject: "Historia",         score: 38, studentEval: 1.9, status: "danger"  },
-  { id: "t5",  name: "Laura Fernández Costa", subject: "Literatura",       score: 91, studentEval: 4.7, status: "good"    },
-  { id: "t6",  name: "Roberto Jiménez Mora",  subject: "Biología",         score: 60, studentEval: 3.2, status: "warning" },
-  { id: "t7",  name: "Sofía Torres Vega",     subject: "Arte",             score: 48, studentEval: 2.1, status: "danger"  },
-  { id: "t8",  name: "Miguel Castro León",    subject: "Inglés",           score: 77, studentEval: 4.0, status: "warning" },
-  { id: "t9",  name: "Elena Vargas Díaz",     subject: "Música",           score: 82, studentEval: 4.3, status: "good"    },
-  { id: "t10", name: "Andrés Morales Ríos",   subject: "Educación Física", score: 50, studentEval: 2.6, status: "danger"  },
-];
+function getStatusFromScore(score: number): Status {
+  if (score <= 50) return "danger";
+  if (score <= 65) return "warning";
+  return "good";
+}
 
 const IconEyebrow = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -93,7 +111,7 @@ function TeacherCard({
   onStatusChange: (id: string, s: Status) => void;
 }) {
   const scoreColor = getScoreColorClass(teacher.score);
-  const evalColor  = getScoreColorClass(teacher.studentEval * 20);
+  const evalColor  = getScoreColorClass(teacher.score);
 
   const BadgeIcon =
     teacher.status === "danger"  ? TrendingDown  :
@@ -139,16 +157,69 @@ function TeacherCard({
     </div>
   );
 }
-
 export default function PerformanceAlertPage() {
-  const [teachers, setTeachers]   = useState<Teacher[]>(INITIAL_TEACHERS);
+  const [teachers, setTeachers]   = useState<Teacher[]>([]);
   const [search, setSearch]       = useState("");
   const [filterStatus, setFilter] = useState<"all" | Status>("all");
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState<string | null>(null);
+  const [page, setPage]           = useState(1);
+  const [pageSize, setPageSize]   = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+
+  const fetchTeachers = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const queryParams = new URLSearchParams();
+      queryParams.append('page', page.toString());
+      queryParams.append('page_size', pageSize.toString());
+
+      const response = await fetch(`${API_URL}/academic-career/teachers/?${queryParams.toString()}`);
+      if (!response.ok) throw new Error('Error al cargar los docentes');
+
+      const data = await response.json();
+
+      const mapped: Teacher[] = data.results.map((teacher: TeacherFromAPI) => {
+        const scoreValue = teacher.score ?? 0;
+        const ratingValue = teacher.rating ?? 0;
+        const name = teacher.full_name || `${teacher.first_name} ${teacher.last_name}` || `Docente ${teacher.teacher_id}`;
+        return {
+          id: String(teacher.teacher_id),
+          name,
+          subject: teacher.courses_taught || "Sin asignatura",
+          score: scoreValue,
+          studentEval: ratingValue,
+          status: getStatusFromScore(scoreValue),
+        };
+      });
+
+      const storedStatuses = getStoredStatuses();
+      const merged = mapped.map(t => ({
+        ...t,
+        status: storedStatuses[t.id] ?? t.status,
+      }));
+      setTeachers(merged);
+      setTotalItems(data.count);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+    } finally {
+      setLoading(false);
+    }
+  }, [page, pageSize]);
+
+  useEffect(() => {
+    fetchTeachers();
+  }, [fetchTeachers]);
 
   const handleStatusChange = (id: string, newStatus: Status) => {
     setTeachers((prev) =>
       prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t))
     );
+    const stored = getStoredStatuses();
+    stored[id] = newStatus;
+    saveStoredStatuses(stored);
   };
 
   const filtered = useMemo(() => {
@@ -219,14 +290,39 @@ export default function PerformanceAlertPage() {
         </div>
 
         <div className="pa-grid">
-          {filtered.map((teacher) => (
-            <TeacherCard
-              key={teacher.id}
-              teacher={teacher}
-              onStatusChange={handleStatusChange}
-            />
-          ))}
+          {loading ? (
+            <div className="pa-loading">Cargando docentes...</div>
+          ) : error ? (
+            <div className="pa-error">{error}</div>
+          ) : filtered.length === 0 ? (
+            <div className="pa-empty">No se encontraron docentes.</div>
+          ) : (
+            filtered.map((teacher) => (
+              <TeacherCard
+                key={teacher.id}
+                teacher={teacher}
+                onStatusChange={handleStatusChange}
+              />
+            ))
+          )}
         </div>
+
+        {!loading && totalItems > 0 && (
+          <Pagination
+            page={page}
+            pageSize={pageSize}
+            totalItems={totalItems}
+            onPageChange={(newPage) => {
+              const totalPages = Math.ceil(totalItems / pageSize) || 1;
+              if (newPage < 1 || newPage > totalPages) return;
+              setPage(newPage);
+            }}
+            onPageSizeChange={(size) => {
+              setPageSize(size > 0 ? size : 10);
+              setPage(1);
+            }}
+          />
+        )}
       </main>
     </div>
   );
