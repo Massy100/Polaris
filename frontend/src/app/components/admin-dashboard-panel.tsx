@@ -38,6 +38,9 @@ const Icons = {
   LogOut: (props: IconProps) => (
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
   ),
+  Eye: (props: IconProps) => (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+  ),
 };
 
 const navItems = [
@@ -47,6 +50,7 @@ const navItems = [
   { id: 5, label: 'Alertas de Desempeño',  icon: 'AlertTriangle', path: '/performance-alert' },
   { id: 6, label: 'Cursos Históricos',     icon: 'History',       path: '/history-view' },
   { id: 7, label: 'Carga Masiva',          icon: 'Upload',        path: '/pensum' },
+  { id: 8, label: 'Observaciones',         icon: 'Eye',           path: '/observations' },
 ];
 
 interface AdminDashboardPanelProps {
@@ -162,14 +166,6 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
         </div>
 
         <div className="adp-actions-bottom">
-          <button
-            className={`adp-item ${activePath === '/notifications' ? 'adp-item--active' : ''}`}
-            onClick={() => handleNavigation('/notifications')}
-          >
-            <span className="adp-item-icon"><Icons.Bell /></span>
-            <span className={`adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>Notificaciones</span>
-          </button>
-
           <button
             className={`adp-item adp-hide-mobile ${activePath === '/settings' ? 'adp-item--active' : ''}`}
             onClick={() => handleNavigation('/settings')}

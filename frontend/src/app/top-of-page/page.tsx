@@ -3,7 +3,7 @@
 import DashboardCard from '../components/dashboard-card';
 import './top-of-page.css';
 
-type IconType = 'teachers' | 'ranking' | 'alerts' | 'history' | 'upload' | 'user' ;
+type IconType = 'teachers' | 'ranking' | 'alerts' | 'history' | 'upload' | 'user' | 'observations';
 
 const cards: { id: string; icon: IconType; iconColor: 'blue' | 'yellow'; title: string; description: string; href: string }[] = [
   {
