@@ -1,0 +1,123 @@
+.obs-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 32px;
+}
+
+.obs-dashboard {
+  display: grid;
+  gap: 24px;
+}
+
+.obs-summary {
+  padding: 40px;
+  text-align: center;
+  color: var(--url-text-muted);
+}
+
+.obs-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.obs-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.obs-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.obs-dimension-block {
+  margin-bottom: 32px;
+  background: var(--url-surface);
+  border-radius: var(--url-radius-md);
+  border: 1px solid var(--url-border-soft);
+  overflow: hidden;
+}
+
+.obs-dim-header {
+  padding: 12px 20px;
+  background: var(--url-navy);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.obs-dim-header h4 {
+  color: white;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.obs-dim-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: white;
+}
+
+.obs-question-item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.obs-question-item p {
+  font-weight: 600;
+  color: var(--url-text-pri);
+  font-size: 14px;
+}
+
+.obs-likert-options {
+  display: flex;
+  gap: 8px;
+}
+
+.obs-likert-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid var(--url-border);
+  background: white;
+  color: var(--url-text-pri);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--url-transition);
+}
+
+.obs-likert-btn:hover {
+  border-color: var(--url-navy-light);
+  background: var(--url-info-bg);
+}
+
+.obs-likert-btn.active {
+  background: var(--url-navy);
+  color: white;
+  border-color: var(--url-navy);
+  box-shadow: var(--url-shadow-sm);
+}
+
+.obs-questions-flow {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.obs-questions-flow::-webkit-scrollbar {
+  width: 6px;
+}
+
+.obs-questions-flow::-webkit-scrollbar-thumb {
+  background: var(--url-border);
+  border-radius: 10px;
+}

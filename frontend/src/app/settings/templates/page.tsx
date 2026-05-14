@@ -15,10 +15,10 @@ export default function TemplatesPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const batchesRes = await fetch(`${API_URL}/integrations/bulk-upload/batches/`);
-      const batchesData = await batchesRes.json();
-      if (batchesData.ok) {
-        setBatches(batchesData.results.filter((b: any) => b.category === 'encuestas'));
+      const res = await fetch(`${API_URL}/templates/`);
+      const data = await res.json();
+      if (data.ok) {
+        setBatches(data.results);
       }
     } catch (error) {
       console.error('Error fetching templates history:', error);
@@ -70,16 +70,16 @@ export default function TemplatesPage() {
                   </svg>
                   Historial de Biblioteca ({batches.length})
                 </h3>
-                {batches.map((batch) => (
-                  <div key={batch.batch_id} className="batch-item">
+                {batches.map((t) => (
+                  <div key={t.template_id} className="batch-item">
                     <div className="batch-info">
-                      <div className="batch-name">{batch.summary?.batch_name || batch.source_filename}</div>
+                      <div className="batch-name">{t.name}</div>
                       <div className="batch-meta">
-                        {batch.total_rows} registros • {new Date(batch.created_at).toLocaleDateString()}
+                        {t.total_dimensions} dimensiones • {t.total_questions} preguntas • {new Date(t.created_at).toLocaleDateString()}
                       </div>
                     </div>
-                    <div className={`batch-status ${batch.status === 'processed' ? 'batch-status--processed' : 'batch-status--errors'}`}>
-                      {batch.status === 'processed' ? 'Activo' : 'Error'}
+                    <div className="batch-status batch-status--processed">
+                      Activo
                     </div>
                   </div>
                 ))}

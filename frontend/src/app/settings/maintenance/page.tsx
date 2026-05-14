@@ -32,10 +32,10 @@ export default function MaintenancePage() {
       setPensumLoaded(pensumData.is_loaded);
       setTotalCourses(pensumData.total_courses || 0);
 
-      const batchesRes = await fetch(`${API_URL}/integrations/bulk-upload/batches/`);
-      const batchesData = await batchesRes.json();
-      if (batchesData.ok) {
-        setTemplates(batchesData.results.filter((b: any) => b.category === 'encuestas'));
+      const templatesRes = await fetch(`${API_URL}/templates/`);
+      const templatesData = await templatesRes.json();
+      if (templatesData.ok) {
+        setTemplates(templatesData.results);
       }
     } catch (error) {
       console.error('Error fetching maintenance data:', error);
@@ -67,10 +67,10 @@ export default function MaintenancePage() {
 
   const handleDeleteTemplate = async (id: number) => {
     try {
-      const res = await fetch(`${API_URL}/integrations/bulk-upload/batches/${id}/`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/templates/${id}/`, { method: 'DELETE' });
       if (res.ok) {
         showToast('Plantilla eliminada correctamente');
-        setTemplates(templates.filter(t => t.batch_id !== id));
+        setTemplates(templates.filter(t => t.template_id !== id));
       } else {
         showToast('Error al eliminar la plantilla', 'error');
       }
@@ -84,14 +84,14 @@ export default function MaintenancePage() {
   const handleRenameTemplate = async () => {
     if (!showRenameModal || !newName.trim()) return;
     try {
-      const res = await fetch(`${API_URL}/integrations/bulk-upload/batches/${showRenameModal.id}/`, {
+      const res = await fetch(`${API_URL}/templates/${showRenameModal.id}/`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ summary: { batch_name: newName } })
+        body: JSON.stringify({ name: newName })
       });
       if (res.ok) {
         showToast('Nombre actualizado correctamente');
-        setTemplates(templates.map(t => t.batch_id === showRenameModal.id ? { ...t, summary: { ...t.summary, batch_name: newName } } : t));
+        setTemplates(templates.map(t => t.template_id === showRenameModal.id ? { ...t, name: newName } : t));
       } else {
         showToast('Error al renombrar', 'error');
       }
@@ -153,18 +153,18 @@ export default function MaintenancePage() {
                     <div style={{ textAlign: 'right' }}>Acciones Administrativas</div>
                   </div>
                   {templates.map(t => (
-                    <div key={t.batch_id} className="maint-tr">
+                    <div key={t.template_id} className="maint-tr">
                       <div className="maint-template-name">
-                        <strong>{t.summary?.batch_name || t.source_filename}</strong>
-                        <span>{t.total_rows} filas detectadas · Cargada el {new Date(t.created_at).toLocaleDateString()}</span>
+                        <strong>{t.name}</strong>
+                        <span>{t.total_dimensions} dimensiones · {t.total_questions} preguntas · Cargada el {new Date(t.created_at).toLocaleDateString()}</span>
                       </div>
                       <div className="maint-actions">
                         <button 
                           className="maint-btn-icon" 
                           title="Renombrar"
                           onClick={() => {
-                            setShowRenameModal({ id: t.batch_id, name: t.summary?.batch_name || t.source_filename });
-                            setNewName(t.summary?.batch_name || t.source_filename);
+                            setShowRenameModal({ id: t.template_id, name: t.name });
+                            setNewName(t.name);
                           }}
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -172,7 +172,7 @@ export default function MaintenancePage() {
                         <button 
                           className="maint-btn-icon maint-btn-icon--danger" 
                           title="Eliminar"
-                          onClick={() => setShowDeleteTemplateModal(t.batch_id)}
+                          onClick={() => setShowDeleteTemplateModal(t.template_id)}
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
