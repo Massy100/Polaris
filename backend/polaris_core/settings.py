@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'dj_database_url',
     'apps.pensum',
     'apps.profile',
+    'apps.templates',
 ]
 
 MIDDLEWARE = [
