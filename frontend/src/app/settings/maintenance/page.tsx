@@ -126,7 +126,6 @@ export default function MaintenancePage() {
         </header>
 
         <div className="maint-grid">
-          {/* Sección Plantillas - AHORA ARRIBA Y ANCHA */}
           <section className="maint-card maint-card--wide">
             <div className="maint-card-header">
               <div className="maint-icon-box maint-icon-box--green">
@@ -185,7 +184,6 @@ export default function MaintenancePage() {
             </div>
           </section>
 
-          {/* Sección Pensum */}
           <section className="maint-card maint-card--primary">
             <div className="maint-card-header">
               <div className="maint-icon-box maint-icon-box--blue">
@@ -231,7 +229,6 @@ export default function MaintenancePage() {
             </div>
           </section>
 
-          {/* Sección Resumen de Cargas */}
           <section className="maint-card">
             <div className="maint-card-header">
               <div className="maint-icon-box maint-icon-box--gold">
@@ -267,7 +264,6 @@ export default function MaintenancePage() {
         </div>
       </main>
 
-      {/* Modales */}
       <Modal 
         open={showResetPensumModal} 
         title="Restablecer Estructura Académica" 

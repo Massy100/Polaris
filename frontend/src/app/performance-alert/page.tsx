@@ -164,7 +164,7 @@ export default function PerformanceAlertPage() {
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState<string | null>(null);
   const [page, setPage]           = useState(1);
-  const [pageSize, setPageSize]   = useState(10);
+  const [pageSize, setPageSize]   = useState(5);
   const [totalItems, setTotalItems] = useState(0);
 
   const fetchTeachers = useCallback(async () => {

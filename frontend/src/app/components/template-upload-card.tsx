@@ -31,7 +31,7 @@ const TemplateUploadCard: React.FC<TemplateUploadCardProps> = ({ onSuccess }) =>
     setMessage(null);
 
     const formData = new FormData();
-    formData.append('category', 'encuestas'); 
+    formData.append('category', 'encuestas');
     formData.append('files', file);
     formData.append('batch_name', templateName);
 

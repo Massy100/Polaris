@@ -1,53 +1,48 @@
+/* Polaris System - Global Stylesheet
+   Architecture based on design tokens and utility primitives
+   No emojis allowed in guiding comments as per user request */
+
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap");
 @import "tailwindcss";
 
-/* ─── Design Tokens ─────────────────────────────────────────────── */
-/*
-  Paleta base:
-    #101b23  → dark (casi negro azulado)
-    #1c415c  → navy (azul petróleo)
-    #3d8dac  → steel (azul acero / accent)
-    #e0db3f  → lime (amarillo-lima / highlight)
-    #ac0b4c  → crimson (magenta oscuro / accent secundario)
-*/
+/* 1. Design Tokens (Root Variables) */
 :root {
-  /* Brand palette */
+  /* Brand Palette - Navy and Blues */
   --url-navy:           #1c415c;
   --url-navy-dark:      #101b23;
   --url-navy-mid:       #245070;
   --url-navy-light:     #3d8dac;
   --url-navy-glow:      rgba(61,141,172,0.18);
 
-  /* Accent principal: lima/amarillo — más oscuro para uso sobre fondos claros */
+  /* Accents - Gold and Crimson */
   --url-gold:           #8a8600;
   --url-gold-light:     #b0ab00;
   --url-gold-pale:      #f8f7d0;
   --url-gold-glow:      rgba(224,219,63,0.15);
 
-  /* Accent secundario: crimson */
   --url-crimson:        #ac0b4c;
   --url-crimson-light:  #c42060;
   --url-crimson-pale:   #fce8f0;
   --url-crimson-glow:   rgba(172,11,76,0.15);
 
-  /* Surfaces */
+  /* Surfaces and Backgrounds */
   --url-surface:        #F0F4F7;
   --url-surface-2:      #E4ECF2;
   --url-surface-raised: #FFFFFF;
   --url-white:          #FFFFFF;
 
-  /* Borders */
+  /* Borders and Interactive States */
   --url-border:         #B8CDD8;
   --url-border-soft:    #D4E2EB;
   --url-border-focus:   #3d8dac;
 
-  /* Text */
+  /* Typography Colors */
   --url-text-pri:       #101b23;
   --url-text-sec:       #2a4a5e;
   --url-text-muted:     #567080;
   --url-text-faint:     #8AAABB;
 
-  /* Semantic */
+  /* Status and Semantic Colors */
   --url-success:        #0A6638;
   --url-success-bg:     #E4F5EE;
   --url-success-bd:     #9ED4B8;
@@ -61,7 +56,7 @@
   --url-info-bg:        #e4eef5;
   --url-info-bd:        #a0c0d4;
 
-  /* Shadows — layered for depth */
+  /* Shadow Elevation System */
   --url-shadow-xs:      0 1px 2px rgba(16,27,35,0.07), 0 1px 6px rgba(16,27,35,0.05);
   --url-shadow-sm:      0 2px 6px rgba(16,27,35,0.08), 0 4px 16px rgba(16,27,35,0.07);
   --url-shadow-md:      0 4px 12px rgba(16,27,35,0.09), 0 8px 28px rgba(16,27,35,0.09);
@@ -69,7 +64,7 @@
   --url-shadow-gold:    0 0 0 3px rgba(224,219,63,0.28);
   --url-shadow-navy:    0 0 0 3px rgba(61,141,172,0.28);
 
-  /* Radii */
+  /* Border Radius */
   --url-radius-xs:      6px;
   --url-radius-sm:      10px;
   --url-radius-md:      14px;
@@ -77,76 +72,57 @@
   --url-radius-xl:      28px;
   --url-radius-pill:    999px;
 
-  /* Typography */
+  /* Fonts */
   --url-font-sans:      "DM Sans", system-ui, -apple-system, sans-serif;
   --url-font-serif:     "DM Serif Display", Georgia, serif;
 
-  /* Motion */
+  /* Animation and Transitions */
   --url-ease:           cubic-bezier(0.22, 1, 0.36, 1);
   --url-ease-in:        cubic-bezier(0.4, 0, 1, 1);
   --url-ease-out:       cubic-bezier(0, 0, 0.2, 1);
   --url-transition:     0.18s cubic-bezier(0.22, 1, 0.36, 1);
   --url-transition-lg:  0.32s cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* Decorative gradients */
+  /* Gradients */
   --url-grad-brand:     linear-gradient(135deg, var(--url-navy) 0%, var(--url-navy-mid) 100%);
   --url-grad-gold:      linear-gradient(135deg, var(--url-gold) 0%, var(--url-gold-light) 100%);
   --url-grad-surface:   linear-gradient(180deg, var(--url-white) 0%, var(--url-surface) 100%);
   --url-grad-header:    linear-gradient(135deg, #081440 0%, #1A3270 60%, #0D1F4E 100%);
 }
 
-/* ─── Dark Mode ─────────────────────────────────────────────────── */
-/*
-  Paleta dark:
-    #101b23  → fondo base
-    #1c415c  → superficies elevadas / navy mid
-    #3d8dac  → accent azul acero / links / focus
-    #e8922a  → ámbar naranja (reemplaza lima en dark — armoniza con los azules)
-    #d4256a  → crimson aclarado — danger / accent secundario
-
-  El amarillo-lima (#e0db3f) se descarta en dark porque chilla sobre
-  fondos oscuros y rompe la armonía cromática con el azul petróleo.
-  El ámbar #e8922a mantiene calidez y contraste sin deslumbrar.
-*/
+/* 2. Dark Theme Tokens */
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Navy — paleta original directa */
     --url-navy:           #3d8dac;
     --url-navy-dark:      #101b23;
     --url-navy-mid:       #1c415c;
     --url-navy-light:     #5aaecb;
     --url-navy-glow:      rgba(61,141,172,0.20);
 
-    /* Gold → ámbar naranja en dark: cálido, legible, armonioso con los azules */
     --url-gold:           #e8922a;
     --url-gold-light:     #f0a84a;
     --url-gold-pale:      #1c1008;
     --url-gold-glow:      rgba(232,146,42,0.16);
 
-    /* Crimson — aclarado para contraste sobre fondos oscuros */
     --url-crimson:        #d4256a;
     --url-crimson-light:  #e8407e;
     --url-crimson-pale:   #1a0410;
     --url-crimson-glow:   rgba(212,37,106,0.18);
 
-    /* Surfaces — #101b23 base, #1c415c elevado */
     --url-surface:        #101b23;
     --url-surface-2:      #141f2b;
     --url-surface-raised: #1a2e40;
     --url-white:          #1a2e40;
 
-    /* Borders */
     --url-border:         #2a5470;
     --url-border-soft:    #1e3a50;
     --url-border-focus:   #3d8dac;
 
-    /* Text */
     --url-text-pri:       #ddeaf2;
     --url-text-sec:       #8ab4cc;
     --url-text-muted:     #567e94;
     --url-text-faint:     #2e5068;
 
-    /* Semantic */
     --url-success:        #3dd68c;
     --url-success-bg:     #041410;
     --url-success-bd:     #0d3d28;
@@ -155,7 +131,6 @@
     --url-danger-bg:      #1a0410;
     --url-danger-bd:      #5a0e30;
 
-    /* warn → ámbar, no lima */
     --url-warn:           #e8922a;
     --url-warn-bg:        #1a0e04;
     --url-warn-bd:        #6b3a10;
@@ -164,7 +139,6 @@
     --url-info-bg:        #081318;
     --url-info-bd:        #1c415c;
 
-    /* Shadows */
     --url-shadow-xs:      0 1px 2px rgba(0,0,0,0.40), 0 1px 6px rgba(0,0,0,0.28);
     --url-shadow-sm:      0 2px 6px rgba(0,0,0,0.44), 0 4px 16px rgba(0,0,0,0.34);
     --url-shadow-md:      0 4px 12px rgba(0,0,0,0.50), 0 8px 28px rgba(0,0,0,0.40);
@@ -172,7 +146,6 @@
     --url-shadow-gold:    0 0 0 3px rgba(232,146,42,0.28);
     --url-shadow-navy:    0 0 0 3px rgba(61,141,172,0.30);
 
-    /* Gradients */
     --url-grad-brand:     linear-gradient(135deg, #101b23 0%, #1c415c 100%);
     --url-grad-gold:      linear-gradient(135deg, #e8922a 0%, #f0a84a 100%);
     --url-grad-surface:   linear-gradient(180deg, #1a2e40 0%, #101b23 100%);
@@ -180,7 +153,7 @@
   }
 }
 
-/* ─── Reset & Base ──────────────────────────────────────────────── */
+/* 3. Global Reset and Base Styles */
 *, *::before, *::after {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -206,6 +179,7 @@ body {
   forced-color-adjust: none;
 }
 
+/* 4. Typography */
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
   font-weight: 700;
@@ -236,6 +210,7 @@ input, textarea, select {
 
 img, svg { display: block; max-width: 100%; }
 
+/* 5. UI Elements and Focus States */
 :focus-visible {
   outline: 2px solid var(--url-border-focus);
   outline-offset: 2px;
@@ -247,7 +222,7 @@ img, svg { display: block; max-width: 100%; }
   color: var(--url-text-pri);
 }
 
-/* ─── Scrollbar ─────────────────────────────────────────────────── */
+/* Scrollbar Customization */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
@@ -261,7 +236,7 @@ img, svg { display: block; max-width: 100%; }
   ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 }
 
-/* ─── Layout Utilities ──────────────────────────────────────────── */
+/* 6. Layout Utilities */
 .url-container {
   width: 100%;
   max-width: 1360px;
@@ -275,13 +250,7 @@ img, svg { display: block; max-width: 100%; }
   color: var(--url-text-pri);
 }
 
-/* ─── Card Component ─────────────────────────────────────────────── */
-/*
-  Unified card system — use these classes for all surface containers.
-  .url-card       → default elevated surface
-  .url-card-flat  → no shadow, border only (for nested cards)
-  .url-card-inset → sunken / background-tinted surface
-*/
+/* Card Variants */
 .url-card {
   background: var(--url-white);
   border: 1px solid var(--url-border-soft);
@@ -301,12 +270,7 @@ img, svg { display: block; max-width: 100%; }
   border-radius: var(--url-radius-md);
 }
 
-/* ─── Section Header ─────────────────────────────────────────────── */
-/*
-  .url-section-label → uppercase eyebrow text above titles
-  .url-page-title    → main page heading
-  .url-page-sub      → page subtitle / description
-*/
+/* 7. Components Framework */
 .url-section-label {
   display: inline-flex;
   align-items: center;
@@ -338,6 +302,32 @@ img, svg { display: block; max-width: 100%; }
   padding: 40px 0 60px;
 }
 
+.url-page-content {
+  min-height: calc(100vh - 64px);
+}
+
+/* Notification Floating Layout */
+.nb-floating-wrapper {
+  position: absolute;
+  top: 80px; 
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 1360px;
+  margin-inline: auto;
+  padding-right: clamp(102px, 15vw, 252px);
+  padding-left: clamp(16px, 4vw, 48px);
+  z-index: 1000;
+  pointer-events: none;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.nb-floating-wrapper > * {
+  pointer-events: auto;
+}
+
+/* Navigation Elements */
 .url-back-btn {
   border: none;
   background: none;
@@ -357,7 +347,6 @@ img, svg { display: block; max-width: 100%; }
   color: var(--url-navy);
 }
 
-/* ─── Divider ────────────────────────────────────────────────────── */
 .url-divider {
   height: 1px;
   background: var(--url-border-soft);
@@ -365,11 +354,7 @@ img, svg { display: block; max-width: 100%; }
   margin: 0;
 }
 
-/* ─── Buttons ────────────────────────────────────────────────────── */
-/*
-  All buttons share padding, font, radius, transition.
-  Variants: primary, secondary, ghost, danger, gold
-*/
+/* 8. Button System */
 .url-btn {
   display: inline-flex;
   align-items: center;
@@ -458,7 +443,7 @@ img, svg { display: block; max-width: 100%; }
   border-radius: var(--url-radius-md);
 }
 
-/* ─── Badges ─────────────────────────────────────────────────────── */
+/* 9. Badges and Status Labels */
 .url-badge {
   display: inline-flex;
   align-items: center;
@@ -502,7 +487,7 @@ img, svg { display: block; max-width: 100%; }
   border-color: var(--url-border-soft);
 }
 
-/* ─── Form Elements ──────────────────────────────────────────────── */
+/* 10. Forms and Inputs */
 .url-input {
   width: 100%;
   padding: 10px 14px;
@@ -523,11 +508,7 @@ img, svg { display: block; max-width: 100%; }
 
 .url-input::placeholder { color: var(--url-text-faint); }
 
-/* ─── Stat Card ──────────────────────────────────────────────────── */
-/*
-  Homogeneous stat display used across all views.
-  .url-stat-card → wraps icon, value, label
-*/
+/* 11. Stats and Data Visualization */
 .url-stat-card {
   background: var(--url-white);
   border: 1px solid var(--url-border-soft);
@@ -560,11 +541,7 @@ img, svg { display: block; max-width: 100%; }
   color: var(--url-text-muted);
 }
 
-/* ─── Icon Chip ──────────────────────────────────────────────────── */
-/*
-  Small icon container. Apply modifier for color:
-  .url-icon-chip--navy / --gold / --success / --danger
-*/
+/* Icon Containers */
 .url-icon-chip {
   display: inline-flex;
   align-items: center;
@@ -596,7 +573,7 @@ img, svg { display: block; max-width: 100%; }
   border: 1px solid var(--url-danger-bd);
 }
 
-/* ─── Table ──────────────────────────────────────────────────────── */
+/* 12. Tables */
 .url-table {
   width: 100%;
   border-collapse: collapse;
@@ -629,7 +606,7 @@ img, svg { display: block; max-width: 100%; }
 .url-table tbody tr { transition: background var(--url-transition); }
 .url-table tbody tr:hover { background: var(--url-surface); }
 
-/* ─── Empty State ────────────────────────────────────────────────── */
+/* Empty States and Messaging */
 .url-empty {
   display: flex;
   flex-direction: column;
@@ -655,7 +632,7 @@ img, svg { display: block; max-width: 100%; }
   line-height: 1.65;
 }
 
-/* ─── Toast ──────────────────────────────────────────────────────── */
+/* 13. Toasts and Feedback */
 .url-toast {
   position: fixed;
   top: clamp(14px, 2vw, 24px);
@@ -686,7 +663,7 @@ img, svg { display: block; max-width: 100%; }
   color: var(--url-danger);
 }
 
-/* ─── Animations ─────────────────────────────────────────────────── */
+/* 14. Keyframes and Animations */
 @keyframes url-toast-in {
   from { opacity: 0; transform: translateY(-10px) scale(0.96); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -711,7 +688,7 @@ img, svg { display: block; max-width: 100%; }
   50%       { box-shadow: 0 0 0 8px transparent; }
 }
 
-/* ─── Responsive ─────────────────────────────────────────────────── */
+/* 15. Responsive Overrides */
 @media (max-width: 768px) {
   body { font-size: 13.5px; }
 }

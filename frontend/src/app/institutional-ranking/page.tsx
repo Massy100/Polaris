@@ -42,7 +42,7 @@ export default function InstitutionalRanking() {
     const router = useRouter();
     const [isMounted, setIsMounted] = useState(false);
     const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(5);
     const [ratingSortOrder, setRatingSortOrder] = useState<SortOrder>("desc");
     const [docentes, setDocentes] = useState<Docente[]>([]);
     const [loading, setLoading] = useState(true);
