@@ -8,7 +8,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from backend.apps.accounts import views
+from apps.accounts import views
 from .factories import CoordinatorFactory, UserFactory
 from ..models import Coordinator, User
 

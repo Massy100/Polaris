@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from backend.apps.profile.models import Coordinator
-from backend.apps.profile.tests.factories import CoordinatorFactory, UserFactory
+from apps.profile.models import Coordinator
+from apps.profile.tests.factories import CoordinatorFactory, UserFactory
 
 User = get_user_model()
 

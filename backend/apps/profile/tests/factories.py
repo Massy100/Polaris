@@ -1,6 +1,6 @@
 import factory
 from django.contrib.auth import get_user_model
-from backend.apps.profile.models import Coordinator
+from apps.profile.models import Coordinator
 
 User = get_user_model()
 
