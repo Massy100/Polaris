@@ -12,3 +12,4 @@ pandas
 xlrd>=2.0.1
 openpyxl>=3.1.0
 gunicorn>=20.0.0 
+factory-bot>=3.3.3
