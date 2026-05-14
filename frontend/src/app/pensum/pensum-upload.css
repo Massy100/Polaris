@@ -1,12 +1,3 @@
-.pup-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 40px);
-  padding: 24px;
-  background: var(--url-surface);
-}
-
 .pup-loading {
   display: flex;
   flex-direction: column;
@@ -34,18 +25,23 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 40px);
-  gap: 10px;
+  min-height: 400px;
+  gap: 12px;
   text-align: center;
   animation: url-slide-up 0.4s var(--url-ease);
-  padding: 24px;
+  padding: 48px 32px;
+  background: var(--url-white);
+  border: 1px solid var(--url-border-soft);
+  border-radius: var(--url-radius-lg);
+  box-shadow: var(--url-shadow-sm);
 }
 
 .pup-icon-success {
   color: var(--url-success);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   background: var(--url-success-bg);
-  padding: 18px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   border: 1px solid var(--url-success-bd);
   display: flex;
@@ -55,8 +51,8 @@
 
 .pup-already-loaded h2 {
   color: var(--url-navy);
-  font-size: clamp(20px, 3vw, 26px);
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
   margin: 0;
   letter-spacing: -0.02em;
 }
@@ -65,61 +61,25 @@
   color: var(--url-text-sec);
   margin: 0;
   font-size: 14.5px;
-  max-width: 380px;
+  max-width: 400px;
   line-height: 1.6;
-}
-
-.pup-btn-primary {
-  margin-top: 16px;
-  padding: 12px 30px;
-  border-radius: var(--url-radius-sm);
-  background: var(--url-navy);
-  color: #FFFFFF;
-  border: none;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 14px;
-  font-family: var(--url-font-sans);
-  transition: background var(--url-transition), box-shadow var(--url-transition), transform var(--url-transition);
-  box-shadow: 0 1px 2px rgba(13,31,78,0.18), inset 0 1px 0 rgba(255,255,255,0.08);
-}
-
-.pup-btn-primary:hover {
-  background: var(--url-navy-dark);
-  box-shadow: var(--url-shadow-md);
-  transform: translateY(-2px);
 }
 
 .puc-card {
   background: var(--url-white);
   border: 1px solid var(--url-border-soft);
   border-radius: var(--url-radius-lg);
-  padding: clamp(32px, 5vw, 48px) clamp(28px, 4.5vw, 44px);
-  max-width: 520px;
+  padding: 40px;
   width: 100%;
   box-shadow: var(--url-shadow-md);
-  text-align: center;
   animation: url-slide-up 0.4s var(--url-ease);
-}
-
-.puc-eyebrow {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--url-gold);
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
 }
 
 .puc-title {
   color: var(--url-navy);
-  margin-bottom: 8px;
-  font-size: clamp(20px, 3vw, 24px);
-  font-weight: 700;
+  margin-bottom: 6px;
+  font-size: 20px;
+  font-weight: 800;
   letter-spacing: -0.02em;
 }
 
@@ -127,131 +87,91 @@
   color: var(--url-text-sec);
   margin-bottom: 32px;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 .puc-dropzone {
-  border: 1.5px dashed var(--url-border);
+  border: 2px dashed var(--url-border);
   border-radius: var(--url-radius-md);
-  padding: clamp(40px, 6vw, 56px) 24px;
+  padding: 48px 24px;
   text-align: center;
   cursor: pointer;
   background: var(--url-surface);
-  transition: border-color var(--url-transition), background var(--url-transition), transform var(--url-transition);
+  transition: all var(--url-transition);
   margin-bottom: 22px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
 }
 
-.puc-dropzone:hover,
-.puc-dropzone--dragging {
+.puc-dropzone:hover {
   border-color: var(--url-navy-light);
   background: var(--url-info-bg);
-  transform: scale(1.015);
+  transform: translateY(-2px);
+  box-shadow: var(--url-shadow-sm);
 }
 
 .puc-dropzone-icon {
   color: var(--url-navy-light);
-  transition: transform var(--url-transition);
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--url-white);
+  border: 1px solid var(--url-border-soft);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: var(--url-surface-2);
-  border: 1px solid var(--url-border-soft);
+  transition: all var(--url-transition);
 }
 
 .puc-dropzone:hover .puc-dropzone-icon {
-  transform: translateY(-4px);
-  background: var(--url-white);
-  border-color: var(--url-navy-light);
+  background: var(--url-navy);
+  color: #fff;
+  border-color: transparent;
 }
 
 .puc-dropzone-title {
   color: var(--url-navy);
   font-weight: 700;
   font-size: 15px;
-  letter-spacing: -0.01em;
 }
 
 .puc-dropzone-hint {
-  color: var(--url-text-muted);
+  color: var(--url-text-faint);
   font-size: 12.5px;
-}
-
-.pensum-tabs {
-  display: flex;
-  gap: 8px;
-  background: var(--url-surface-2);
-  padding: 4px;
-  border-radius: var(--url-radius-md);
-  margin-bottom: 32px;
-  border: 1px solid var(--url-border-soft);
-}
-
-.pensum-tab {
-  flex: 1;
-  padding: 10px 16px;
-  border-radius: var(--url-radius-sm);
-  border: none;
-  background: transparent;
-  color: var(--url-text-sec);
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all var(--url-transition);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.pensum-tab:hover {
-  color: var(--url-navy);
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.pensum-tab--active {
-  background: var(--url-white);
-  color: var(--url-navy);
-  box-shadow: var(--url-shadow-sm);
 }
 
 .pensum-tab-content {
   width: 100%;
-  max-width: 600px;
   display: flex;
   flex-direction: column;
-  align-items: center;
 }
 
 .pensum-content-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32px;
   width: 100%;
-  animation: url-fade-in 0.4s var(--url-ease);
+}
+
+.url-container-full {
+  max-width: 100% !important;
 }
 
 .batch-list-container {
   width: 100%;
-  text-align: left;
-  margin-top: 12px;
+  margin-top: 40px;
 }
 
 .batch-list-title {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
-  color: var(--url-navy-light);
+  color: var(--url-text-muted);
   margin-bottom: 16px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -259,79 +179,76 @@
 
 .batch-item {
   background: var(--url-white);
-  padding: 16px;
+  padding: 16px 20px;
   border-radius: var(--url-radius-md);
   border: 1px solid var(--url-border-soft);
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
-  transition: transform var(--url-transition), box-shadow var(--url-transition);
+  transition: all var(--url-transition);
+  box-shadow: var(--url-shadow-xs);
 }
 
 .batch-item:hover {
-  transform: translateY(-2px);
+  transform: translateX(4px);
+  border-color: var(--url-border);
   box-shadow: var(--url-shadow-sm);
-}
-
-.batch-info {
-  overflow: hidden;
-  margin-right: 12px;
 }
 
 .batch-name {
   font-weight: 700;
   color: var(--url-navy);
-  font-size: 14px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 14.5px;
 }
 
 .batch-meta {
   font-size: 12px;
-  color: var(--url-text-sec);
+  color: var(--url-text-faint);
   margin-top: 2px;
 }
 
 .batch-status {
   font-size: 11px;
   font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 20px;
-  white-space: nowrap;
+  padding: 4px 12px;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .batch-status--processed {
   background: var(--url-success-bg);
   color: var(--url-success);
+  border: 1px solid var(--url-success-bd);
 }
 
 .batch-status--errors {
   background: var(--url-danger-bg);
   color: var(--url-danger);
+  border: 1px solid var(--url-danger-bd);
 }
 
 .puc-message {
-  padding: 13px 18px;
+  padding: 14px;
   border-radius: var(--url-radius-sm);
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 600;
-  animation: url-fade-in 0.3s var(--url-ease);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
+  gap: 8px;
+  margin-top: 16px;
 }
 
 .puc-message--success {
   background: var(--url-success-bg);
-  border: 1px solid var(--url-success-bd);
   color: var(--url-success);
+  border: 1px solid var(--url-success-bd);
 }
 
 .puc-message--error {
   background: var(--url-danger-bg);
-  border: 1px solid var(--url-danger-bd);
   color: var(--url-danger);
+  border: 1px solid var(--url-danger-bd);
 }

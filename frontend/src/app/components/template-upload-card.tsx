@@ -69,7 +69,7 @@ const TemplateUploadCard: React.FC<TemplateUploadCardProps> = ({ onSuccess }) =>
   };
 
   return (
-    <div className="puc-card" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div className="puc-card" style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
       <h2 className="puc-title">Carga de Plantilla</h2>
       <p className="puc-subtitle">Sube el archivo de encuestas y observaciones docentes.</p>
 
