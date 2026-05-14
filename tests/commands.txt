@@ -1,0 +1,35 @@
+Commands to run the diferent tests (E2E)
+
+
+
+Sign in:
+    !!!!! important enter your email and password in sign-in.spec.ts to sign in
+    npx playwright test tests/e2e/auth/sign-in.spec.ts --project=chromium --headed
+
+Teacher workflow from the teaching management system:
+    npx playwright test tests/e2e/teachers/edit-teacher-and-open-detail.spec.ts --project=chromium --headed
+
+Workflow for creating a coordinator:
+    npx playwright test tests/e2e/coordinators/create-coordinators-pagination.spec.ts --project=chromium --headed
+
+Institutional ranking flow:
+    npx playwright test tests/e2e/ranking/ranking-navigation-pagination.spec.ts --project=chromium --headed
+
+Performance Alert Workflow:
+    npx playwright test tests/e2e/performance-alert/update-and-filter-alerts.spec.ts --project=chromium --headed
+
+Workflow of massive data loads:
+    Download the templates:
+        npx playwright test tests/e2e/bulk-upload/download-templates.spec.ts --project=chromium --headed
+
+    Load data:
+        npx playwright test tests/e2e/bulk-upload/upload-files.spec.ts --project=chromium --headed
+
+Configuration workflow:
+    npx playwright test tests/e2e/settings/settings-full-flow.spec.ts --project=chromium --headed
+
+
+
+Complete application workflow:
+    !!!!! important enter your email and password in full-flow.spec.ts to sign in
+    npx playwright test tests/e2e/full-flow/full-flow.spec.ts --project=chromium --headed
