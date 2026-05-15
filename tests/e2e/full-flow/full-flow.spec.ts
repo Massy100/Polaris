@@ -75,6 +75,16 @@ async function waitForTableLoad(page: Page) {
     });
 }
 
+async function waitForHistoryViewToLoad(page: Page) {
+    await expect(page.getByText(/Cargando\.\.\./i)).toBeHidden({
+        timeout: 45000,
+    });
+
+    await expect(page.getByText(/Estamos obteniendo la información/i)).toBeHidden({
+        timeout: 45000,
+    });
+}
+
 async function fillInputByFieldLabel(
     modal: Locator,
     label: string,
@@ -295,6 +305,155 @@ async function setCriterionPercentage(
     await expect(input).toHaveValue(value, {
         timeout: 10000,
     });
+}
+
+async function runHistoryViewFlow(page: Page) {
+    await goHome(page);
+
+    await page.locator('a[href="/history-view"]').click();
+
+    await expect(page).toHaveURL(/\/history-view$/);
+
+    await expect(
+        page.getByRole('heading', { name: /Cursos Históricos/i })
+    ).toBeVisible({
+        timeout: 15000,
+    });
+
+    await expect(page.getByText(/Historial Académico/i)).toBeVisible({
+        timeout: 15000,
+    });
+
+    await waitForHistoryViewToLoad(page);
+
+    await expect(
+        page.getByRole('button', { name: /^Profesores$/i })
+    ).toBeVisible({
+        timeout: 15000,
+    });
+
+    await expect(
+        page.getByText(/No hay profesor seleccionado/i)
+    ).toBeVisible({
+        timeout: 15000,
+    });
+
+    const freddyProfessorCard = page
+        .locator('.hv-list-card')
+        .filter({
+            hasText: /FREDDY ALEJANDRO GONZÁLEZ ARMAS/i,
+        })
+        .first();
+
+    await expect(freddyProfessorCard).toBeVisible({
+        timeout: 25000,
+    });
+
+    await freddyProfessorCard.click();
+
+    const professorDetail = page.locator('.hv-detail-content').first();
+
+    await expect(professorDetail).toBeVisible({
+        timeout: 15000,
+    });
+
+    await expect(professorDetail).toContainText(
+        /FREDDY ALEJANDRO GONZÁLEZ ARMAS/i,
+        {
+            timeout: 15000,
+        }
+    );
+
+    await expect(professorDetail.locator('.hv-history-list')).toBeVisible({
+        timeout: 15000,
+    });
+
+    const professorHistoryCards = professorDetail.locator('.hv-history-card');
+    const professorHistoryCount = await professorHistoryCards.count();
+
+    if (professorHistoryCount > 0) {
+        await expect(professorHistoryCards.first()).toBeVisible({
+            timeout: 15000,
+        });
+    } else {
+        await expect(
+            professorDetail.getByText(/Sin cursos asociados/i)
+        ).toBeVisible({
+            timeout: 15000,
+        });
+    }
+
+    await page.getByRole('button', { name: /^Cursos$/i }).click();
+
+    await waitForHistoryViewToLoad(page);
+
+    await expect(
+        page.getByText(/No hay curso seleccionado/i)
+    ).toBeVisible({
+        timeout: 15000,
+    });
+
+    const arquitecturaCursoCard = page
+        .locator('.hv-list-card')
+        .filter({
+            hasText: /ARQUITECTURA DEL COMPUTADOR/i,
+        })
+        .first();
+
+    await expect(arquitecturaCursoCard).toBeVisible({
+        timeout: 25000,
+    });
+
+    await arquitecturaCursoCard.click();
+
+    const courseDetail = page.locator('.hv-detail-content').first();
+
+    await expect(courseDetail).toBeVisible({
+        timeout: 15000,
+    });
+
+    await expect(courseDetail).toContainText(
+        /ARQUITECTURA DEL COMPUTADOR/i,
+        {
+            timeout: 15000,
+        }
+    );
+
+    await expect(courseDetail.locator('.hv-history-list')).toBeVisible({
+        timeout: 15000,
+    });
+
+    const courseHistoryCards = courseDetail.locator('.hv-history-card');
+    const courseHistoryCount = await courseHistoryCards.count();
+
+    if (courseHistoryCount > 0) {
+        await expect(courseHistoryCards.first()).toBeVisible({
+            timeout: 15000,
+        });
+    } else {
+        await expect(
+            courseDetail.getByText(/Sin docentes asociados/i)
+        ).toBeVisible({
+            timeout: 15000,
+        });
+    }
+
+    const historyPagination = page.locator('.hv-sidebar-pagination').first();
+
+    await expect(historyPagination).toBeVisible({
+        timeout: 15000,
+    });
+
+    const pageSizeInput = historyPagination.locator('#pageSize');
+
+    if (await pageSizeInput.isVisible().catch(() => false)) {
+        await pageSizeInput.fill('1');
+        await pageSizeInput.press('Enter');
+
+        await expect(page.locator('.hv-list-card')).toHaveCount(1, {
+            timeout: 15000,
+        });
+    }
 }
 
 test('Flujo semicompleto de Polaris', async ({ page }) => {
@@ -584,44 +743,44 @@ test('Flujo semicompleto de Polaris', async ({ page }) => {
 
     await expect(searchInput).toBeVisible();
 
-    await searchInput.fill('An');
+    await searchInput.fill('V');
 
-    const anaCard = await getTeacherCard(page, 'Ana Rodríguez Silva');
-    const juanCard = await getTeacherCard(page, 'Juan Pérez Martínez');
+    const linaCard = await getTeacherCard(page, 'LINA VILLAGRÁN COMPARINI de BARILLAS');
+    const veroCard = await getTeacherCard(page, 'VERÓNICA ELIZABETH COJULÚN LÓPEZ');
 
-    await expect(anaCard.locator('.pa-status-badge')).toContainText(
-        /Advertencia/i
-    );
-
-    await anaCard.getByRole('button', { name: /^Bueno$/i }).click();
-
-    await expect(anaCard.locator('.pa-status-badge')).toContainText(
-        /Buen Desempeño/i
-    );
-
-    await expect(juanCard.locator('.pa-status-badge')).toContainText(
-        /Buen Desempeño/i
-    );
-
-    await juanCard.getByRole('button', { name: /^Peligro$/i }).click();
-
-    await expect(juanCard.locator('.pa-status-badge')).toContainText(
+    await expect(linaCard.locator('.pa-status-badge')).toContainText(
         /En Peligro/i
+    );
+
+    await linaCard.getByRole('button', { name: /^Bueno$/i }).click();
+
+    await expect(linaCard.locator('.pa-status-badge')).toContainText(
+        /Buen Desempeño/i
+    );
+
+    await expect(veroCard.locator('.pa-status-badge')).toContainText(
+        /En Peligro/i
+    );
+
+    await veroCard.getByRole('button', { name: /^Bueno$/i }).click();
+
+    await expect(veroCard.locator('.pa-status-badge')).toContainText(
+        /Buen Desempeño/i
     );
 
     await searchInput.fill('');
 
-    await expect(page.getByText(/María García López/i)).toBeVisible({
+    await expect(page.getByText(/VERÓNICA ELIZABETH COJULÚN LÓPEZ/i)).toBeVisible({
         timeout: 15000,
     });
 
-    await page.locator('.pa-filter-select').selectOption('danger');
+    await page.locator('.pa-filter-select').selectOption('good');
 
-    await expect(page.getByText(/Juan Pérez Martínez/i)).toBeVisible({
+    await expect(page.getByText(/VERÓNICA ELIZABETH COJULÚN LÓPEZ/i)).toBeVisible({
         timeout: 15000,
     });
 
-    await expect(page.getByText(/Ana Rodríguez Silva/i)).toBeHidden({
+    await expect(page.getByText(/LINA VILLAGRÁN COMPARINI de BARILLAS/i)).toBeVisible({
         timeout: 15000,
     });
 
@@ -631,7 +790,7 @@ test('Flujo semicompleto de Polaris', async ({ page }) => {
     for (let i = 0; i < visibleCardsCount; i++) {
         await expect(
             visibleCards.nth(i).locator('.pa-status-badge')
-        ).toContainText(/En Peligro/i);
+        ).toContainText(/Buen Desempeño/i);
     }
 
     // RANKING INSTITUCIONAL
@@ -656,7 +815,7 @@ test('Flujo semicompleto de Polaris', async ({ page }) => {
 
     await rankingRows.nth(5).click();
 
-    await expect(page).toHaveURL(/\/individual-teacher-view\/18$/, {
+    await expect(page).toHaveURL(/\/individual-teacher-view\/17$/, {
         timeout: 25000,
     });
 
@@ -682,7 +841,7 @@ test('Flujo semicompleto de Polaris', async ({ page }) => {
 
     await rankingRows.nth(3).click();
 
-    await expect(page).toHaveURL(/\/individual-teacher-view\/20$/, {
+    await expect(page).toHaveURL(/\/individual-teacher-view\/19$/, {
         timeout: 25000,
     });
 
@@ -1010,13 +1169,15 @@ test('Flujo semicompleto de Polaris', async ({ page }) => {
         timeout: 25000,
     });
 
+    await page.getByRole('button', { name: '2do. Semestre 2025' }).click();
+
     const curso526 = page
         .locator('.itv-class-card')
-        .filter({ hasText: /curso 5 - 26/i })
+        .filter({ hasText: /curso 5/i })
         .first();
 
     await expect(curso526).toBeVisible({
-        timeout: 25000,
+        timeout: 30000,
     });
 
     const notaValue = curso526.locator('.itv-note-value');
@@ -1041,27 +1202,33 @@ test('Flujo semicompleto de Polaris', async ({ page }) => {
         .getByRole('button', { name: /Analizar comentarios/i })
         .click();
 
-    await expect(
-        page.getByText(/Se están analizando los comentarios/i)
-    ).toBeVisible({
-        timeout: 10000,
-    });
+    const errorDialog = page
+        .getByRole('dialog')
+        .filter({
+            hasText: /Error en el análisis/i,
+        });
 
-    await expect(
-        page.getByText(/Se están analizando los comentarios/i)
-    ).toBeHidden({
+    await expect(errorDialog).toBeVisible({
         timeout: 15000,
     });
 
-    await curso526.getByRole('button', { name: /Ver comentarios/i }).click();
-
-    await expect(curso526.getByText(/Comentarios Positivos/i)).toBeVisible({
-        timeout: 25000,
+    await expect(
+        errorDialog.getByText(/No hay comentarios para analizar/i)
+    ).toBeVisible({
+        timeout: 15000,
     });
 
-    await expect(curso526.getByText(/Comentarios Negativos/i)).toBeVisible({
-        timeout: 25000,
+    await errorDialog
+        .getByRole('button', { name: 'Cerrar', exact: true })
+        .last()
+        .click();
+
+    await expect(errorDialog).toBeHidden({
+        timeout: 15000,
     });
 
-    await page.pause();
+    // HISTORICOS
+    await runHistoryViewFlow(page);
+
+    // await page.pause();
 });

@@ -4,6 +4,18 @@ test.use({
     storageState: 'tests/.auth/user.json',
 });
 
+async function goHome(page: Page) {
+    await page.goto('/top-of-page');
+
+    await expect(
+        page.getByRole('heading', {
+            name: /Sistema de Gestión Académica - Polaris/i,
+        })
+    ).toBeVisible({
+        timeout: 25000,
+    });
+}
+
 async function waitForRankingToLoad(page: Page) {
     await expect(page.getByText(/Cargando clasificación/i)).toBeHidden({
         timeout: 45000,
@@ -11,9 +23,7 @@ async function waitForRankingToLoad(page: Page) {
 }
 
 async function goBackToRanking(page: Page) {
-    await page
-        .getByRole('button', { name: /Volver al listado/i })
-        .click();
+    await page.getByRole('button', { name: /Volver al listado/i }).click();
 
     await expect(page).toHaveURL(/\/institutional-ranking$/, {
         timeout: 25000,
@@ -26,7 +36,7 @@ async function goBackToRanking(page: Page) {
     ).toBeVisible();
 }
 
-async function setPageSize(page: Page, size: string) {
+async function setRankingPageSize(page: Page, size: string) {
     const pageSizeInput = page.locator('#pageSize');
 
     await expect(pageSizeInput).toBeVisible({
@@ -42,15 +52,9 @@ async function setPageSize(page: Page, size: string) {
 test('navega desde ranking institucional hacia detalle y valida paginación', async ({ page }) => {
     test.setTimeout(120_000);
 
-    await page.goto('/top-of-page');
+    await goHome(page);
 
-    await expect(
-        page.getByRole('heading', { name: /Sistema de Gestión Académica - Polaris/i })
-    ).toBeVisible();
-
-    await page
-        .locator('a[href="/institutional-ranking"]')
-        .click();
+    await page.locator('a[href="/institutional-ranking"]').click();
 
     await expect(page).toHaveURL(/\/institutional-ranking$/);
 
@@ -68,7 +72,7 @@ test('navega desde ranking institucional hacia detalle y valida paginación', as
 
     await rankingRows.nth(5).click();
 
-    await expect(page).toHaveURL(/\/individual-teacher-view\/18$/, {
+    await expect(page).toHaveURL(/\/individual-teacher-view\/17$/, {
         timeout: 25000,
     });
 
@@ -78,7 +82,7 @@ test('navega desde ranking institucional hacia detalle y valida paginación', as
 
     await goBackToRanking(page);
 
-    await setPageSize(page, '5');
+    await setRankingPageSize(page, '5');
 
     await expect(page.getByText(/Página 1 de/i)).toBeVisible({
         timeout: 15000,
@@ -94,7 +98,7 @@ test('navega desde ranking institucional hacia detalle y valida paginación', as
 
     await rankingRows.nth(3).click();
 
-    await expect(page).toHaveURL(/\/individual-teacher-view\/20$/, {
+    await expect(page).toHaveURL(/\/individual-teacher-view\/19$/, {
         timeout: 25000,
     });
 
@@ -104,7 +108,7 @@ test('navega desde ranking institucional hacia detalle y valida paginación', as
 
     await goBackToRanking(page);
 
-    await setPageSize(page, '5');
+    await setRankingPageSize(page, '5');
 
     await expect(rankingRows).toHaveCount(5, {
         timeout: 15000,
@@ -126,5 +130,5 @@ test('navega desde ranking institucional hacia detalle y valida paginación', as
 
     await waitForRankingToLoad(page);
 
-    // await page.pause();
+    // await page.pause()
 });

@@ -4,6 +4,18 @@ test.use({
     storageState: 'tests/.auth/user.json',
 });
 
+async function goHome(page: Page) {
+    await page.goto('/top-of-page');
+
+    await expect(
+        page.getByRole('heading', {
+            name: /Sistema de Gestión Académica - Polaris/i,
+        })
+    ).toBeVisible({
+        timeout: 25000,
+    });
+}
+
 async function goToSettingsFromSidebar(page: Page) {
     await page
         .locator('nav')
@@ -51,7 +63,11 @@ async function openSettingsCard(page: Page, name: RegExp) {
     await card.click();
 }
 
-async function fillCategoryModal(page: Page, categoryName: string, categoryDescription: string) {
+async function fillCategoryModal(
+    page: Page,
+    categoryName: string,
+    categoryDescription: string
+) {
     await expect(
         page.getByRole('heading', { name: /^Agregar Nueva Categoría$/i })
     ).toBeVisible({
@@ -83,7 +99,10 @@ async function fillCategoryModal(page: Page, categoryName: string, categoryDescr
     });
 }
 
-async function getCriterionCard(page: Page, criterionName: RegExp): Promise<Locator> {
+async function getCriterionCard(
+    page: Page,
+    criterionName: RegExp
+): Promise<Locator> {
     const criterion = page
         .locator('.wc-criteria-list > *')
         .filter({ hasText: criterionName })
@@ -96,12 +115,14 @@ async function getCriterionCard(page: Page, criterionName: RegExp): Promise<Loca
     return criterion;
 }
 
-async function setCriterionPercentage(page: Page, criterionName: RegExp, value: string) {
+async function setCriterionPercentage(
+    page: Page,
+    criterionName: RegExp,
+    value: string
+) {
     const criterion = await getCriterionCard(page, criterionName);
 
-    const input = criterion
-        .locator('input[type="number"]')
-        .first();
+    const input = criterion.locator('input[type="number"]').first();
 
     await expect(input).toBeVisible({
         timeout: 15000,
@@ -119,19 +140,15 @@ test('flujo completo de configuración, pesos, alertas y auditoría', async ({ p
     test.setTimeout(240_000);
 
     const categoryName = `Categoria E2E ${Date.now()}`;
-    const categoryDescription = 'Categoría creada automáticamente por prueba E2E';
+    const categoryDescription =
+        'Categoría creada automáticamente por prueba E2E';
 
-    await page.goto('/top-of-page');
-
-    await expect(
-        page.getByRole('heading', { name: /Sistema de Gestión Académica - Polaris/i })
-    ).toBeVisible({
-        timeout: 15000,
-    });
+    await goHome(page);
 
     await goToSettingsFromSidebar(page);
 
     // Mi Perfil
+
     await openSettingsCard(page, /Mi Perfil/i);
 
     await expect(page).toHaveURL(/\/settings\/profile$/, {
@@ -147,6 +164,7 @@ test('flujo completo de configuración, pesos, alertas y auditoría', async ({ p
     await backToSettings(page);
 
     // Gestión de Importaciones
+
     await openSettingsCard(page, /Gestión de Importaciones/i);
 
     await expect(page).toHaveURL(/\/settings\/data-import$/, {
@@ -165,6 +183,7 @@ test('flujo completo de configuración, pesos, alertas y auditoría', async ({ p
     await backToSettings(page);
 
     // Pesos y Fórmulas
+
     await openSettingsCard(page, /Pesos y Fórmulas/i);
 
     await expect(page).toHaveURL(/\/weights-config$/, {
@@ -193,23 +212,20 @@ test('flujo completo de configuración, pesos, alertas y auditoría', async ({ p
         timeout: 45000,
     });
 
-    await page
-        .getByRole('button', { name: /Agregar Categoría/i })
-        .click();
+    await page.getByRole('button', { name: /Agregar Categoría/i }).click();
 
     await fillCategoryModal(page, categoryName, categoryDescription);
 
-    const newCategoryCriterion = page
-        .locator('.wc-criteria-list > *')
-        .filter({ hasText: categoryName })
-        .first();
-
-    await expect(newCategoryCriterion).toBeVisible({
+    await expect(
+        page
+            .locator('.wc-criteria-list > *')
+            .filter({ hasText: categoryName })
+            .first()
+    ).toBeVisible({
         timeout: 15000,
     });
 
     await setCriterionPercentage(page, /Evaluación de alumnos/i, '30');
-
     await setCriterionPercentage(page, new RegExp(categoryName, 'i'), '10');
 
     await expect(page.locator('.wc-summary-value')).toHaveText('100%', {
@@ -227,14 +243,9 @@ test('flujo completo de configuración, pesos, alertas y auditoría', async ({ p
         .click();
 
     await expect(
-        page.getByText(/Guardando/i)
-    ).toBeVisible({
-        timeout: 10000,
-    }).catch(() => {
-    });
-
-    await expect(
-        page.getByText(/Configuración guardada|guardada correctamente|activada correctamente/i)
+        page.getByText(
+            /Configuración guardada|guardada correctamente|activada correctamente/i
+        )
     ).toBeVisible({
         timeout: 45000,
     });
@@ -242,6 +253,7 @@ test('flujo completo de configuración, pesos, alertas y auditoría', async ({ p
     await goToSettingsFromSidebar(page);
 
     // Reglas de Notificación
+
     await openSettingsCard(page, /Reglas de Notificación/i);
 
     await expect(page).toHaveURL(/\/settings\/alert-config$/, {
@@ -263,11 +275,11 @@ test('flujo completo de configuración, pesos, alertas y auditoría', async ({ p
         timeout: 15000,
     });
 
-    const failedAccessCheckbox = failedAccessCard.locator('input[type="checkbox"]');
+    const failedAccessCheckbox = failedAccessCard.locator(
+        'input[type="checkbox"]'
+    );
 
-    await failedAccessCard
-        .locator('.profile-toggle-track')
-        .click();
+    await failedAccessCard.locator('.profile-toggle-track').click();
 
     await expect(failedAccessCheckbox).toBeChecked({
         timeout: 10000,
@@ -286,6 +298,7 @@ test('flujo completo de configuración, pesos, alertas y auditoría', async ({ p
     await backToSettings(page);
 
     // Auditoría y Equipo
+
     await openSettingsCard(page, /Auditoría y Equipo/i);
 
     await expect(page).toHaveURL(/\/settings\/audit$/, {
@@ -306,5 +319,5 @@ test('flujo completo de configuración, pesos, alertas y auditoría', async ({ p
         timeout: 15000,
     });
 
-    await page.pause();
+    // await page.pause()
 });
