@@ -4,6 +4,18 @@ test.use({
     storageState: 'tests/.auth/user.json',
 });
 
+async function goHome(page: Page) {
+    await page.goto('/top-of-page');
+
+    await expect(
+        page.getByRole('heading', {
+            name: /Sistema de Gestión Académica - Polaris/i,
+        })
+    ).toBeVisible({
+        timeout: 25000,
+    });
+}
+
 async function getTeacherCard(page: Page, teacherName: string): Promise<Locator> {
     const card = page
         .locator('.pa-teacher-card')
@@ -17,18 +29,12 @@ async function getTeacherCard(page: Page, teacherName: string): Promise<Locator>
     return card;
 }
 
-test('actualiza estados de docentes y filtra por peligro', async ({ page }) => {
+test('actualiza estados de docentes y filtra por buen desempeño', async ({ page }) => {
     test.setTimeout(120_000);
 
-    await page.goto('/top-of-page');
+    await goHome(page);
 
-    await expect(
-        page.getByRole('heading', { name: /Sistema de Gestión Académica - Polaris/i })
-    ).toBeVisible();
-
-    await page
-        .locator('a[href="/performance-alert"]')
-        .click();
+    await page.locator('a[href="/performance-alert"]').click();
 
     await expect(page).toHaveURL(/\/performance-alert$/);
 
@@ -40,54 +46,68 @@ test('actualiza estados de docentes y filtra por peligro', async ({ page }) => {
 
     await expect(searchInput).toBeVisible();
 
-    await searchInput.fill('An');
+    await searchInput.fill('V');
 
-    const anaCard = await getTeacherCard(page, 'Ana Rodríguez Silva');
-    const juanCard = await getTeacherCard(page, 'Juan Pérez Martínez');
+    const linaCard = await getTeacherCard(
+        page,
+        'LINA VILLAGRÁN COMPARINI de BARILLAS'
+    );
 
-    await expect(anaCard.locator('.pa-status-badge')).toContainText(/Advertencia/i);
+    const veroCard = await getTeacherCard(
+        page,
+        'VERÓNICA ELIZABETH COJULÚN LÓPEZ'
+    );
 
-    await anaCard
-        .getByRole('button', { name: /^Bueno$/i })
-        .click();
+    await expect(linaCard.locator('.pa-status-badge')).toContainText(
+        /En Peligro/i
+    );
 
-    await expect(anaCard.locator('.pa-status-badge')).toContainText(/Buen Desempeño/i);
+    await linaCard.getByRole('button', { name: /^Bueno$/i }).click();
 
-    await expect(juanCard.locator('.pa-status-badge')).toContainText(/Buen Desempeño/i);
+    await expect(linaCard.locator('.pa-status-badge')).toContainText(
+        /Buen Desempeño/i
+    );
 
-    await juanCard
-        .getByRole('button', { name: /^Peligro$/i })
-        .click();
+    await expect(veroCard.locator('.pa-status-badge')).toContainText(
+        /En Peligro/i
+    );
 
-    await expect(juanCard.locator('.pa-status-badge')).toContainText(/En Peligro/i);
+    await veroCard.getByRole('button', { name: /^Bueno$/i }).click();
+
+    await expect(veroCard.locator('.pa-status-badge')).toContainText(
+        /Buen Desempeño/i
+    );
 
     await searchInput.fill('');
 
-    await expect(page.getByText(/María García López/i)).toBeVisible({
+    await expect(
+        page.getByText(/VERÓNICA ELIZABETH COJULÚN LÓPEZ/i)
+    ).toBeVisible({
         timeout: 15000,
     });
 
-    await page
-        .locator('.pa-filter-select')
-        .selectOption('danger');
+    await page.locator('.pa-filter-select').selectOption('good');
 
-    await expect(page.getByText(/Juan Pérez Martínez/i)).toBeVisible({
+    await expect(
+        page.getByText(/VERÓNICA ELIZABETH COJULÚN LÓPEZ/i)
+    ).toBeVisible({
         timeout: 15000,
     });
 
-    await expect(page.getByText(/Ana Rodríguez Silva/i)).toBeHidden({
+    await expect(
+        page.getByText(/LINA VILLAGRÁN COMPARINI de BARILLAS/i)
+    ).toBeVisible({
         timeout: 15000,
     });
 
     const visibleCards = page.locator('.pa-teacher-card');
+    const visibleCardsCount = await visibleCards.count();
 
-    const count = await visibleCards.count();
-
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < visibleCardsCount; i++) {
         await expect(
             visibleCards.nth(i).locator('.pa-status-badge')
-        ).toContainText(/En Peligro/i);
+        ).toContainText(/Buen Desempeño/i);
     }
 
-    // await page.pause();
+    // await page.pause()
 });

@@ -28,6 +28,9 @@ Workflow of massive data loads:
 Configuration workflow:
     npx playwright test tests/e2e/settings/settings-full-flow.spec.ts --project=chromium --headed
 
+History View workflow:
+    npx playwright test tests/e2e/history-view/history-view.spec.ts --headed
+
 
 
 Complete application workflow:
