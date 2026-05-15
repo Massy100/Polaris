@@ -1,6 +1,10 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useUser, useAuth } from '@clerk/nextjs';
 import DashboardCard from '../components/dashboard-card';
+import { useApi } from '../utils/api';
 import './top-of-page.css';
 
 type IconType = 'teachers' | 'ranking' | 'alerts' | 'history' | 'upload' | 'user' ;
@@ -14,16 +18,6 @@ const cards: { id: string; icon: IconType; iconColor: 'blue' | 'yellow'; title: 
     description: 'CRUD (Crear, Leer, Actualizar, Borrar) de Docentes. Crear docentes para tener acceso rápido a sus demás funciones como carga masiva.',
     href: '/user-management',
   },
-
-  {
-    id: 'coordinators',
-    icon: 'user',
-    iconColor: 'yellow',
-    title: 'Gestión de Coordinadores',
-    description: 'Centro de administración de coordinadores. Permite crear, editar y gestionar los accesos y roles de los coordinadores del sistema.',
-    href: '/coord-management',
-  },
-
   {
     id: 'ranking',
     icon: 'ranking',
@@ -59,6 +53,33 @@ const cards: { id: string; icon: IconType; iconColor: 'blue' | 'yellow'; title: 
 ];
 
 export default function HomePage() {
+  const { user: clerkUser } = useUser();
+  const { signOut } = useAuth();
+  const api = useApi();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (clerkUser) {
+      api.post('/accounts/clerk-login/', {
+        clerk_id: clerkUser.id,
+        email: clerkUser.primaryEmailAddress?.emailAddress,
+        username: clerkUser.username || clerkUser.firstName,
+      })
+      .then(async (res) => {
+        const data = await res.json();
+        if (data.status === 'pending' || data.status === 'inactive') {
+          await signOut();
+          router.push(`/sign-in?status=${data.status}`);
+        }
+      })
+      .catch(async (err) => {
+        console.error('Error syncing with backend:', err);
+        await signOut();
+        router.push('/sign-in?status=error');
+      });
+    }
+  }, [clerkUser, router, api, signOut]);
+
   return (
     <div className="url-page-bg flex-1">
       <main className="url-container" style={{ paddingTop: '80px', paddingBottom: '60px' }}>

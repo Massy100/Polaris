@@ -1,32 +1,26 @@
 from rest_framework import serializers
+from .models import User, Coordinator, AccessRequest
 import random
 import string
 
-from .models import User, Coordinator
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['user_id', 'username', 'status', 'created_at', 'updated_at', 'email']
-        read_only_fields = ['user_id', 'created_at', 'updated_at']
+        fields = ['user_id', 'username', 'email', 'status', 'role', 'created_at', 'updated_at', 'last_login']
+        read_only_fields = ['user_id', 'created_at', 'updated_at', 'last_login', 'clerk_id']
 
 
 class CoordinatorSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    username = serializers.CharField(
-        write_only=True, 
-        required=False, 
-        allow_blank=True,  
-        allow_null=True,   
-        default=None
-    )
+    username = serializers.CharField(write_only=True, required=False, allow_blank=True, allow_null=True)
     password = serializers.CharField(write_only=True, required=False, min_length=6, allow_blank=True, allow_null=True)
     email = serializers.EmailField(write_only=True, required=False, allow_blank=True, allow_null=True)
     
     class Meta:
         model = Coordinator
         fields = [
-            'coordinator_id', 'first_name', 'last_name', 'status', 
+            'coordinator_id', 'first_name', 'last_name', 'status',
             'code', 'phone', 'department', 'role', 'since',
             'created_at', 'updated_at', 'user', 'username', 'password', 'email'
         ]
@@ -56,14 +50,13 @@ class CoordinatorSerializer(serializers.ModelSerializer):
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
             code=validated_data.get('code', ''),
-            phone=validated_data.get('phone', ''),  
+            phone=validated_data.get('phone', ''),
             department=validated_data.get('department', ''),
             role=validated_data.get('role', 'Coordinador'),
-            status=validated_data.get('status', 'active')  
+            status=validated_data.get('status', 'active')
         )
         
         coordinator.temp_password = password
-        
         return coordinator
     
     def generate_random_password(self, length=10):
@@ -77,11 +70,6 @@ class CoordinatorSerializer(serializers.ModelSerializer):
         if instance.user and instance.user.email:
             representation['email'] = instance.user.email
         return representation
-    
-    def validate_username(self, value):
-        if not value or not value.strip():
-            return None
-        return value
     
     def update(self, instance, validated_data):
         instance.first_name = validated_data.get('first_name', instance.first_name)
@@ -108,15 +96,15 @@ class CoordinatorSerializer(serializers.ModelSerializer):
 
 class CoordinatorListSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    username = serializers.SerializerMethodField()  
-    email = serializers.SerializerMethodField()     
+    username = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
     
     class Meta:
         model = Coordinator
         fields = [
-            'coordinator_id', 'first_name', 'last_name', 'status', 
-            'code', 'phone', 'department', 'role', 'user', 
-            'username', 'email'  
+            'coordinator_id', 'first_name', 'last_name', 'status',
+            'code', 'phone', 'department', 'role', 'user',
+            'username', 'email'
         ]
     
     def get_username(self, obj):
@@ -125,10 +113,11 @@ class CoordinatorListSerializer(serializers.ModelSerializer):
     def get_email(self, obj):
         return obj.user.email if obj.user else None
 
+
 class CoordinatorDetailSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    username = serializers.SerializerMethodField()  
-    email = serializers.SerializerMethodField()     
+    username = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
     
     class Meta:
         model = Coordinator
@@ -139,6 +128,28 @@ class CoordinatorDetailSerializer(serializers.ModelSerializer):
     
     def get_email(self, obj):
         return obj.user.email if obj.user else None
+
+
+class AccessRequestSerializer(serializers.ModelSerializer):
+    processed_by = UserSerializer(read_only=True)
+    
+    class Meta:
+        model = AccessRequest
+        fields = [
+            'request_id', 'clerk_id', 'email', 'username',
+            'status', 'requested_role', 'processed_by',
+            'created_at', 'processed_at'
+        ]
+        read_only_fields = ['request_id', 'clerk_id', 'email', 'username', 'created_at', 'processed_at']
+
+
+class AccessRequestDetailSerializer(serializers.ModelSerializer):
+    processed_by = UserSerializer(read_only=True)
+    
+    class Meta:
+        model = AccessRequest
+        fields = '__all__'
+        read_only_fields = ['request_id', 'created_at', 'processed_at']
 
 
 class ResetPasswordSerializer(serializers.Serializer):

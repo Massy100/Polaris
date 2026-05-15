@@ -56,7 +56,7 @@ export default function SignUpPage() {
 
           <div className="signup-left-inner">
             <span className="signup-eyebrow">
-              Sistema De Gestión Académica &nbsp;·&nbsp; Universidad Rafael Landívar
+              Comunidad Landivariana &nbsp;·&nbsp; Valores y Servicio
             </span>
 
             <div className="signup-logo-wrap">
@@ -72,27 +72,27 @@ export default function SignUpPage() {
             <div className="signup-divider" />
 
             <h2 className="signup-tagline">
-              Grandes legados<br />
-              comienzan con<br />
-              <em>una decisión.</em>
+              Unidos para servir,<br />
+              llamados a<br />
+              <em>trascender.</em>
             </h2>
 
             <p className="signup-sub">
-              Únete a la comunidad landivariana y forma parte de una tradición académica que transforma vidas.
+              Crea tu cuenta institucional y forma parte de un ecosistema diseñado para la innovación académica y el liderazgo con propósito.
             </p>
 
             <div className="signup-stats-carousel">
               <div className="signup-stat-slide">
                 <span className="signup-stat-num">+1,000</span>
-                <span className="signup-stat-label">Catedráticos activos</span>
+                <span className="signup-stat-label">Mentores de Vida</span>
               </div>
               <div className="signup-stat-slide">
                 <span className="signup-stat-num">+20,000</span>
-                <span className="signup-stat-label">Estudiantes formados</span>
+                <span className="signup-stat-label">Historias de Éxito</span>
               </div>
               <div className="signup-stat-slide">
                 <span className="signup-stat-num">75+</span>
-                <span className="signup-stat-label">Años de excelencia</span>
+                <span className="signup-stat-label">Años Forjando el Futuro</span>
               </div>
             </div>
           </div>
