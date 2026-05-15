@@ -49,7 +49,7 @@ class TemplateUploadView(APIView):
             col_dim = next((c for c in df.columns if any(k in c for k in ['dimension', 'apartado', 'seccion', 'categoria', 'criterio', 'aspecto', 'ambito'])), None)
             col_ques = next((c for c in df.columns if any(k in c for k in ['pregunta', 'enunciado', 'item', 'indicador', 'descripcion'])), None)
             col_type = next((c for c in df.columns if any(k in c for k in ['tipo', 'type'])), None)
-            col_weight = next((c for c in df.columns if any(k in c for k in ['peso', 'valor', 'weight'])), None)
+            col_weight = next((c for c in df.columns if any(k in c for k in ['peso', 'valor', 'weight', 'porcentaje', 'puntuacion'])), None)
 
             if not col_dim or not col_ques:
                 return Response({
@@ -59,41 +59,60 @@ class TemplateUploadView(APIView):
 
             with transaction.atomic():
                 template = EvaluationTemplate.objects.create(name=name)
-                dimensions_cache = {}
-                questions_cache = {}
+                
+                # First pass: Aggregate weights by dimension
+                dim_total_weights = {}
+                dim_questions_data = {} # To keep track of questions per dimension
                 
                 for _, row in df.iterrows():
                     dim_name = str(row[col_dim]).strip()
+                    if not dim_name or dim_name.lower() == 'nan':
+                        continue
+                        
+                    # Find the last numeric value in the row (the point value for this row)
+                    row_weight = 0.0
+                    for val in reversed(row.values):
+                        try:
+                            if pd.notna(val):
+                                clean_val = str(val).replace('%', '').replace(',', '.').strip()
+                                row_weight = float(clean_val)
+                                break # Found the last number
+                        except:
+                            continue
+                    
+                    if dim_name not in dim_total_weights:
+                        dim_total_weights[dim_name] = 0.0
+                        dim_questions_data[dim_name] = []
+                    
+                    dim_total_weights[dim_name] += row_weight
+                    
                     question_text = str(row[col_ques]).strip()
                     q_type = str(row[col_type]).strip().lower() if col_type and pd.notna(row[col_type]) else 'likert'
                     
-                    try:
-                        weight = float(row[col_weight]) if col_weight and pd.notna(row[col_weight]) else 0.0
-                    except:
-                        weight = 0.0
-
-                    if not dim_name or dim_name.lower() == 'nan':
-                        continue
-                    
-                    if dim_name not in dimensions_cache:
-                        dimension = TemplateDimension.objects.create(
-                            template=template,
-                            name=dim_name,
-                            weight=weight
-                        )
-                        dimensions_cache[dim_name] = dimension
-                        questions_cache[dim_name] = set()
-                    
-                    current_dim = dimensions_cache[dim_name]
-                    
                     if question_text and question_text.lower() != 'nan':
-                        if question_text not in questions_cache[dim_name]:
+                        dim_questions_data[dim_name].append({
+                            'text': question_text,
+                            'type': q_type
+                        })
+
+                # Second pass: Create dimensions and questions
+                for dim_name, total_weight in dim_total_weights.items():
+                    dimension = TemplateDimension.objects.create(
+                        template=template,
+                        name=dim_name,
+                        weight=total_weight
+                    )
+                    
+                    # Prevent duplicate questions within same dimension
+                    seen_questions = set()
+                    for q_info in dim_questions_data[dim_name]:
+                        if q_info['text'] not in seen_questions:
                             TemplateQuestion.objects.create(
-                                dimension=current_dim,
-                                text=question_text,
-                                question_type=q_type
+                                dimension=dimension,
+                                text=q_info['text'],
+                                question_type=q_info['type']
                             )
-                            questions_cache[dim_name].add(question_text)
+                            seen_questions.add(q_info['text'])
 
             return Response({
                 'ok': True,
@@ -241,14 +260,44 @@ class SaveEvaluationView(APIView):
                 evaluation.final_score = total_weighted_score
                 evaluation.save()
 
-                teacher.score = total_weighted_score
-                teacher.save()
+                # --- CONSOLIDATION LOGIC (360) ---
+                from apps.assessment_360.models import Weightconfig, WeightconfigCriterion
+                from apps.academic_workload.models import TeacherCourseScore
+                from django.db.models import Avg
+
+                active_config = Weightconfig.objects.filter(status='active').first()
+                if active_config:
+                    # 1. Alumnos (usually 30%)
+                    avg_alumnos = TeacherCourseScore.objects.filter(teacher=teacher).aggregate(Avg('final_score'))['final_score__avg'] or 0.0
+                    
+                    # 2. Observaciones (usually 10%)
+                    avg_obs_raw = TeacherEvaluation.objects.filter(teacher=teacher).aggregate(Avg('final_score'))['final_score__avg'] or 0.0
+                    avg_obs_100 = (float(avg_obs_raw) / 5.0) * 100.0
+
+                    total_global_score = 0.0
+                    criteria_weights = WeightconfigCriterion.objects.filter(weight_config=active_config).select_related('criterion')
+                    
+                    for cw in criteria_weights:
+                        c_name = cw.criterion.name.lower()
+                        percentage = float(cw.percentage)
+                        
+                        if 'alumno' in c_name:
+                            total_global_score += (float(avg_alumnos) * percentage) / 100.0
+                        elif 'pares' in c_name or 'observacion' in c_name:
+                            total_global_score += (float(avg_obs_100) * percentage) / 100.0
+
+                    teacher.score = round(total_global_score, 2)
+                    teacher.save(update_fields=['score'])
+                else:
+                    teacher.score = round((float(total_weighted_score) / 5.0) * 100.0, 2)
+                    teacher.save(update_fields=['score'])
 
             return Response({
                 'ok': True,
-                'message': 'Evaluacion guardada exitosamente.',
+                'message': 'Evaluación guardada y score global actualizado.',
                 'evaluation_id': evaluation.evaluation_id,
-                'final_score': total_weighted_score
+                'template_score': total_weighted_score,
+                'global_score': teacher.score
             })
 
         except Exception as e:
@@ -256,23 +305,64 @@ class SaveEvaluationView(APIView):
 
 class EvaluationResourcesView(APIView):
     def get(self, request):
-        teachers = Teacher.objects.filter(status='active').only('teacher_id', 'first_name', 'last_name', 'code')
+        from apps.assessment_360.models import Weightconfig, WeightconfigCriterion, Evaluationcriterion
+        from django.utils import timezone
+        
+        # Determine current semester based on month
+        now = timezone.now()
+        month = now.month
+        year = now.year
+        if 1 <= month <= 6:
+            current_semester = f"Primer Semestre {year}"
+        else:
+            current_semester = f"Segundo Semestre {year}"
+            
+        # Optimize teacher fetching
+        teachers = Teacher.objects.filter(status__iexact='active').prefetch_related(
+            'section_set__course', 
+            'section_set__period'
+        ).only('teacher_id', 'first_name', 'last_name', 'code')
+        
         templates = EvaluationTemplate.objects.all().only('template_id', 'name')
         
+        # Get weight for "Evaluación de pares" or similar
+        active_config = Weightconfig.objects.filter(status='active').first()
+        obs_weight = 10.0  # Default fallback
+        if active_config:
+            weight_entry = WeightconfigCriterion.objects.filter(
+                weight_config=active_config,
+                criterion__name__icontains='pares'
+            ).first()
+            if not weight_entry:
+                weight_entry = WeightconfigCriterion.objects.filter(
+                    weight_config=active_config,
+                    criterion__name__icontains='observacion'
+                ).first()
+            
+            if weight_entry:
+                obs_weight = float(weight_entry.percentage)
+
         teacher_list = []
         for t in teachers:
-            # Get sections for this teacher to auto-populate fields in the frontend
-            sections = Section.objects.filter(teacher=t).select_related('course', 'period')
-            
             section_list = []
-            for s in sections:
+            for s in t.section_set.all():
+                raw_p_name = s.period.name if s.period and s.period.name else ''
+                p_name = 'Periodo General' if raw_p_name == 'Carga masiva' or not raw_p_name else raw_p_name
+                
+                # Extract section from course name if it contains (Section)
+                import re
+                section_code = s.section_code
+                match = re.search(r'\(([^)]+)\)', s.course.name)
+                if match:
+                    section_code = match.group(1)
+                    
                 section_list.append({
                     'section_id': s.section_id,
-                    'section_code': s.section_code,
+                    'section_code': section_code,
                     'course_id': s.course.course_id,
                     'course_name': s.course.name,
                     'period_id': s.period.period_id,
-                    'period_name': s.period.name
+                    'period_name': p_name
                 })
             
             teacher_list.append({
@@ -289,5 +379,44 @@ class EvaluationResourcesView(APIView):
             'templates': [{
                 'template_id': t.template_id,
                 'name': t.name
-            } for t in templates]
+            } for t in templates],
+            'observation_weight': obs_weight,
+            'current_semester': current_semester
         })
+
+class EvaluationStatsView(APIView):
+    def get(self, request):
+        from django.db.models import Avg, Count
+        from apps.templates.models import TeacherEvaluation
+        from apps.academic_career.models import Teacher
+
+        # Calculate stats
+        stats = TeacherEvaluation.objects.aggregate(
+            avg_score=Avg('final_score'),
+            total_evals=Count('evaluation_id')
+        )
+
+        # Get active teachers count
+        active_teachers = Teacher.objects.filter(status__iexact='active').count()
+
+        # Get recent evaluations
+        recent_evals = TeacherEvaluation.objects.select_related('teacher', 'template').order_by('-created_at')[:5]
+
+        recent_list = []
+        for e in recent_evals:
+            recent_list.append({
+                'id': e.evaluation_id,
+                'teacher_name': f"{e.teacher.first_name} {e.teacher.last_name}",
+                'template_name': e.template.name,
+                'score': float(e.final_score),
+                'date': e.created_at
+            })
+
+        return Response({
+            'ok': True,
+            'total_evals': stats['total_evals'] or 0,
+            'avg_score': round(float(stats['avg_score'] or 0.0), 2),
+            'active_teachers': active_teachers,
+            'recent_evaluations': recent_list
+        })
+

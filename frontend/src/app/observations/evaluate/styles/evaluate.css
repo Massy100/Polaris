@@ -1,0 +1,314 @@
+/* evaluate.css - Professional Premium Look for SGA Polaris */
+
+.eval-page {
+  background: var(--url-surface);
+  min-height: 100vh;
+  font-family: var(--url-font-sans);
+}
+
+/* Centered Loading Screen */
+.eval-loading-screen-centered {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--url-white);
+  animation: eval-fade-in 0.6s ease-out;
+}
+
+.eval-loading-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.eval-loading-text {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--url-navy);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.eval-loading-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.eval-loading-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--url-navy-light);
+  animation: eval-dots 1.4s infinite;
+}
+
+.eval-loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.eval-loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes eval-dots {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1.2); opacity: 1; background: var(--url-gold); }
+}
+
+@keyframes eval-fade-in {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header High-End */
+.eval-header-high-end {
+  background: var(--url-white);
+  border-bottom: 1px solid var(--url-border-soft);
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.05);
+}
+
+.eval-header-content-wide {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 48px;
+}
+
+.eval-header-left-side {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex: 1;
+}
+
+.eval-back-circle-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--url-border);
+  background: var(--url-surface);
+  color: var(--url-navy-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.28s var(--url-ease);
+}
+
+.eval-back-circle-btn:hover {
+  background: var(--url-navy);
+  color: var(--url-white);
+  border-color: var(--url-navy);
+  transform: translateX(-4px);
+  box-shadow: var(--url-shadow-md);
+}
+
+.eval-brand-badge {
+  font-size: 10px;
+  font-weight: 900;
+  color: var(--url-gold);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.eval-template-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--url-navy);
+  margin: 0;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+.eval-context-info {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  background: var(--url-surface-2);
+  padding: 10px 32px;
+  border-radius: 16px;
+  border: 1px solid var(--url-border-soft);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.eval-info-tag {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--url-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.eval-info-main {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--url-navy);
+  white-space: nowrap;
+}
+
+.eval-sec-label {
+  background: var(--url-navy);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  margin-left: 8px;
+  font-weight: 900;
+}
+
+.eval-info-sep {
+  width: 1px;
+  height: 32px;
+  background: var(--url-border);
+}
+
+.eval-btn-finish-premium {
+  background: var(--url-navy);
+  color: var(--url-white);
+  border: none;
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s var(--url-ease);
+  box-shadow: 0 8px 20px rgba(13, 31, 78, 0.2);
+}
+
+.eval-btn-finish-premium:hover {
+  background: var(--url-navy-light);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(13, 31, 78, 0.25);
+}
+
+.eval-stats-val {
+  display: block;
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--url-navy-light);
+  text-align: right;
+}
+
+/* Layout */
+.eval-content-flow {
+  padding: 64px 40px 120px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.eval-container-narrow {
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+/* Section Card */
+.eval-section-card {
+  background: var(--url-white);
+  border-radius: 24px;
+  border: 1px solid var(--url-border-soft);
+  box-shadow: var(--url-shadow-md);
+  margin-bottom: 48px;
+  overflow: hidden;
+}
+
+.eval-section-header {
+  padding: 40px 48px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  background: linear-gradient(180deg, var(--url-surface) 0%, var(--url-white) 100%);
+  border-bottom: 1.5px solid var(--url-border-soft);
+}
+
+.eval-section-number {
+  background: var(--url-navy);
+  color: var(--url-white);
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 20px;
+  box-shadow: 0 6px 15px rgba(13, 31, 78, 0.25);
+}
+
+.eval-section-title-box h2 {
+  font-size: 22px;
+  margin: 0 0 4px 0;
+  color: var(--url-navy);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.eval-section-weight {
+  margin-left: auto;
+  text-align: right;
+  background: var(--url-white);
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: 1.5px solid var(--url-border-soft);
+}
+
+/* Controls Area */
+.eval-questions-list {
+  padding: 0 48px;
+}
+
+.eval-question-row {
+  padding: 48px 0;
+  border-bottom: 1.5px solid var(--url-border-soft);
+}
+
+.eval-question-text {
+  font-size: 17.5px;
+  font-weight: 700;
+  color: var(--url-text-pri);
+  letter-spacing: -0.015em;
+  margin-bottom: 24px;
+  line-height: 1.45;
+}
+
+.eval-likert-premium {
+  display: flex;
+  gap: 14px;
+}
+
+.eval-likert-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2.5px solid var(--url-border);
+  background: var(--url-white);
+  font-weight: 900;
+  font-size: 19px;
+  color: var(--url-text-muted);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.eval-likert-circle:hover {
+  border-color: var(--url-navy-light);
+  color: var(--url-navy-light);
+  transform: scale(1.15);
+}
+
+.eval-likert-circle.active {
+  background: var(--url-navy);
+  border-color: var(--url-navy);
+  color: var(--url-white);
+  transform: scale(1.15);
+  box-shadow: 0 6px 18px rgba(13, 31, 78, 0.25);
+}
