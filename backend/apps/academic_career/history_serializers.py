@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Teacher, Course
+from .history_services import build_course_history, build_teacher_history
 
 
 class CourseSimpleSerializer(serializers.ModelSerializer):
@@ -18,7 +19,10 @@ class TeacherSimpleSerializer(serializers.ModelSerializer):
 
 class TeacherWithCoursesSerializer(serializers.ModelSerializer):
     full_name = serializers.ReadOnlyField()
-    courses = CourseSimpleSerializer(many=True, read_only=True)
+    courses = serializers.SerializerMethodField()
+
+    def get_courses(self, teacher):
+        return build_teacher_history(teacher)
 
     class Meta:
         model = Teacher
@@ -34,7 +38,10 @@ class TeacherWithCoursesSerializer(serializers.ModelSerializer):
 
 
 class CourseWithTeachersSerializer(serializers.ModelSerializer):
-    teachers = TeacherSimpleSerializer(source='teacher_set', many=True, read_only=True)
+    teachers = serializers.SerializerMethodField()
+
+    def get_teachers(self, course):
+        return build_course_history(course)
 
     class Meta:
         model = Course
