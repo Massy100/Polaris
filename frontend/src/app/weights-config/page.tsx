@@ -36,10 +36,10 @@ interface WeightConfig {
 }
 
 const INITIAL_CRITERIA: Criterion[] = [
-  { criterion_id: 1, name: "Evaluación de alumnos", description: "Calificación promedio otorgada por los estudiantes", percentage: 40 },
-  { criterion_id: 2, name: "Grados académicos", description: "Doctorado, Maestría, Licenciatura, etc.", percentage: 30 },
-  { criterion_id: 3, name: "Autoevaluación del docente", description: "Evaluación realizada por el propio docente", percentage: 20 },
-  { criterion_id: 4, name: "Evaluación de pares", description: "Observación y evaluación de otros docentes", percentage: 10 },
+  { criterion_id: 1, name: "Calidad de enseñanza", description: "Claridad, organizacion y capacidad de explicar", percentage: 35 },
+  { criterion_id: 2, name: "Interaccion con estudiantes", description: "Empatia, respeto y apoyo al alumno", percentage: 25 },
+  { criterion_id: 3, name: "Metodologia y evaluacion", description: "Forma de evaluar y dar retroalimentacion", percentage: 20 },
+  { criterion_id: 4, name: "Dominio del tema", description: "Conocimiento y preparacion del docente", percentage: 20 },
 ];
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
