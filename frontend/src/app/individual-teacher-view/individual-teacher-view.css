@@ -195,6 +195,105 @@
   letter-spacing: -0.015em;
 }
 
+/* Breakdown */
+.itv-breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.itv-breakdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--url-surface);
+  border: 1px solid var(--url-border-soft);
+  border-radius: var(--url-radius-md);
+  transition: transform var(--url-transition), box-shadow var(--url-transition);
+}
+
+.itv-breakdown-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--url-shadow-xs);
+  border-color: var(--url-border);
+}
+
+.itv-breakdown-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.itv-breakdown-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: var(--url-white);
+  border: 1px solid var(--url-border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--url-gold);
+  font-size: 20px;
+}
+
+.itv-breakdown-texts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.itv-breakdown-label {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--url-navy);
+}
+
+.itv-breakdown-weight {
+  margin: 0;
+  font-size: 12px;
+  color: var(--url-text-muted);
+  font-weight: 600;
+}
+
+.itv-breakdown-scores {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.itv-score-badge, .itv-score-contribution {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 60px;
+}
+
+.itv-score-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--url-navy);
+  line-height: 1.1;
+}
+
+.itv-contrib-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--url-success);
+  line-height: 1.1;
+}
+
+.itv-score-label, .itv-contrib-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--url-text-muted);
+  margin-top: 2px;
+}
+
 /* Períodos */
 .itv-periods-list {
   display: flex;

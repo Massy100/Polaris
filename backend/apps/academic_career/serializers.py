@@ -92,6 +92,7 @@ class TeacherSerializer(serializers.ModelSerializer):
         many=True, queryset=Course.objects.all(), write_only=True, required=False
     )
     courses_detail = CourseSerializer(source='courses', many=True, read_only=True)
+    score_breakdown = serializers.SerializerMethodField()
 
     class Meta:
         model = Teacher
@@ -100,8 +101,52 @@ class TeacherSerializer(serializers.ModelSerializer):
             'phone', 'department', 'since', 'role', 'courses', 'courses_detail',
             'courses_taught', 'specialties', 'titles', 'merits', 'coordinator_opinions',
             'student_surveys', 'status', 'score', 'manual_status', 'created_at', 'updated_at',
+            'score_breakdown',
         ]
         read_only_fields = ['created_at', 'updated_at']
+
+    def get_score_breakdown(self, obj):
+        from apps.assessment_360.models import Weightconfig, WeightconfigCriterion
+        from apps.academic_workload.models import TeacherCourseScore
+        from apps.templates.models import TeacherEvaluation
+        from django.db.models import Avg
+
+        active_config = Weightconfig.objects.filter(status='active', is_deleted=False).first()
+        
+        avg_alumnos = TeacherCourseScore.objects.filter(teacher=obj).aggregate(Avg('final_score'))['final_score__avg'] or 0.0
+        avg_obs_raw = TeacherEvaluation.objects.filter(teacher=obj).aggregate(Avg('final_score'))['final_score__avg'] or 0.0
+        avg_observaciones = (float(avg_obs_raw) / 5.0) * 100.0
+
+        breakdown = []
+        
+        breakdown.append({
+            'label': 'Evaluación de Alumnos',
+            'score': round(float(avg_alumnos), 2),
+            'weight': 0,
+            'icon': 'book'
+        })
+
+        breakdown.append({
+            'label': 'Observaciones de Aula',
+            'score': round(float(avg_observaciones), 2),
+            'weight': 0,
+            'icon': 'eye'
+        })
+
+        if active_config:
+            criteria_weights = WeightconfigCriterion.objects.filter(
+                weight_config=active_config, 
+                is_deleted=False
+            ).select_related('criterion')
+            
+            for cw in criteria_weights:
+                c_name = cw.criterion.name.lower()
+                if 'alumno' in c_name or 'estudiante' in c_name:
+                    breakdown[0]['weight'] = float(cw.percentage)
+                elif 'observacion' in c_name or 'pares' in c_name or 'directiv' in c_name:
+                    breakdown[1]['weight'] = float(cw.percentage)
+
+        return breakdown
 
     def get_full_name(self, obj):
         if obj.first_name and obj.last_name:
@@ -164,4 +209,9 @@ class TeacherListSerializer(serializers.ModelSerializer):
         if count == 0:
             return 0.0
 
-        return round(total_ratings / count, 2)
+        avg = total_ratings / count
+        # If the average is very low (<= 10), it's likely from the old 0-10 scale, so we normalize.
+        if avg <= 10:
+            avg = avg * 10
+            
+        return round(float(avg), 2)

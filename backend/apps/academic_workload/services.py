@@ -114,7 +114,7 @@ def analyze_teacher(
             'weighted_score': weighted,
         })
 
-    final_score = round(sum(c['weighted_score'] for c in criteria_scores)/20, 2)
+    final_score = round(sum(c['weighted_score'] for c in criteria_scores), 2)
     positive_count = sentiments.count('P')
     negative_count = sentiments.count('N')
 

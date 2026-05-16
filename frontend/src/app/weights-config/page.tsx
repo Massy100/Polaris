@@ -7,6 +7,7 @@ import AddCategoryModal from "../components/add-category-modal";
 import VisualDistribution from "../components/visual-distribution";
 import CalcExample from "../components/calc-example";
 import Modal from '../components/modal';
+import NotificationWrapper from '../components/notification-wrapper';
 import "./weights-config.css";
 
 interface Criterion {
@@ -278,6 +279,7 @@ export default function WeightsConfig() {
 
   return (
     <div className="url-page-bg flex-1">
+      <NotificationWrapper />
       <main className="url-container url-page-main">
         <header style={{ marginBottom: '32px' }}>
           <button onClick={() => router.push('/settings')} className="url-back-btn">

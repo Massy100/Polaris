@@ -155,11 +155,8 @@ class TeacherAIAnalysisView(APIView):
             }
         )
 
-        avg = TeacherCourseScore.objects.filter(
-            teacher_id=teacher_id
-        ).aggregate(avg=Avg('final_score'))['avg'] or 0.0
-
-        Teacher.objects.filter(teacher_id=teacher_id).update(score=round(avg, 2))
+        from apps.academic_career.services.scoring_service import update_teacher_global_score
+        update_teacher_global_score(teacher_id)
 
         return Response(
             {

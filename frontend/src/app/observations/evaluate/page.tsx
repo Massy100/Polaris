@@ -165,13 +165,19 @@ function EvaluationContent() {
 
           <div className="eval-context-info">
              <div className="eval-info-block">
-                <span className="eval-info-tag">EVALUADO</span>
+                <span className="eval-info-tag">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ marginRight: '4px' }}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  DOCENTE EVALUADO
+                </span>
                 <span className="eval-info-main">{teacherName}</span>
              </div>
              <div className="eval-info-sep"></div>
              <div className="eval-info-block">
-                <span className="eval-info-tag">ASIGNATURA</span>
-                <span className="eval-info-main">{courseName} <strong className="eval-sec-label">SECCIÓN {section}</strong></span>
+                <span className="eval-info-tag">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ marginRight: '4px' }}><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M8 7h6"/><path d="M8 11h8"/></svg>
+                  ASIGNATURA Y SECCIÓN
+                </span>
+                <span className="eval-info-main">{courseName} <strong className="eval-sec-label">S. {section}</strong></span>
              </div>
           </div>
 

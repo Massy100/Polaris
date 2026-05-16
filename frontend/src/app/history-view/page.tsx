@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from "react";
+import NotificationWrapper from "../components/notification-wrapper";
 import "./history-view.css";
 import Pagination from "../components/pagination";
 
@@ -293,6 +294,7 @@ export default function HistoryView() {
 
   return (
     <div className="hv-layout flex-1">
+      <NotificationWrapper />
       <div className="hv-header-main">
         <div className="hv-eyebrow">
           <IconEyebrow />

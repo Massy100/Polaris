@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Modal from '../components/modal';
+import NotificationWrapper from '../components/notification-wrapper';
 import './observations.css';
 
 interface SectionData {
@@ -38,6 +39,8 @@ export default function ObservationsPage() {
     recent_evaluations: []
   });
   const [showEvalModal, setShowEvalModal] = useState(false);
+  const [showFullPendingModal, setShowFullPendingModal] = useState(false);
+  const [pendingSearch, setPendingSearch] = useState('');
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
   const [config, setConfig] = useState({
@@ -60,7 +63,6 @@ export default function ObservationsPage() {
   };
 
   const fetchResources = useCallback(async () => {
-    setLoading(true);
     try {
       const res = await fetch(`${API_URL}/templates/resources/`);
       const data = await res.json();
@@ -69,7 +71,7 @@ export default function ObservationsPage() {
           teachers: data.teachers,
           templates: data.templates
         });
-        if (data.current_semester) {
+        if (data.current_semester && !config.semester) {
           setConfig(prev => ({ ...prev, semester: data.current_semester }));
         }
       }
@@ -78,7 +80,7 @@ export default function ObservationsPage() {
     } finally {
       setLoading(false);
     }
-  }, [API_URL]);
+  }, [API_URL, config.semester]);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -100,7 +102,36 @@ export default function ObservationsPage() {
   useEffect(() => {
     fetchResources();
     fetchStats();
+
+    // Polling interval: 1 second
+    const interval = setInterval(() => {
+      fetchResources();
+      fetchStats();
+    }, 1000);
+
+    return () => clearInterval(interval);
   }, [fetchResources, fetchStats]);
+
+  // Compute pending teachers (active teachers without recent evaluations)
+  const allPendingTeachers = useMemo(() => {
+    const recentlyEvaluatedIds = new Set(stats.recent_evaluations.map((e: any) => {
+        // Find teacher by name in resources if ID is not available in evaluation item
+        const teacher = resources.teachers.find(t => `${t.first_name} ${t.last_name}` === e.teacher_name);
+        return teacher?.teacher_id;
+    }).filter(id => id !== undefined));
+
+    return resources.teachers.filter(t => !recentlyEvaluatedIds.has(t.teacher_id));
+  }, [resources.teachers, stats.recent_evaluations]);
+
+  const filteredPending = useMemo(() => {
+    if (!pendingSearch) return allPendingTeachers;
+    return allPendingTeachers.filter(t => 
+      `${t.first_name} ${t.last_name}`.toLowerCase().includes(pendingSearch.toLowerCase()) ||
+      t.code.toLowerCase().includes(pendingSearch.toLowerCase())
+    );
+  }, [allPendingTeachers, pendingSearch]);
+
+  const topPending = useMemo(() => allPendingTeachers.slice(0, 4), [allPendingTeachers]);
 
   const handleTeacherChange = (teacherId: string) => {
     const teacher = resources.teachers.find(t => String(t.teacher_id) === teacherId);
@@ -118,6 +149,12 @@ export default function ObservationsPage() {
       setAvailableSections([]);
       setConfig(prev => ({ ...prev, teacher_id: teacherId, course_id: '', section: '', semester: '' }));
     }
+  };
+
+  const handleQuickEval = (teacherId: number) => {
+    handleTeacherChange(String(teacherId));
+    setShowEvalModal(true);
+    setShowFullPendingModal(false);
   };
 
   const handleSectionChange = (sectionId: string) => {
@@ -157,14 +194,15 @@ export default function ObservationsPage() {
 
   return (
     <div className="url-page-bg min-h-screen">
+      <NotificationWrapper />
       {toast && (
         <div className={`url-toast url-toast--${toast.type}`}>
           {toast.msg}
         </div>
       )}
 
-      <main className="url-container" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
-        <div className="obs-new-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
+      <main className="url-container" style={{ paddingTop: '80px', paddingBottom: '60px' }}>
+        <div className="obs-new-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
           <div>
             <div className="url-eyebrow" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--url-navy-light)', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', marginBottom: '8px' }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -191,7 +229,7 @@ export default function ObservationsPage() {
           <div className="url-card" style={{ padding: '24px' }}>
              <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--url-text-muted)', marginBottom: '8px' }}>Nota Promedio</p>
              <h2 style={{ fontSize: '32px', margin: 0, color: 'var(--url-navy)' }}>{stats.avg_score.toFixed(2)}</h2>
-             <p style={{ fontSize: '11px', color: 'var(--url-text-muted)', marginTop: '4px' }}>Escala de 1 - 5.0</p>
+             <p style={{ fontSize: '11px', color: 'var(--url-text-muted)', marginTop: '4px' }}>Escala de 0 - 100</p>
           </div>
           <div className="url-card" style={{ padding: '24px' }}>
              <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--url-text-muted)', marginBottom: '8px' }}>Docentes Activos</p>
@@ -200,7 +238,7 @@ export default function ObservationsPage() {
           </div>
           <div className="url-card" style={{ padding: '24px' }}>
              <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--url-text-muted)', marginBottom: '8px' }}>Efectividad</p>
-             <h2 style={{ fontSize: '32px', margin: 0, color: '#f59e0b' }}>{((stats.avg_score / 5) * 100).toFixed(0)}%</h2>
+             <h2 style={{ fontSize: '32px', margin: 0, color: '#f59e0b' }}>{stats.avg_score.toFixed(0)}%</h2>
              <p style={{ fontSize: '11px', color: 'var(--url-text-muted)', marginTop: '4px' }}>Cumplimiento global</p>
           </div>
         </div>
@@ -225,8 +263,8 @@ export default function ObservationsPage() {
                           borderRadius: '20px', 
                           fontSize: '13px', 
                           fontWeight: 800,
-                          backgroundColor: evalItem.score >= 4 ? 'var(--url-success-bg)' : evalItem.score >= 3 ? 'var(--url-gold-glow)' : 'var(--url-danger-bg)',
-                          color: evalItem.score >= 4 ? 'var(--url-success)' : evalItem.score >= 3 ? 'var(--url-gold)' : 'var(--url-danger)',
+                          backgroundColor: evalItem.score >= 80 ? 'var(--url-success-bg)' : evalItem.score >= 60 ? 'var(--url-gold-glow)' : 'var(--url-danger-bg)',
+                          color: evalItem.score >= 80 ? 'var(--url-success)' : evalItem.score >= 60 ? 'var(--url-gold)' : 'var(--url-danger)',
                         }}>
                           {evalItem.score.toFixed(2)}
                         </span>
@@ -244,109 +282,226 @@ export default function ObservationsPage() {
              )}
           </div>
 
-          <div className="url-card" style={{ padding: '24px' }}>
-             <h3 style={{ margin: '0 0 20px 0', fontSize: '16px' }}>Próximas Evaluaciones</h3>
-             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <p style={{ fontSize: '13px', color: 'var(--url-text-muted)', fontStyle: 'italic' }}>No hay sesiones programadas para las próximas 24 horas.</p>
+          <div className="url-card" style={{ padding: '0', overflow: 'hidden' }}>
+             <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--url-border-soft)' }}>
+                <h3 style={{ margin: 0, fontSize: '16px' }}>Pendientes de Evaluación</h3>
              </div>
+             <div style={{ padding: '10px 0' }}>
+                {topPending.length > 0 ? (
+                  topPending.map((teacher) => (
+                    <div key={teacher.teacher_id} style={{ padding: '14px 24px', borderBottom: '1px solid var(--url-border-soft)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ flex: 1, minWidth: 0, marginRight: '16px' }}>
+                        <p style={{ fontWeight: 700, margin: '0 0 2px 0', fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{teacher.first_name} {teacher.last_name}</p>
+                        <p style={{ fontSize: '11px', color: 'var(--url-text-muted)', margin: 0 }}>{teacher.sections[0]?.course_name || 'Sin curso asignado'}</p>
+                      </div>
+                      <button 
+                        className="url-btn url-btn-ghost url-btn-sm" 
+                        onClick={() => handleQuickEval(teacher.teacher_id)}
+                        style={{ color: 'var(--url-navy-light)', fontWeight: 800, padding: '4px 10px', fontSize: '11px', borderRadius: '6px' }}
+                      >
+                        Evaluar
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ padding: '32px 24px', textAlign: 'center' }}>
+                    <p style={{ fontSize: '13px', color: 'var(--url-text-muted)', fontStyle: 'italic' }}>Todos los docentes activos han sido evaluados recientemente.</p>
+                  </div>
+                )}
+             </div>
+             {topPending.length > 0 && (
+               <div style={{ padding: '12px 24px', background: 'var(--url-surface)', textAlign: 'center' }}>
+                  <button 
+                    style={{ background: 'none', border: 'none', color: 'var(--url-navy-light)', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}
+                    onClick={() => setShowFullPendingModal(true)}
+                  >
+                    Ver lista completa
+                  </button>
+               </div>
+             )}
           </div>
         </div>
+
+        {/* Modal: Full Pending List */}
+        <Modal
+          open={showFullPendingModal}
+          title="Todos los Docentes Pendientes"
+          onClose={() => setShowFullPendingModal(false)}
+          width={600}
+        >
+          <div style={{ padding: '20px' }}>
+            <div className="url-search-box" style={{ marginBottom: '20px', position: 'relative' }}>
+              <input 
+                type="text" 
+                placeholder="Buscar por nombre o código..." 
+                className="url-input"
+                value={pendingSearch}
+                onChange={(e) => setPendingSearch(e.target.value)}
+                style={{ paddingLeft: '40px' }}
+              />
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--url-text-muted)" strokeWidth="2.5" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }}>
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+              </svg>
+            </div>
+
+            <div style={{ maxHeight: '400px', overflowY: 'auto', borderRadius: '12px', border: '1px solid var(--url-border-soft)' }}>
+              {filteredPending.length > 0 ? (
+                filteredPending.map((teacher) => (
+                  <div key={teacher.teacher_id} style={{ padding: '16px 20px', borderBottom: '1px solid var(--url-border-soft)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white' }}>
+                    <div>
+                      <p style={{ fontWeight: 700, margin: '0 0 2px 0', fontSize: '14px' }}>{teacher.first_name} {teacher.last_name}</p>
+                      <p style={{ fontSize: '12px', color: 'var(--url-text-muted)', margin: 0 }}>Código: {teacher.code} • {teacher.sections[0]?.course_name || 'Sin curso'}</p>
+                    </div>
+                    <button 
+                      className="url-btn url-btn-primary url-btn-sm" 
+                      onClick={() => handleQuickEval(teacher.teacher_id)}
+                    >
+                      Evaluar
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div style={{ padding: '40px', textAlign: 'center', background: 'white' }}>
+                  <p style={{ color: 'var(--url-text-muted)' }}>No se encontraron docentes con ese criterio.</p>
+                </div>
+              )}
+            </div>
+            
+            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
+               <button className="url-btn url-btn-secondary" onClick={() => setShowFullPendingModal(false)}>Cerrar</button>
+            </div>
+          </div>
+        </Modal>
 
         <Modal 
           open={showEvalModal} 
           title="Configurar Sesión de Observación"
           onClose={() => setShowEvalModal(false)}
-          width={500}
+          width={560}
         >
-          <div className="obs-modal-form">
-            <div className="url-field">
-              <label>Docente a Evaluar *</label>
-              <select className="url-input" value={config.teacher_id} onChange={e => handleTeacherChange(e.target.value)}>
-                <option value="">Seleccionar docente...</option>
-                {resources.teachers.map(t => (
-                  <option key={t.teacher_id} value={t.teacher_id}>{t.first_name} {t.last_name} ({t.code})</option>
-                ))}
-              </select>
-            </div>
-
-            {availableSections.length > 1 && (
+          <div className="obs-modal-form-premium" style={{ padding: '12px 0' }}>
+            <div className="obs-modal-section">
+              <div className="obs-section-tag">1. Contexto Académico</div>
+              
               <div className="url-field">
-                <label>Cambiar Curso/Sección (Opcional)</label>
-                <select 
-                  className="url-input" 
-                  onChange={e => handleSectionChange(e.target.value)} 
-                  value={availableSections.find(s => s.section_code === config.section && String(s.course_id) === config.course_id)?.section_id || ''}
-                >
-                  {availableSections.map(s => (
-                    <option key={s.section_id} value={s.section_id}>
-                      {s.course_name} ({s.section_code})
-                    </option>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  Docente a Evaluar *
+                </label>
+                <select className="url-input" value={config.teacher_id} onChange={e => handleTeacherChange(e.target.value)}>
+                  <option value="">Seleccionar docente...</option>
+                  {resources.teachers.map(t => (
+                    <option key={t.teacher_id} value={t.teacher_id}>{t.first_name} {t.last_name} ({t.code})</option>
                   ))}
                 </select>
               </div>
-            )}
 
-            <div className="url-field">
-              <label>Asignatura / Curso</label>
-              <input 
-                className="url-input" 
-                value={availableSections.find(s => String(s.course_id) === config.course_id)?.course_name || ''} 
-                placeholder="Se autocompleta al seleccionar docente/sección"
-                readOnly
-                style={{ background: '#f8fafc' }}
-              />
+              {availableSections.length > 0 && (
+                <div className="url-field" style={{ marginTop: '16px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M8 7h6"/><path d="M8 11h8"/></svg>
+                    Asignatura y Sección *
+                  </label>
+                  <select 
+                    className="url-input" 
+                    onChange={e => handleSectionChange(e.target.value)} 
+                    value={availableSections.find(s => s.section_code === config.section && String(s.course_id) === config.course_id)?.section_id || ''}
+                  >
+                    <option value="">Seleccionar curso...</option>
+                    {availableSections.map(s => (
+                      <option key={s.section_id} value={s.section_id}>
+                        {s.course_name} (Sec. {s.section_code})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
-            <div className="obs-form-row">
-              <div className="url-field">
-                <label>Sección *</label>
-                <input className="url-input" placeholder="Ej: A, B" value={config.section} onChange={e => setConfig({...config, section: e.target.value})} />
+            <div className="obs-modal-divider"></div>
+
+            <div className="obs-modal-section">
+              <div className="obs-section-tag">2. Detalles de la Sesión</div>
+              
+              <div className="obs-form-row">
+                <div className="url-field">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Hora de Clase
+                  </label>
+                  <input 
+                    className="url-input" 
+                    type="time" 
+                    value={config.period} 
+                    onChange={e => setConfig({...config, period: e.target.value})} 
+                  />
+                </div>
+                <div className="url-field">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Fecha
+                  </label>
+                  <input className="url-input" type="date" value={config.date} disabled style={{ background: '#f8fafc', color: 'var(--url-text-muted)' }} />
+                </div>
               </div>
-              <div className="url-field">
-                <label>Ciclo / Semestre *</label>
-                <input 
-                  className="url-input" 
-                  value={config.semester} 
-                  onChange={e => setConfig({...config, semester: e.target.value})} 
-                />
+
+              <div className="url-field" style={{ marginTop: '16px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+                  Instrumento de Evaluación *
+                </label>
+                <select className="url-input" value={config.template_id} onChange={e => setConfig({...config, template_id: e.target.value})}>
+                  <option value="">Seleccionar plantilla...</option>
+                  {resources.templates.map(t => (
+                    <option key={t.template_id} value={t.template_id}>{t.name}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
-            <div className="obs-form-row">
-              <div className="url-field">
-                <label>Hora de la Clase</label>
-                <input 
-                  className="url-input" 
-                  type="time" 
-                  value={config.period} 
-                  onChange={e => setConfig({...config, period: e.target.value})} 
-                />
-              </div>
-              <div className="url-field">
-                <label>Fecha de Observación</label>
-                <input className="url-input" type="date" value={config.date} disabled style={{ background: '#f8fafc' }} />
-              </div>
-            </div>
-
-            <div className="url-field">
-              <label>Instrumento / Plantilla *</label>
-              <select className="url-input" value={config.template_id} onChange={e => setConfig({...config, template_id: e.target.value})}>
-                <option value="">Seleccionar formato...</option>
-                {resources.templates.map(t => (
-                  <option key={t.template_id} value={t.template_id}>{t.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="obs-modal-actions" style={{ marginTop: '20px' }}>
-              <button className="url-btn url-btn-secondary" onClick={() => setShowEvalModal(false)}>Cerrar</button>
-              <button className="url-btn url-btn-primary" onClick={handleStartEvaluation}>
+            <div className="obs-modal-actions" style={{ marginTop: '32px', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button className="url-btn url-btn-ghost" onClick={() => setShowEvalModal(false)}>Cancelar</button>
+              <button className="url-btn url-btn-primary" onClick={handleStartEvaluation} style={{ minWidth: '200px' }}>
                 Comenzar Evaluación
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ marginLeft: '4px' }}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </button>
             </div>
           </div>
         </Modal>
       </main>
+
+      <style jsx>{`
+        .obs-modal-section {
+          background: #f8fafc;
+          padding: 20px;
+          border-radius: 12px;
+          border: 1px solid var(--url-border-soft);
+        }
+        .obs-section-tag {
+          font-size: 10px;
+          font-weight: 800;
+          color: var(--url-navy-light);
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          margin-bottom: 16px;
+          display: flex;
+          align-items: center;
+        }
+        .obs-modal-divider {
+          height: 24px;
+          position: relative;
+        }
+        .obs-modal-divider::after {
+          content: "";
+          position: absolute;
+          left: 50%;
+          top: 0;
+          bottom: 0;
+          width: 1px;
+          background: var(--url-border-soft);
+          display: none; /* Only if we wanted side by side */
+        }
+      `}</style>
     </div>
   );
 }

@@ -309,20 +309,19 @@ img, svg { display: block; max-width: 100%; }
 /* Notification Floating Layout */
 .nb-floating-wrapper {
   position: absolute;
-  top: 80px; 
+  top: 32px;
   left: 0;
   right: 0;
   width: 100%;
   max-width: 1360px;
   margin-inline: auto;
-  padding-right: clamp(102px, 15vw, 252px);
+  padding-right: clamp(24px, 4vw, 48px);
   padding-left: clamp(16px, 4vw, 48px);
   z-index: 1000;
   pointer-events: none;
   display: flex;
   justify-content: flex-end;
 }
-
 .nb-floating-wrapper > * {
   pointer-events: auto;
 }

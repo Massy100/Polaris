@@ -34,7 +34,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apps.academic_career',
     'apps.academic_workload',
-    'apps.accounts',
     'apps.assessment_360',
     'apps.integrations',
     'apps.notifications',

@@ -1,6 +1,7 @@
 'use client';
 
 import DashboardCard from '../components/dashboard-card';
+import NotificationWrapper from '../components/notification-wrapper';
 import './top-of-page.css';
 
 type IconType = 'teachers' | 'ranking' | 'alerts' | 'history' | 'upload' | 'user' | 'observations';
@@ -16,12 +17,12 @@ const cards: { id: string; icon: IconType; iconColor: 'blue' | 'yellow'; title: 
   },
 
   {
-    id: 'coordinators',
-    icon: 'user',
+    id: 'observations',
+    icon: 'observations',
     iconColor: 'yellow',
-    title: 'Gestión de Coordinadores',
-    description: 'Centro de administración de coordinadores. Permite crear, editar y gestionar los accesos y roles de los coordinadores del sistema.',
-    href: '/coord-management',
+    title: 'Gestión de Observaciones',
+    description: 'Acceso directo a la evaluación docente en aula. Permite realizar observaciones en tiempo real y consultar resultados inmediatos.',
+    href: '/observations',
   },
 
   {
@@ -61,6 +62,7 @@ const cards: { id: string; icon: IconType; iconColor: 'blue' | 'yellow'; title: 
 export default function HomePage() {
   return (
     <div className="url-page-bg flex-1">
+      <NotificationWrapper />
       <main className="url-container" style={{ paddingTop: '80px', paddingBottom: '60px' }}>
         
         <header style={{ marginBottom: '48px' }}>

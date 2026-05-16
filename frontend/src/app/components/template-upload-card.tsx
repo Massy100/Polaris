@@ -22,8 +22,8 @@ const TemplateUploadCard: React.FC<TemplateUploadCardProps> = ({ onSuccess }) =>
       return;
     }
 
-    if (!file.name.match(/\.(xlsx|xls|csv)$/)) {
-      setMessage({ text: 'Formato inválido. Usa Excel (.xlsx, .xls) o CSV.', type: 'error' });
+    if (!file.name.match(/\.(xlsx|xls)$/)) {
+      setMessage({ text: 'Formato inválido. Usa únicamente archivos de Excel (.xlsx, .xls).', type: 'error' });
       return;
     }
 
@@ -114,11 +114,11 @@ const TemplateUploadCard: React.FC<TemplateUploadCardProps> = ({ onSuccess }) =>
         <p className="puc-dropzone-title">
           {loading ? 'Procesando plantilla...' : 'Arrastra tu archivo aquí'}
         </p>
-        <p className="puc-dropzone-hint">o haz clic para seleccionar (Excel o CSV)</p>
+        <p className="puc-dropzone-hint">o haz clic para seleccionar (Únicamente Excel)</p>
         <input
           ref={inputRef}
           type="file"
-          accept=".xlsx,.xls,.csv"
+          accept=".xlsx,.xls"
           style={{ display: 'none' }}
           onChange={(e) => {
             const file = e.target.files?.[0];

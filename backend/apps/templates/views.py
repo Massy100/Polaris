@@ -60,23 +60,21 @@ class TemplateUploadView(APIView):
             with transaction.atomic():
                 template = EvaluationTemplate.objects.create(name=name)
                 
-                # First pass: Aggregate weights by dimension
                 dim_total_weights = {}
-                dim_questions_data = {} # To keep track of questions per dimension
+                dim_questions_data = {} 
                 
                 for _, row in df.iterrows():
                     dim_name = str(row[col_dim]).strip()
                     if not dim_name or dim_name.lower() == 'nan':
                         continue
                         
-                    # Find the last numeric value in the row (the point value for this row)
                     row_weight = 0.0
                     for val in reversed(row.values):
                         try:
                             if pd.notna(val):
                                 clean_val = str(val).replace('%', '').replace(',', '.').strip()
                                 row_weight = float(clean_val)
-                                break # Found the last number
+                                break
                         except:
                             continue
                     
@@ -95,7 +93,6 @@ class TemplateUploadView(APIView):
                             'type': q_type
                         })
 
-                # Second pass: Create dimensions and questions
                 for dim_name, total_weight in dim_total_weights.items():
                     dimension = TemplateDimension.objects.create(
                         template=template,
@@ -103,7 +100,6 @@ class TemplateUploadView(APIView):
                         weight=total_weight
                     )
                     
-                    # Prevent duplicate questions within same dimension
                     seen_questions = set()
                     for q_info in dim_questions_data[dim_name]:
                         if q_info['text'] not in seen_questions:
@@ -209,6 +205,19 @@ class SaveEvaluationView(APIView):
             template = get_object_or_404(EvaluationTemplate.objects.prefetch_related('dimensions__questions'), pk=template_id)
             course = Course.objects.filter(pk=course_id).first() if course_id else None
 
+            existing_eval = TeacherEvaluation.objects.filter(
+                teacher=teacher,
+                course=course,
+                semester=semester,
+                section=section
+            ).exists()
+
+            if existing_eval:
+                return Response({
+                    'ok': False, 
+                    'message': f'Ya existe una observación registrada para el docente {teacher.first_name} en esta sección ({section}) y semestre.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
             with transaction.atomic():
                 evaluation = TeacherEvaluation.objects.create(
                     teacher=teacher,
@@ -254,43 +263,15 @@ class SaveEvaluationView(APIView):
                                 )
                     
                     if q_count > 0:
-                        avg_dim = dim_sum / q_count
-                        total_weighted_score += (avg_dim * float(dim.weight)) / 100.0
+                        # Convert 1-5 scale to 0-100 scale for each dimension
+                        avg_dim_100 = (dim_sum / q_count) * 20.0
+                        total_weighted_score += (avg_dim_100 * float(dim.weight)) / 100.0
 
                 evaluation.final_score = total_weighted_score
                 evaluation.save()
 
-                # --- CONSOLIDATION LOGIC (360) ---
-                from apps.assessment_360.models import Weightconfig, WeightconfigCriterion
-                from apps.academic_workload.models import TeacherCourseScore
-                from django.db.models import Avg
-
-                active_config = Weightconfig.objects.filter(status='active').first()
-                if active_config:
-                    # 1. Alumnos (usually 30%)
-                    avg_alumnos = TeacherCourseScore.objects.filter(teacher=teacher).aggregate(Avg('final_score'))['final_score__avg'] or 0.0
-                    
-                    # 2. Observaciones (usually 10%)
-                    avg_obs_raw = TeacherEvaluation.objects.filter(teacher=teacher).aggregate(Avg('final_score'))['final_score__avg'] or 0.0
-                    avg_obs_100 = (float(avg_obs_raw) / 5.0) * 100.0
-
-                    total_global_score = 0.0
-                    criteria_weights = WeightconfigCriterion.objects.filter(weight_config=active_config).select_related('criterion')
-                    
-                    for cw in criteria_weights:
-                        c_name = cw.criterion.name.lower()
-                        percentage = float(cw.percentage)
-                        
-                        if 'alumno' in c_name:
-                            total_global_score += (float(avg_alumnos) * percentage) / 100.0
-                        elif 'pares' in c_name or 'observacion' in c_name:
-                            total_global_score += (float(avg_obs_100) * percentage) / 100.0
-
-                    teacher.score = round(total_global_score, 2)
-                    teacher.save(update_fields=['score'])
-                else:
-                    teacher.score = round((float(total_weighted_score) / 5.0) * 100.0, 2)
-                    teacher.save(update_fields=['score'])
+                from apps.academic_career.services.scoring_service import update_teacher_global_score
+                update_teacher_global_score(teacher_id)
 
             return Response({
                 'ok': True,
@@ -404,18 +385,30 @@ class EvaluationStatsView(APIView):
 
         recent_list = []
         for e in recent_evals:
+            # If the score is <= 5, it's likely from the old scale, so normalize it for display
+            score_val = float(e.final_score)
+            if score_val <= 5.0 and score_val > 0:
+                score_val = (score_val / 5.0) * 100.0
+
             recent_list.append({
                 'id': e.evaluation_id,
                 'teacher_name': f"{e.teacher.first_name} {e.teacher.last_name}",
                 'template_name': e.template.name,
-                'score': float(e.final_score),
+                'score': round(score_val, 2),
                 'date': e.created_at
             })
+
+        # Calculate average score for the dashboard (normalized to 100)
+        avg_score_raw = float(stats['avg_score'] or 0.0)
+        if avg_score_raw <= 5.0 and avg_score_raw > 0:
+            avg_score_100 = (avg_score_raw / 5.0) * 100.0
+        else:
+            avg_score_100 = avg_score_raw
 
         return Response({
             'ok': True,
             'total_evals': stats['total_evals'] or 0,
-            'avg_score': round(float(stats['avg_score'] or 0.0), 2),
+            'avg_score': round(avg_score_100, 2),
             'active_teachers': active_teachers,
             'recent_evaluations': recent_list
         })

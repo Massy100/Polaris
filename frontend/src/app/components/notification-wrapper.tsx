@@ -1,22 +1,12 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
 import NotificationBell from './notification-bell';
 
-const EXCLUDED_ROUTES = [
-  '/observations/evaluate',
-  '/sign-in',
-  '/sign-up'
-];
-
+/**
+ * Componente que envuelve la campana de notificaciones con su posicionamiento flotante.
+ * Se debe colocar manualmente en las vistas donde se desee mostrar el centro de notificaciones.
+ */
 export default function NotificationWrapper() {
-  const pathname = usePathname();
-  
-  // No mostrar en rutas excluidas
-  const isExcluded = EXCLUDED_ROUTES.some(route => pathname.startsWith(route));
-  
-  if (isExcluded) return null;
-
   return (
     <div className="nb-floating-wrapper">
       <NotificationBell />

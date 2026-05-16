@@ -47,10 +47,10 @@ const navItems = [
   { id: 1, label: 'Inicio',                icon: 'Home',          path: '/top-of-page' },
   { id: 2, label: 'Gestión Docente',       icon: 'Users',         path: '/user-management' },
   { id: 3, label: 'Ranking Institucional', icon: 'TrendingUp',    path: '/institutional-ranking' },
+  { id: 4, label: 'Observaciones',         icon: 'Eye',           path: '/observations' },
   { id: 5, label: 'Alertas de Desempeño',  icon: 'AlertTriangle', path: '/performance-alert' },
   { id: 6, label: 'Cursos Históricos',     icon: 'History',       path: '/history-view' },
   { id: 7, label: 'Carga Masiva',          icon: 'Upload',        path: '/pensum' },
-  { id: 8, label: 'Observaciones',         icon: 'Eye',           path: '/observations' },
 ];
 
 interface AdminDashboardPanelProps {

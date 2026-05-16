@@ -25,7 +25,6 @@ export default function RootLayout({
           <div className="flex relative">
             <ConditionalPanel />
             <main className="flex-1 overflow-auto relative">
-              <NotificationWrapper />
               {children}
             </main>
           </div>
