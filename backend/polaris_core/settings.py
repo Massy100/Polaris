@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'apps.notifications',
     'apps.reporting',
     'apps.security_audit',
+    'apps.accounts',
     'rest_framework',
     'corsheaders', 
     'dj_database_url',

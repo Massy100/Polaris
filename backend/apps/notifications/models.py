@@ -16,7 +16,7 @@ class Event(models.Model):
 
 class Eventsubscription(models.Model):
     subscription_id = models.BigAutoField(primary_key=True)
-    user = models.ForeignKey('profile.User', models.DO_NOTHING)
+    user = models.ForeignKey('accounts.User', models.DO_NOTHING)
     event_type = models.CharField(max_length=60)
     channel = models.CharField(max_length=30)
     status = models.CharField(max_length=20, blank=True, null=True)

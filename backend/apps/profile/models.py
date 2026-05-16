@@ -1,25 +1,27 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 
-class User(models.Model):
-    STATUS_CHOICES = [
-        ('active', 'Activo'),
-        ('inactive', 'Inactivo'),
-        ('suspended', 'Suspendido'),
-    ]
-    
-    user_id = models.BigAutoField(primary_key=True)
-    username = models.CharField(unique=True, max_length=80, blank=True, null=True)
-    password_hash = models.CharField(max_length=255, blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
-    email = models.EmailField(max_length=255, blank=True, null=True)
-    
+UserAuth = get_user_model()
+
+class Coordinator(models.Model):
+    coordinator_id = models.BigAutoField(primary_key=True)
+    first_name = models.CharField(max_length=120, null=True, blank=True)
+    last_name = models.CharField(max_length=120, null=True, blank=True)
+    status = models.CharField(max_length=20, default='ACTIVE')
+    user = models.OneToOneField(UserAuth, on_delete=models.CASCADE, db_column='user_id')
+    code = models.CharField(max_length=50, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    department = models.CharField(max_length=200, null=True, blank=True)
+    phone = models.CharField(max_length=20, null=True, blank=True)
+    role = models.CharField(max_length=100, null=True, blank=True)
+    since = models.DateField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    email = models.EmailField(max_length=120, unique=True)
+    email_notifications = models.BooleanField(default=True)
+    system_alerts = models.BooleanField(default=True)
+    weekly_report = models.BooleanField(default=False)
+    two_factor = models.BooleanField(default=False)
+
     class Meta:
-        db_table = 'User'
-        managed = True
-        verbose_name = 'Usuario'
-        verbose_name_plural = 'Usuarios'
-    
-    def __str__(self):
-        return self.username or str(self.user_id)
+        db_table = 'coordinator'
+        managed = False

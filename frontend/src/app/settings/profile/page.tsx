@@ -103,10 +103,12 @@ export default function ProfilePage() {
     };
   };
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const endpoint = 'http://localhost:8000/api/profile/';
+        const endpoint = `${API_URL}/profile/`;
         const res = await fetch(endpoint, {
           headers: getAuthHeaders(),
         });
@@ -145,7 +147,7 @@ export default function ProfilePage() {
 
   const handleSavePersonal = async () => {
     try {
-      const endpoint = 'http://localhost:8000/api/profile/personal/';
+      const endpoint = `${API_URL}/profile/personal/`;
       const res = await fetch(endpoint, {
         method: 'PATCH',
         headers: getAuthHeaders(),
@@ -167,7 +169,7 @@ export default function ProfilePage() {
     if (!passwordsMatch) return;
     
     try {
-      const endpoint = 'http://localhost:8000/api/profile/change-password/';
+      const endpoint = `${API_URL}/profile/change-password/`;
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: getAuthHeaders(),
@@ -190,7 +192,7 @@ export default function ProfilePage() {
 
   const handleSavePrefs = async () => {
     try {
-      const endpoint = 'http://localhost:8000/api/profile/preferences/';
+      const endpoint = `${API_URL}/profile/preferences/`;
       const res = await fetch(endpoint, {
         method: 'PATCH',
         headers: getAuthHeaders(),
