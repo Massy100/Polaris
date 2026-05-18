@@ -1,14 +1,14 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
-User = get_user_model()
+UserAuth = get_user_model()
 
 class Coordinator(models.Model):
     coordinator_id = models.BigAutoField(primary_key=True)
     first_name = models.CharField(max_length=120, null=True, blank=True)
     last_name = models.CharField(max_length=120, null=True, blank=True)
     status = models.CharField(max_length=20, default='ACTIVE')
-    user = models.OneToOneField(User, on_delete=models.CASCADE, db_column='user_id')
+    user = models.OneToOneField(UserAuth, on_delete=models.CASCADE, db_column='user_id')
     code = models.CharField(max_length=50, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     department = models.CharField(max_length=200, null=True, blank=True)

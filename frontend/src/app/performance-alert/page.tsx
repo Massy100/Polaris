@@ -9,6 +9,7 @@ import {
   Search,
   Filter,
 } from "lucide-react";
+import NotificationWrapper from "../components/notification-wrapper";
 import Pagination from "../components/pagination";
 import "./add-category.css";
 
@@ -138,7 +139,7 @@ function TeacherCard({
         </div>
         <div className="pa-stat-item">
           <span className="pa-stat-label">Eval. Estudiantes</span>
-          <span className={`pa-stat-value ${evalColor}`}>{teacher.studentEval.toFixed(1)}/5</span>
+          <span className={`pa-stat-value ${evalColor}`}>{teacher.studentEval.toFixed(1)}%</span>
         </div>
       </div>
 
@@ -164,7 +165,7 @@ export default function PerformanceAlertPage() {
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState<string | null>(null);
   const [page, setPage]           = useState(1);
-  const [pageSize, setPageSize]   = useState(10);
+  const [pageSize, setPageSize]   = useState(5);
   const [totalItems, setTotalItems] = useState(0);
 
   const fetchTeachers = useCallback(async () => {
@@ -241,6 +242,7 @@ export default function PerformanceAlertPage() {
 
   return (
     <div className="pa-layout flex-1">
+      <NotificationWrapper />
       <div className="pa-header-main">
         <div className="pa-eyebrow">
           <IconEyebrow />

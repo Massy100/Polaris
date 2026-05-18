@@ -1,18 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from '@clerk/nextjs';
 import "./globals.css";
 import ConditionalPanel from "./components/conditional-panel";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import NotificationWrapper from "./components/notification-wrapper";
 
 export const metadata: Metadata = {
   title: "SGA • Polaris",
@@ -31,10 +21,10 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="es">
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <div className="flex">
+        <body className="antialiased">
+          <div className="flex relative">
             <ConditionalPanel />
-            <main className="flex-1 overflow-auto">
+            <main className="flex-1 overflow-auto relative">
               {children}
             </main>
           </div>

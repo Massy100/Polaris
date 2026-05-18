@@ -149,8 +149,8 @@ def _score_to_rating(value: str) -> int | None:
     except Exception:
         return None
     if number <= 10:
-        return max(1, min(10, round(number)))
-    return max(1, min(10, round(number / 10)))
+        return max(0, min(100, round(number * 10)))
+    return max(0, min(100, round(number)))
 
 
 def _adapt_row_for_category(category: str, row: dict) -> dict | None:
@@ -864,7 +864,7 @@ def _build_evaluation_context(descriptors: list[dict]) -> dict:
     return {
         "by_code_course_section": by_code_course_section,
         "by_code_average": {
-            code: max(1, min(10, round(sum(values) / len(values))))
+            code: max(0, min(100, round(sum(values) / len(values))))
             for code, values in by_code.items()
             if values
         },
@@ -899,7 +899,7 @@ def _build_evaluation_context_from_db() -> dict:
     return {
         "by_code_course_section": by_code_course_section,
         "by_code_average": {
-            code: max(1, min(10, round(sum(values) / len(values))))
+            code: max(0, min(100, round(sum(values) / len(values))))
             for code, values in by_code.items()
             if values
         },
@@ -918,7 +918,7 @@ def _merge_evaluation_context(*contexts: dict) -> dict:
     return {
         "by_code_course_section": merged_by_code_course_section,
         "by_code_average": {
-            code: max(1, min(10, round(sum(values) / len(values))))
+            code: max(0, min(100, round(sum(values) / len(values))))
             for code, values in merged_by_code.items()
             if values
         },

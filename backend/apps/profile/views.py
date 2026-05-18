@@ -26,10 +26,10 @@ class CreateProfileView(APIView):
         email = request.data.get('email')
         if not email:
             return Response({"error": "El correo es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         if User.objects.filter(username=email).exists() or Coordinator.objects.filter(email=email).exists():
             return Response({"error": "Ya existe un usuario o coordinador con este correo."}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         try:
             with transaction.atomic():
                 user = User.objects.create_user(
@@ -53,7 +53,7 @@ class CreateProfileView(APIView):
                     role = request.data.get('role', 'Coordinador')
                     serializer.save(user=user, role=role)
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
-                
+
                 error_msg = next(iter(serializer.errors.values()))[0]
                 raise ValueError(error_msg)
         except Exception as e:
@@ -91,12 +91,15 @@ class UpdatePersonalView(APIView):
             coordinator = Coordinator.objects.first()
         else:
             coordinator = get_object_or_404(Coordinator, user=request.user)
-            
+
         serializer = CoordinatorPersonalSerializer(coordinator, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk=None):
+        return self.patch(request, pk)
 
 class UpdatePreferencesView(APIView):
     permission_classes = [AllowAny]
@@ -129,13 +132,13 @@ class ChangePasswordView(APIView):
                 user = coordinator.user
             else:
                 user = request.user
-            
+
             if not pk and not request.user.is_anonymous and not user.check_password(serializer.validated_data['current_password']):
                 return Response({'current_password': ['La contraseña actual es incorrecta.']}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             user.set_password(serializer.validated_data['new_password'])
             user.save()
-            
+
             if user == request.user:
                 update_session_auth_hash(request, user)
             return Response({'detail': 'Contraseña actualizada.'})

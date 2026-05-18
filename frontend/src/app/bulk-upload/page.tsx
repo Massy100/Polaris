@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useMemo } from "react";
+import NotificationWrapper from "../components/notification-wrapper";
 import "./bulk-upload.css";
 
 type TabKey = 'credenciales' | 'evaluaciones';
@@ -395,6 +396,7 @@ export default function BulkUploadPage() {
 
   return (
     <div className="bu-layout flex-1">
+      <NotificationWrapper />
       <Toast toast={toast} />
 
       <div className="bu-header-main">

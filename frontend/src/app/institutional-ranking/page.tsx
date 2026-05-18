@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import NotificationWrapper from "../components/notification-wrapper";
 import Pagination from "../components/pagination";
 import "./institutional-ranking.css";
 
@@ -42,7 +43,7 @@ export default function InstitutionalRanking() {
     const router = useRouter();
     const [isMounted, setIsMounted] = useState(false);
     const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(5);
     const [ratingSortOrder, setRatingSortOrder] = useState<SortOrder>("desc");
     const [docentes, setDocentes] = useState<Docente[]>([]);
     const [loading, setLoading] = useState(true);
@@ -127,6 +128,7 @@ export default function InstitutionalRanking() {
 
     return (
         <div className="ir-layout flex-1">
+            <NotificationWrapper />
             <div className="ir-header-main">
                 <div className="ir-eyebrow">
                     <IconEyebrow />
@@ -218,7 +220,7 @@ export default function InstitutionalRanking() {
                                                 </td>
                                                 <td className="ir-td">
                                                     <span className="rating-value">{docente.rating.toFixed(2)}</span>
-                                                    <span className="rating-max"> / 5.0</span>
+                                                    <span className="rating-max"> / 100</span>
                                                 </td>
                                                 <td className="ir-td">
                                                     <div className="specialties-cell">

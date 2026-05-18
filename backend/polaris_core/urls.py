@@ -22,7 +22,6 @@ urlpatterns = [
     
     path('api/academic-career/', include('apps.academic_career.urls')),
     path('api/academic-workload/', include('apps.academic_workload.urls')),
-    path('api/accounts/', include('apps.accounts.urls')),
     path('api/assessment-360/', include('apps.assessment_360.urls')),
     path('api/integrations/', include('apps.integrations.urls')),
     path('api/notifications/', include('apps.notifications.urls')),
@@ -30,4 +29,5 @@ urlpatterns = [
     path('api/security-audit/', include('apps.security_audit.urls')),
     path('api/pensum/', include('apps.pensum.urls')),
     path('api/profile/', include('apps.profile.urls')),
+    path('api/templates/', include('apps.templates.urls')),
 ]

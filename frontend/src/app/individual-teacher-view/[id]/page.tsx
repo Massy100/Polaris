@@ -19,7 +19,8 @@ type CourseInPeriod = { course_id: number; name: string; };
 type CommentGroup = { positive: string[]; negative: string[]; };
 type SentimentMetrics = { positiveReal: number; negativeReal: number; falsePositive: number; falseNegative: number; };
 type TeacherClass = { id: string; name: string; comments: CommentGroup; sentiment: SentimentMetrics; };
-type Teacher = { id: string; name: string; department: string; email: string; phone: string; role: string; since: string; finalScore: number; };
+type ScoreBreakdown = { label: string; score: number; weight: number; icon: string; };
+type Teacher = { id: string; name: string; department: string; email: string; phone: string; role: string; since: string; finalScore: number; scoreBreakdown?: ScoreBreakdown[]; };
 
 function formatRole(role: string): string {
     const roles: Record<string, string> = { titular: "Profesor Titular", asociado: "Profesor Asociado", auxiliar: "Profesor Auxiliar" };
@@ -31,7 +32,7 @@ function formatSince(dateStr: string): string {
     const [year, month] = dateStr.split("-");
     return `${months[parseInt(month) - 1]} ${year}`;
 }
-function mapTeacher(data: TeacherFromAPI): Teacher {
+function mapTeacher(data: TeacherFromAPI & { score_breakdown?: ScoreBreakdown[] }): Teacher {
     return {
         id: String(data.teacher_id),
         name: `${data.first_name} ${data.last_name}`,
@@ -40,7 +41,8 @@ function mapTeacher(data: TeacherFromAPI): Teacher {
         phone: data.phone ?? "",
         role: data.role ? formatRole(data.role) : "",
         since: data.since ? formatSince(data.since) : "",
-        finalScore: data.score ? Math.round(data.score * 10) / 10 : 0,
+        finalScore: data.score ? Math.round(data.score * 100) / 100 : 0,
+        scoreBreakdown: data.score_breakdown
     };
 }
 
@@ -74,13 +76,16 @@ const IconMail = () => (<svg stroke="currentColor" fill="currentColor" strokeWid
 const IconPhone = () => (<svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M17.707,12.293c-0.391-0.391-1.023-0.391-1.414,0l-1.594,1.594c-0.739-0.22-2.118-0.72-2.992-1.594s-1.374-2.253-1.594-2.992l1.594-1.594c0.391-0.391,0.391-1.023,0-1.414l-4-4c-0.391-0.391-1.023-0.391-1.414,0L3.581,5.005c-0.38,0.38-0.594,0.902-0.586,1.435c0.023,1.424,0.4,6.37,4.298,10.268s8.844,4.274,10.269,4.298c0.005,0,0.023,0,0.028,0c0.528,0,1.027-0.208,1.405-0.586l2.712-2.712c0.391-0.391,0.391-1.023,0-1.414L17.707,12.293z M17.58,19.005c-1.248-0.021-5.518-0.356-8.873-3.712c-3.366-3.366-3.692-7.651-3.712-8.874L7,4.414L9.586,7L8.293,8.293C8.054,8.531,7.952,8.875,8.021,9.205c0.024,0.115,0.611,2.842,2.271,4.502s4.387,2.247,4.502,2.271c0.333,0.071,0.674-0.032,0.912-0.271L17,14.414L19.586,17L17.58,19.005z"></path></svg>);
 const IconRole = () => (<svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><g><path fill="none" d="M0 0h24v24H0z"></path><path fillRule="nonzero" d="M12 7a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm0 1.5l1.323 2.68 2.957.43-2.14 2.085.505 2.946L12 17.25l-2.645 1.39.505-2.945-2.14-2.086 2.957-.43L12 10.5zM18 2v3l-1.363 1.138A9.935 9.935 0 0 0 13 5.049L13 2 18 2zm-7-.001v3.05a9.935 9.935 0 0 0-3.636 1.088L6 5V2l5-.001z"></path></g></svg>);
 const IconCalendar = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>);
+const IconPeriod = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>);
 const IconTrending = () => (<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em"><path d="M23 6L13.5 15.5L8.5 10.5L1 18" /><path d="M17 6H23V12" /></svg>);
 const IconBook = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>);
 const IconPositive = () => (<svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 1024 1024" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M885.9 533.7c16.8-22.2 26.1-49.4 26.1-77.7 0-44.9-25.1-87.4-65.5-111.1a67.67 67.67 0 0 0-34.3-9.3H572.4l6-122.9c1.4-29.7-9.1-57.9-29.5-79.4A106.62 106.62 0 0 0 471 99.9c-52 0-98 35-111.8 85.1l-85.9 311H144c-17.7 0-32 14.3-32 32v364c0 17.7 14.3 32 32 32h601.3c9.2 0 18.2-1.8 26.5-5.4 47.6-20.3 78.3-66.8 78.3-118.4 0-12.6-1.8-25-5.4-37 16.8-22.2 26.1-49.4 26.1-77.7 0-12.6-1.8-25-5.4-37 16.8-22.2 26.1-49.4 26.1-77.7-.2-12.6-2-25.1-5.6-37.1zM184 852V568h81v284h-81zm636.4-353l-21.9 19 13.9 25.4a56.2 56.2 0 0 1 6.9 27.3c0 16.5-7.2 32.2-19.6 43l-21.9 19 13.9 25.4a56.2 56.2 0 0 1 6.9 27.3c0 16.5-7.2 32.2-19.6 43l-21.9 19 13.9 25.4a56.2 56.2 0 0 1 6.9 27.3c0 22.4-13.2 42.6-33.6 51.8H329V564.8l99.5-360.5a44.1 44.1 0 0 1 42.2-32.3c7.6 0 15.1 2.2 21.1 6.7 9.9 7.4 15.2 18.6 14.6 30.5l-9.6 198.4h314.4C829 418.5 840 436.9 840 456c0 16.5-7.2 32.1-19.6 43z"></path></svg>);
 const IconNegative = () => (<svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M20,3h-3H6.693C5.864,3,5.112,3.521,4.82,4.298l-2.757,7.351C2.021,11.761,2,11.88,2,12v2c0,1.103,0.897,2,2,2h5.612L8.49,19.367c-0.203,0.608-0.101,1.282,0.274,1.802C9.14,21.689,9.746,22,10.388,22H12c0.297,0,0.578-0.132,0.769-0.36l4.7-5.64H20c1.103,0,2-0.897,2-2V5C22,3.897,21.103,3,20,3z M11.531,20h-1.145l1.562-4.684c0.103-0.305,0.051-0.64-0.137-0.901C11.623,14.154,11.321,14,11,14H4v-1.819L6.693,5H16v9.638L11.531,20z M18,14V5h2l0.001,9H18z"></path></svg>);
-const IconPeriod = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>);
+const IconEye = () => (<svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>);
 
 export default function IndividualTeacherView() {
+    // ... rest of state and effects ...
+
     const router = useRouter();
     const params = useParams();
     const teacherId = params?.id as string;
@@ -271,6 +276,40 @@ export default function IndividualTeacherView() {
                             <p className="itv-score-subtitle">Promedio ponderado</p>
                         </div>
                     </div>
+                </div>
+
+                <div className="itv-section-card">
+                    <div className="itv-section-header">
+                        <h2 className="itv-section-title">Desglose de Calificación</h2>
+                    </div>
+                    <div className="itv-breakdown-list">
+                        {teacher.scoreBreakdown?.map((item, idx) => (
+                            <div key={idx} className="itv-breakdown-item">
+                                <div className="itv-breakdown-info">
+                                    <span className="itv-breakdown-icon">
+                                        {item.icon === 'book' ? <IconBook /> : item.icon === 'eye' ? <IconEye /> : <IconTrending />}
+                                    </span>
+                                    <div className="itv-breakdown-texts">
+                                        <p className="itv-breakdown-label">{item.label}</p>
+                                        <p className="itv-breakdown-weight">Peso: {item.weight}%</p>
+                                    </div>
+                                </div>
+                                <div className="itv-breakdown-scores">
+                                    <div className="itv-score-badge">
+                                        <span className="itv-score-val">{item.score.toFixed(2)}</span>
+                                        <span className="itv-score-label">Nota</span>
+                                    </div>
+                                    <div className="itv-score-contribution">
+                                        <span className="itv-contrib-val">+{((item.score * item.weight) / 100).toFixed(2)}</span>
+                                        <span className="itv-contrib-label">Al Total</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    {(!teacher.scoreBreakdown || teacher.scoreBreakdown.length === 0) && (
+                        <p className="itv-comment-empty" style={{ padding: '24px' }}>No hay configuración de pesos activa para mostrar el desglose.</p>
+                    )}
                 </div>
 
                 <div className="itv-section-card">

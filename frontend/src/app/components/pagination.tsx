@@ -11,7 +11,7 @@ type PaginationProps = {
     onPageSizeChange: (pageSize: number) => void;
 };
 
-const DEFAULT_PAGE_SIZE = 10; // Default page size if the provided pageSize is invalid
+const DEFAULT_PAGE_SIZE = 10;
 
 export default function Pagination({
     page,
@@ -89,21 +89,3 @@ export default function Pagination({
         </div>
     );
 }
-
-// Example usage:
-{/* <Pagination
-    page={page}
-    pageSize={pageSize}
-    totalItems={totalItems}
-    onPageChange={(newPage) => {
-        const totalPages = Math.ceil(totalItems / pageSize) || 1;
-        if (newPage < 1 || newPage > totalPages) return;
-        setPage(newPage);
-    }}
-    // onPageSizeChange will reset to page 1 to avoid invalid page numbers after changing page size
-    onPageSizeChange={(size) => {
-        const safeSize = size > 0 ? size : 10;
-        setPageSize(safeSize);
-        setPage(1);
-    }}
-/> */}

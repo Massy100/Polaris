@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 
 import { useEffect, useState, useCallback } from 'react';
 import Modal from '../components/modal';
+import NotificationWrapper from '../components/notification-wrapper';
 import Pagination from '../components/pagination';
 import './user-management.css';
 
@@ -232,6 +233,7 @@ export default function UserManagementPage() {
 
   return (
     <div className="um-layout flex-1">
+      <NotificationWrapper />
       {error && (
         <div className="um-toast um-toast--err">
           <span>{error}</span>

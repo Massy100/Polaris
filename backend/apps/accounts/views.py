@@ -1,8 +1,9 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
+from rest_framework.permissions import AllowAny
 from .models import Coordinator
 from .serializers import (
     CoordinatorSerializer, CoordinatorListSerializer, 
@@ -30,28 +31,9 @@ class CoordinatorViewSet(viewsets.ModelViewSet):
         
         return queryset
     
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)    
     def create(self, request, *args, **kwargs):
-        
         serializer = self.get_serializer(data=request.data)
-        
-        if not serializer.is_valid():
-            return Response(
-                {
-                    'error': 'Datos inválidos',
-                    'details': serializer.errors
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        serializer.is_valid(raise_exception=True)
         
         try:
             with transaction.atomic():
@@ -62,64 +44,42 @@ class CoordinatorViewSet(viewsets.ModelViewSet):
                     response_data['temp_password'] = coordinator.temp_password
                 
                 return Response(response_data, status=status.HTTP_201_CREATED)
-                
         except Exception as e:
             return Response(
-                {
-                    'error': 'Error al crear el coordinador',
-                    'details': str(e)
-                },
+                {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
     
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        
-        if not serializer.is_valid():
-            return Response(
-                {
-                    'error': 'Error de validación',
-                    'details': serializer.errors
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        serializer.is_valid(raise_exception=True)
         
         try:
             with transaction.atomic():
                 self.perform_update(serializer)
-                
-                instance.refresh_from_db()
-                
-                response_serializer = CoordinatorDetailSerializer(instance)
-                return Response(response_serializer.data)
-                
+                return Response(serializer.data)
         except Exception as e:
             return Response(
-                {
-                    'error': 'Error al actualizar el coordinador',
-                    'details': str(e)
-                },
+                {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+    
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         
         try:
-            with transaction.atomic():
-                instance.status = 'inactive'
-                instance.save()
-                
-                instance.user.status = 'inactive'
-                instance.user.save()
-                
-                return Response(
-                    {'message': 'Coordinador desactivado exitosamente', 'status': 'inactive'},
-                    status=status.HTTP_200_OK
-                )
+            instance.status = 'inactive'
+            instance.save()
+            
+            instance.user.status = 'inactive'
+            instance.user.save()
+            
+            return Response(
+                {'message': 'Coordinador desactivado exitosamente'},
+                status=status.HTTP_200_OK
+            )
         except Exception as e:
             return Response(
                 {'error': str(e)},
@@ -138,7 +98,7 @@ class CoordinatorViewSet(viewsets.ModelViewSet):
             coordinator.user.save()
             
             return Response({
-                'message': 'Contraseña generada exitosamente',
+                'message': 'Contraseña resetada exitosamente',
                 'new_password': new_password
             })
         except Exception as e:
@@ -149,22 +109,17 @@ class CoordinatorViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['patch'], url_path='toggle-status')
     def toggle_status(self, request, pk=None):
-        """Cambiar estado entre activo e inactivo"""
         coordinator = self.get_object()
         
         try:
-            with transaction.atomic():
-                new_status = 'inactive' if coordinator.status == 'active' else 'active'
-                coordinator.status = new_status
-                coordinator.save()
-                
-                coordinator.user.status = new_status
-                coordinator.user.save()
-                
-                return Response({
-                    'status': new_status,
-                    'message': f'Coordinador {"desactivado" if new_status == "inactive" else "activado"} exitosamente'
-                })
+            coordinator.status = 'inactive' if coordinator.status == 'active' else 'active'
+            coordinator.save()
+            
+            coordinator.user.status = coordinator.status
+            coordinator.user.save()
+            
+            serializer = CoordinatorDetailSerializer(coordinator)
+            return Response(serializer.data)
         except Exception as e:
             return Response(
                 {'error': str(e)},
