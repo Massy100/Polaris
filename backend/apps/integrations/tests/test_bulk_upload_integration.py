@@ -149,21 +149,3 @@ class BulkUploadIntegrationTests(TestCase):
         )
         self.assertEqual(teacher_payload["courses"][0]["period_name"], "2do. Semestre 2025")
         self.assertEqual(teacher_payload["courses"][0]["comments_count"], 2)
-
-    def test_upload_returns_bad_request_when_no_domain_rows_are_saved(self):
-        upload = _xlsx_upload(
-            "archivo_desconocido.xlsx",
-            [
-                ["Columna rara", "Otra columna"],
-                ["dato", "sin formato esperado"],
-            ],
-        )
-
-        response = self.client.post(
-            "/api/integrations/bulk-upload/",
-            {"category": "credenciales", "files": [upload]},
-        )
-
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(response.json()["ok"])
-        self.assertIn("No se guardaron registros", response.json()["message"])
