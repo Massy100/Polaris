@@ -13,13 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class CoordinatorSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    username = serializers.CharField(
-        write_only=True, 
-        required=False, 
-        allow_blank=True,  
-        allow_null=True,   
-        default=None
-    )
+    username = serializers.CharField(write_only=True, required=False)
     password = serializers.CharField(write_only=True, required=False, min_length=6, allow_blank=True, allow_null=True)
     email = serializers.EmailField(write_only=True, required=False, allow_blank=True, allow_null=True)
     
@@ -56,32 +50,15 @@ class CoordinatorSerializer(serializers.ModelSerializer):
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
             code=validated_data.get('code', ''),
-            phone=validated_data.get('phone', ''),  
+            phone=validated_data.get('phone', ''),
             department=validated_data.get('department', ''),
             role=validated_data.get('role', 'Coordinador'),
-            status=validated_data.get('status', 'active')  
+            status='active'
         )
         
         coordinator.temp_password = password
         
         return coordinator
-    
-    def generate_random_password(self, length=10):
-        characters = string.ascii_letters + string.digits
-        return ''.join(random.choice(characters) for _ in range(length))
-    
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        if hasattr(instance, 'temp_password'):
-            representation['temp_password'] = instance.temp_password
-        if instance.user and instance.user.email:
-            representation['email'] = instance.user.email
-        return representation
-    
-    def validate_username(self, value):
-        if not value or not value.strip():
-            return None
-        return value
     
     def update(self, instance, validated_data):
         instance.first_name = validated_data.get('first_name', instance.first_name)
@@ -91,54 +68,46 @@ class CoordinatorSerializer(serializers.ModelSerializer):
         instance.department = validated_data.get('department', instance.department)
         instance.role = validated_data.get('role', instance.role)
         instance.since = validated_data.get('since', instance.since)
-        instance.status = validated_data.get('status', instance.status)
         instance.save()
         
-        if 'email' in validated_data:
-            instance.user.email = validated_data.get('email', '')
+        if 'username' in validated_data:
+            instance.user.username = validated_data['username']
             instance.user.save()
         
-        username = validated_data.get('username')
-        if username and username.strip():
-            instance.user.username = username
+        if 'email' in validated_data:
+            instance.user.email = validated_data['email']
             instance.user.save()
         
         return instance
+    
+    def generate_random_password(self, length=10):
+        characters = string.ascii_letters + string.digits
+        return ''.join(random.choice(characters) for _ in range(length))
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if hasattr(instance, 'temp_password'):
+            representation['temp_password'] = instance.temp_password
+        return representation
 
 
 class CoordinatorListSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    username = serializers.SerializerMethodField()  
-    email = serializers.SerializerMethodField()     
     
     class Meta:
         model = Coordinator
         fields = [
             'coordinator_id', 'first_name', 'last_name', 'status', 
-            'code', 'phone', 'department', 'role', 'user', 
-            'username', 'email'  
+            'code', 'phone', 'department', 'role', 'user'
         ]
-    
-    def get_username(self, obj):
-        return obj.user.username if obj.user else None
-    
-    def get_email(self, obj):
-        return obj.user.email if obj.user else None
+
 
 class CoordinatorDetailSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    username = serializers.SerializerMethodField()  
-    email = serializers.SerializerMethodField()     
     
     class Meta:
         model = Coordinator
         fields = '__all__'
-    
-    def get_username(self, obj):
-        return obj.user.username if obj.user else None
-    
-    def get_email(self, obj):
-        return obj.user.email if obj.user else None
 
 
 class ResetPasswordSerializer(serializers.Serializer):

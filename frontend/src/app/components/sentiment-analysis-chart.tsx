@@ -42,7 +42,6 @@ const BAR_COLORS = {
     negativeReal: '#FBBF24',
 };
 
-// Custom tooltip component for the chart to display detailed information on hover
 function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
     if (!active || !payload || payload.length === 0) {
         return null;
@@ -72,7 +71,6 @@ export default function SentimentAnalysisChart({
     height = 420,
 }: SentimentAnalysisChartProps) {
 
-    // helper to hide x-axis ticks on mobile devices
     const [isMobile, setIsMobile] = useState(false);
     useEffect(() => {
         const mediaQuery = window.matchMedia("(max-width: 600px)");

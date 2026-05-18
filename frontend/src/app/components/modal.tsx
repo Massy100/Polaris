@@ -21,14 +21,12 @@ export default function Modal({
     useEffect(() => {
         if (!open) return;
 
-        // Press esc to close
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
         };
 
         document.addEventListener('keydown', onKeyDown);
 
-        // lock scroll
         const prevOverflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
 
