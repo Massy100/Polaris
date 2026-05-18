@@ -3,40 +3,53 @@ from django.db import migrations, models, connection
 
 
 def add_fields_if_missing(apps, schema_editor):
+    from django.db import models
+    from django.db import connection
     with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT column_name FROM information_schema.columns
-            WHERE table_name = 'teacher'
-        """)
+        cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'teacher'")
         existing_columns = {row[0] for row in cursor.fetchall()}
-
-        cursor.execute("""
-            SELECT table_name FROM information_schema.tables
-            WHERE table_name = 'teacher_courses'
-        """)
-        existing_tables = {row[0] for row in cursor.fetchall()}
 
     Teacher = apps.get_model('academic_career', 'Teacher')
 
     if 'code' not in existing_columns:
-        schema_editor.add_field(Teacher, Teacher._meta.get_field('code'))
-    if 'email' not in existing_columns:
-        schema_editor.add_field(Teacher, Teacher._meta.get_field('email'))
-    if 'created_at' not in existing_columns:
-        schema_editor.add_field(Teacher, Teacher._meta.get_field('created_at'))
-    if 'updated_at' not in existing_columns:
-        schema_editor.add_field(Teacher, Teacher._meta.get_field('updated_at'))
-    if 'role' not in existing_columns:
-        schema_editor.add_field(Teacher, Teacher._meta.get_field('role'))
-    if 'department' not in existing_columns:
-        schema_editor.add_field(Teacher, Teacher._meta.get_field('department'))
-    if 'phone' not in existing_columns:
-        schema_editor.add_field(Teacher, Teacher._meta.get_field('phone'))
-    if 'since' not in existing_columns:
-        schema_editor.add_field(Teacher, Teacher._meta.get_field('since'))
-    if 'teacher_courses' not in existing_tables:
-        schema_editor.add_field(Teacher, Teacher._meta.get_field('courses'))
+        field = models.CharField(max_length=20, blank=True, null=True, unique=True)
+        field.column = 'code'
+        schema_editor.add_field(Teacher, field)
 
+    if 'email' not in existing_columns:
+        field = models.EmailField(max_length=254, blank=True, null=True, unique=True)
+        field.column = 'email'
+        schema_editor.add_field(Teacher, field)
+
+    if 'created_at' not in existing_columns:
+        field = models.DateTimeField(auto_now_add=True)
+        field.column = 'created_at'
+        schema_editor.add_field(Teacher, field)
+
+    if 'updated_at' not in existing_columns:
+        field = models.DateTimeField(auto_now=True)
+        field.column = 'updated_at'
+        schema_editor.add_field(Teacher, field)
+
+    if 'role' not in existing_columns:
+        field = models.CharField(max_length=50, blank=True, null=True)
+        field.column = 'role'
+        schema_editor.add_field(Teacher, field)
+
+    if 'department' not in existing_columns:
+        field = models.CharField(max_length=120, blank=True, null=True)
+        field.column = 'department'
+        schema_editor.add_field(Teacher, field)
+
+    if 'phone' not in existing_columns:
+        field = models.CharField(max_length=20, blank=True, null=True)
+        field.column = 'phone'
+        schema_editor.add_field(Teacher, field)
+
+    if 'since' not in existing_columns:
+        field = models.DateField(blank=True, null=True)
+        field.column = 'since'
+        schema_editor.add_field(Teacher, field)
 
 class Migration(migrations.Migration):
 

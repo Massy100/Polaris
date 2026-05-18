@@ -1,0 +1,31 @@
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ("academic_career", "0007_alter_teacher_created_at_alter_teacher_updated_at"),
+    ]
+
+    operations = [
+        migrations.AddField(
+            model_name="teacherstudentsurvey",
+            name="course",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=models.DO_NOTHING,
+                related_name="student_surveys",
+                to="academic_career.course",
+            ),
+        ),
+        migrations.AddField(
+            model_name="teacherstudentsurvey",
+            name="section",
+            field=models.CharField(blank=True, max_length=30, null=True),
+        ),
+        migrations.AlterUniqueTogether(
+            name="teacherstudentsurvey",
+            unique_together={("teacher", "course", "section", "author", "opinion", "opinion_date")},
+        ),
+    ]

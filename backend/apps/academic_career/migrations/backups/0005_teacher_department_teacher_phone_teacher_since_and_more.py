@@ -10,7 +10,21 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        
+        migrations.AddField(
+            model_name='teacher',
+            name='department',
+            field=models.CharField(blank=True, max_length=120, null=True),
+        ),
+        migrations.AddField(
+            model_name='teacher',
+            name='phone',
+            field=models.CharField(blank=True, max_length=20, null=True),
+        ),
+        migrations.AddField(
+            model_name='teacher',
+            name='since',
+            field=models.DateField(blank=True, null=True),
+        ),
         migrations.AlterField(
             model_name='teacher',
             name='created_at',
