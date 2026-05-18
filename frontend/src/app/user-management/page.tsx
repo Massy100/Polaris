@@ -172,15 +172,30 @@ export default function UserManagementPage() {
     }
   };
 
-  const handleEdit = (c: Docente) => {
+  const handleEdit = async (c: Docente) => {
     setSelectedId(c.teacher_id);
-    setDraft({
-      first_name: c.first_name,
-      last_name: c.last_name,
-      code: c.code,
-      email: c.email,
-      courses: [],
-    });
+    
+    try {
+      const response = await fetch(`${API_URL}/academic-career/teachers/${c.teacher_id}/`);
+      const data = await response.json();
+      
+      setDraft({
+        first_name: c.first_name,
+        last_name: c.last_name,
+        code: c.code,
+        email: c.email,
+        courses: data.courses_detail.map((course: any) => course.course_id),
+      });
+    } catch {
+      setDraft({
+        first_name: c.first_name,
+        last_name: c.last_name,
+        code: c.code,
+        email: c.email,
+        courses: [], 
+      });
+    }
+
     setOpen(true);
   };
 
