@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
+import { useUser } from '@clerk/nextjs';
 import './profile.css';
 
 const NAV_ITEMS = [
@@ -10,8 +10,13 @@ const NAV_ITEMS = [
   { id: 'access_control', label: 'Control de Acceso', icon: 'Lock', adminOnly: true },
 ];
 
+const ROLE_LABELS: Record<string, string> = {
+  'GATEKEEPER_ADMIN': 'Administrador',
+  'STAFF_COORDINATOR': 'Coordinador',
+};
+
 export default function ProfilePage() {
-  const { user: clerkUser } = useAuth() as any;
+  const { user: clerkUser } = useUser();
   const router = useRouter();
   const [activeSection, setActiveSection] = useState('personal');
   const [vaultData, setVaultData] = useState<any>(null);
@@ -19,6 +24,16 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('pending');
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
+  
+  // Form state
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    full_identity_name: '',
+    contact_phone: '',
+    org_unit: '',
+    identification_code: '',
+    start_date: '',
+  });
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
@@ -28,7 +43,17 @@ export default function ProfilePage() {
         const res = await fetch(`${API_URL}/access-vault/identity/`, {
           headers: { 'X-Clerk-ID': clerkUser?.id || '' }
         });
-        if (res.ok) setVaultData(await res.json());
+        if (res.ok) {
+          const data = await res.json();
+          setVaultData(data);
+          setFormData({
+            full_identity_name: data.identity?.full_identity_name || '',
+            contact_phone: data.profile?.contact_phone || '',
+            org_unit: data.profile?.org_unit || '',
+            identification_code: data.profile?.identification_code || '',
+            start_date: data.profile?.start_date || '',
+          });
+        }
       } catch (e) { console.error(e); }
     };
     if (clerkUser?.id) fetchData();
@@ -67,6 +92,52 @@ export default function ProfilePage() {
     } catch (e) { toast('Error en el servidor'); }
   };
 
+  const handleUpdate = async () => {
+    try {
+      // 1. Intentar sincronización con Clerk (Identidad Central)
+      if (clerkUser && formData.full_identity_name !== vaultData?.identity?.full_identity_name) {
+        const nameParts = formData.full_identity_name.trim().split(' ');
+        const fName = nameParts[0] || '';
+        const lName = nameParts.slice(1).join(' ') || '';
+        
+        try {
+          await clerkUser.update({
+            firstName: fName,
+            lastName: lName
+          });
+          console.log(">>> VAULT: Clerk identity updated");
+        } catch (clerkError) {
+          console.error(">>> VAULT: Error syncing with Clerk", clerkError);
+          // Continuamos con la actualización local aunque falle Clerk
+        }
+      }
+
+      // 2. Sincronizar con Polaris (Base de Datos Local / Django)
+      const res = await fetch(`${API_URL}/access-vault/identity/`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Clerk-ID': clerkUser?.id || ''
+        },
+        body: JSON.stringify(formData)
+      });
+      if (res.ok) {
+        toast('Perfil e Identidad actualizados correctamente');
+        setIsEditing(false);
+        const updatedProfile = await res.json();
+        
+        // Refrescar los datos locales para asegurar sincronía visual
+        const refreshRes = await fetch(`${API_URL}/access-vault/identity/`, {
+          headers: { 'X-Clerk-ID': clerkUser?.id || '' }
+        });
+        if (refreshRes.ok) setVaultData(await refreshRes.json());
+        
+      } else {
+        toast('Error al actualizar el perfil local');
+      }
+    } catch (e) { toast('Error en el servidor'); }
+  };
+
   const toast = (msg: string) => {
     setToastMsg(msg);
     setShowToast(true);
@@ -74,6 +145,7 @@ export default function ProfilePage() {
   };
 
   const isAdmin = vaultData?.identity?.access_level === 'GATEKEEPER_ADMIN';
+  const displayRole = ROLE_LABELS[vaultData?.identity?.access_level] || vaultData?.identity?.access_level;
 
   return (
     <div className="url-page-bg flex-1">
@@ -90,7 +162,7 @@ export default function ProfilePage() {
             <div className="profile-sidebar-hero">
               <div className="profile-avatar">{vaultData?.identity?.full_identity_name?.[0] || 'U'}</div>
               <p className="profile-sidebar-name">{vaultData?.identity?.full_identity_name || 'Cargando...'}</p>
-              <p className="profile-sidebar-role">{vaultData?.identity?.access_level}</p>
+              <p className="profile-sidebar-role">{displayRole}</p>
             </div>
             <nav className="profile-sidebar-nav">
               {NAV_ITEMS.filter(i => !i.adminOnly || isAdmin).map(item => (
@@ -108,27 +180,86 @@ export default function ProfilePage() {
           <div className="profile-main">
             {activeSection === 'personal' && (
               <div className="profile-panel">
-                <div className="profile-panel-header"><h2>Información Personal</h2></div>
+                <div className="profile-panel-header">
+                  <div className="profile-panel-title">
+                    <h2>Información Personal</h2>
+                    <p>Datos sincronizados y de contacto institucional.</p>
+                  </div>
+                  {!isEditing ? (
+                    <button className="url-btn-sm url-btn-secondary" onClick={() => setIsEditing(true)}>Editar Perfil</button>
+                  ) : (
+                    <div className="action-btns">
+                      <button className="url-btn-sm url-btn-ghost" onClick={() => setIsEditing(false)}>Cancelar</button>
+                      <button className="url-btn-sm url-btn-primary" onClick={handleUpdate}>Guardar Cambios</button>
+                    </div>
+                  )}
+                </div>
                 <div className="profile-panel-body">
                   <div className="profile-form-grid">
                     <div className="profile-field full-width">
-                      <label>Nombre Completo (Sincronizado con Clerk)</label>
-                      <input className="url-input" value={vaultData?.identity?.full_identity_name || ''} disabled />
+                      <label>Nombre de Usuario / Identidad</label>
+                      <input 
+                        className="url-input" 
+                        value={formData.full_identity_name} 
+                        onChange={(e) => setFormData({...formData, full_identity_name: e.target.value})}
+                        disabled={!isEditing}
+                        placeholder="Nombre que se mostrará en Polaris"
+                      />
+                      <span className="profile-field-hint">Este nombre se utilizará en todo el sistema Polaris.</span>
                     </div>
                     <div className="profile-field full-width">
-                      <label>Correo Electrónico</label>
+                      <label>Correo Electrónico (Solo Lectura)</label>
                       <input className="url-input" value={vaultData?.identity?.email || ''} disabled />
                     </div>
                     <div className="profile-field">
                       <label>Teléfono de Contacto</label>
-                      <input className="url-input" value={vaultData?.profile?.contact_phone || ''} readOnly />
+                      <input 
+                        className="url-input" 
+                        value={formData.contact_phone} 
+                        onChange={(e) => setFormData({...formData, contact_phone: e.target.value})}
+                        disabled={!isEditing}
+                        placeholder="+503 ...."
+                      />
                     </div>
                     <div className="profile-field">
                       <label>Unidad Organizativa</label>
-                      <input className="url-input" value={vaultData?.profile?.org_unit || ''} readOnly />
+                      <input 
+                        className="url-input" 
+                        value={formData.org_unit} 
+                        onChange={(e) => setFormData({...formData, org_unit: e.target.value})}
+                        disabled={!isEditing}
+                        placeholder="Ej: Facultad de Ingeniería"
+                      />
+                    </div>
+                    <div className="profile-field">
+                      <label>Código de Identificación</label>
+                      <input 
+                        className="url-input" 
+                        value={formData.identification_code} 
+                        onChange={(e) => setFormData({...formData, identification_code: e.target.value})}
+                        disabled={!isEditing}
+                        placeholder="Ej: COD-12345"
+                      />
+                    </div>
+                    <div className="profile-field">
+                      <label>Fecha de Inicio</label>
+                      <input 
+                        type="date"
+                        className="url-input" 
+                        value={formData.start_date} 
+                        onChange={(e) => setFormData({...formData, start_date: e.target.value})}
+                        disabled={!isEditing}
+                      />
                     </div>
                   </div>
                 </div>
+                {isEditing && (
+                  <div className="profile-panel-footer">
+                    <p className="profile-field-hint" style={{ marginRight: 'auto' }}>Asegúrese de que los datos sean correctos antes de guardar.</p>
+                    <button className="url-btn-sm url-btn-ghost" onClick={() => setIsEditing(false)}>Descartar</button>
+                    <button className="url-btn-sm url-btn-primary" onClick={handleUpdate}>Actualizar Información</button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -156,7 +287,7 @@ export default function ProfilePage() {
                         <tr key={req.vault_id}>
                           <td>{req.full_identity_name}</td>
                           <td>{req.email}</td>
-                          <td>{req.access_level}</td>
+                          <td>{ROLE_LABELS[req.access_level] || req.access_level}</td>
                           <td>
                             {activeTab === 'pending' && (
                               <div className="action-btns">
