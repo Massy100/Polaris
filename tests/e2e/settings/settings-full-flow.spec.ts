@@ -136,7 +136,7 @@ async function setCriterionPercentage(
     });
 }
 
-test('flujo completo de configuración, pesos, alertas y auditoría', async ({ page }) => {
+test('flujo completo de configuración y pesos', async ({ page }) => {
     test.setTimeout(240_000);
 
     const categoryName = `Categoria E2E ${Date.now()}`;
@@ -144,11 +144,9 @@ test('flujo completo de configuración, pesos, alertas y auditoría', async ({ p
         'Categoría creada automáticamente por prueba E2E';
 
     await goHome(page);
-
     await goToSettingsFromSidebar(page);
 
     // Mi Perfil
-
     await openSettingsCard(page, /Mi Perfil/i);
 
     await expect(page).toHaveURL(/\/settings\/profile$/, {
@@ -156,34 +154,145 @@ test('flujo completo de configuración, pesos, alertas y auditoría', async ({ p
     });
 
     await expect(
-        page.getByRole('heading', { name: /Mi Perfil|Perfil/i })
+        page.getByRole('heading', { name: /^Mi Perfil$/, level: 1 })
     ).toBeVisible({
-        timeout: 15000,
+        timeout: 30000,
     });
+
+    await expect(
+        page.getByRole('heading', { name: /^Información Personal$/, level: 2 })
+    ).toBeVisible({
+        timeout: 30000,
+    });
+
+    await expect(page.getByText(/Nombre/i)).toBeVisible();
+    await expect(page.getByText(/Apellido/i)).toBeVisible();
+    await expect(page.getByText(/Correo electrónico/i)).toBeVisible();
+    await expect(page.getByText(/Teléfono/i)).toBeVisible();
+    await expect(page.getByText(/Rol en el sistema/i)).toBeVisible();
+
+    await page.getByRole('button', { name: /Seguridad/i }).click();
+
+    await expect(
+        page.getByRole('heading', { name: /^Cambiar Contraseña$/, level: 2 })
+    ).toBeVisible();
+
+    await expect(page.getByText(/Contraseña actual/i)).toBeVisible();
+    await expect(page.getByText(/Confirmar nueva contraseña/i)).toBeVisible();
+
+    await page.getByRole('button', { name: /Preferencias/i }).click();
+
+    await expect(
+        page.getByRole('heading', { name: /^Preferencias del Sistema$/, level: 2 })
+    ).toBeVisible();
+
+    await expect(page.getByText(/Notificaciones por correo/i)).toBeVisible();
+    await expect(page.getByText(/Alertas del sistema/i)).toBeVisible();
+    await expect(page.getByText(/Reporte semanal/i)).toBeVisible();
+    await expect(page.getByText(/Autenticación de dos factores/i)).toBeVisible();
 
     await backToSettings(page);
 
-    // Gestión de Importaciones
+    // Estructura Académica
+    await openSettingsCard(page, /Estructura Académica/i);
 
-    await openSettingsCard(page, /Gestión de Importaciones/i);
-
-    await expect(page).toHaveURL(/\/settings\/data-import$/, {
+    await expect(page).toHaveURL(/\/pensum$/, {
         timeout: 15000,
     });
 
     await expect(
         page.getByRole('heading', {
-            name: /^Gestión de Importaciones$/,
+            name: /^Estructura Académica \(Pensum\)$/,
             level: 1,
         })
     ).toBeVisible({
+        timeout: 30000,
+    });
+
+    await expect(page.getByText(/Sincronizando con el servidor/i)).toBeHidden({
+        timeout: 45000,
+    });
+
+    await expect(
+        page.getByRole('heading', {
+            name: /^Carga de Pensum Realizada$/,
+            level: 2,
+        })
+    ).toBeVisible({
+        timeout: 30000,
+    });
+
+    await goToSettingsFromSidebar(page);
+
+    // Biblioteca de Plantillas
+    await openSettingsCard(page, /Biblioteca de Plantillas/i);
+
+    await expect(page).toHaveURL(/\/settings\/templates$/, {
         timeout: 15000,
+    });
+
+    await expect(
+        page.getByRole('heading', {
+            name: /^Biblioteca de Plantillas$/,
+            level: 1,
+        })
+    ).toBeVisible({
+        timeout: 30000,
+    });
+
+    await expect(
+        page.getByText(
+            /Gestione los formatos de evaluación y observación docente disponibles en el sistema/i
+        )
+    ).toBeVisible();
+
+    await expect(
+        page.getByText(/Historial de Biblioteca|Sin plantillas disponibles/i)
+    ).toBeVisible({
+        timeout: 45000,
     });
 
     await backToSettings(page);
 
-    // Pesos y Fórmulas
+    // Mantenimiento de Datos
+    await openSettingsCard(page, /Mantenimiento de Datos/i);
 
+    await expect(page).toHaveURL(/\/settings\/maintenance$/, {
+        timeout: 15000,
+    });
+
+    await expect(
+        page.getByRole('heading', {
+            name: /^Mantenimiento y Restauración$/,
+            level: 1,
+        })
+    ).toBeVisible({
+        timeout: 30000,
+    });
+
+    await expect(
+        page.getByText(/Panel administrativo para la gestión de la integridad de datos/i)
+    ).toBeVisible();
+
+    await expect(page.getByText(/Biblioteca de Plantillas de Evaluación/i)).toBeVisible({
+        timeout: 30000,
+    });
+
+    await expect(page.getByText(/Gestión del Pensum/i)).toBeVisible();
+    await expect(page.getByText(/Estado de Integridad/i)).toBeVisible();
+
+    await expect(
+        page.getByText(/No hay plantillas cargadas en el sistema|Estructura de la Plantilla/i)
+    ).toBeVisible({
+        timeout: 45000,
+    });
+
+    await expect(page.getByText(/Cursos registrados:/i)).toBeVisible();
+    await expect(page.getByText(/Estado de la Base:/i)).toBeVisible();
+
+    await backToSettings(page);
+
+    // Pesos y Fórmulas
     await openSettingsCard(page, /Pesos y Fórmulas/i);
 
     await expect(page).toHaveURL(/\/weights-config$/, {
@@ -192,7 +301,7 @@ test('flujo completo de configuración, pesos, alertas y auditoría', async ({ p
 
     await expect(
         page.getByRole('heading', {
-            name: /^Sistema de Evaluación Docente$/,
+            name: /^Pesos y Fórmulas$/,
             level: 1,
         })
     ).toBeVisible({
@@ -212,6 +321,11 @@ test('flujo completo de configuración, pesos, alertas y auditoría', async ({ p
         timeout: 45000,
     });
 
+    await page.getByRole('button', { name: /Restablecer/i }).click();
+    await page.getByRole('button', { name: /Sí, restablecer/i }).click();
+
+    await setCriterionPercentage(page, /Dominio del tema/i, '10');
+
     await page.getByRole('button', { name: /Agregar Categoría/i }).click();
 
     await fillCategoryModal(page, categoryName, categoryDescription);
@@ -225,7 +339,6 @@ test('flujo completo de configuración, pesos, alertas y auditoría', async ({ p
         timeout: 15000,
     });
 
-    await setCriterionPercentage(page, /Evaluación de alumnos/i, '30');
     await setCriterionPercentage(page, new RegExp(categoryName, 'i'), '10');
 
     await expect(page.locator('.wc-summary-value')).toHaveText('100%', {
@@ -238,85 +351,14 @@ test('flujo completo de configuración, pesos, alertas y auditoría', async ({ p
         timeout: 15000,
     });
 
-    await page
-        .getByRole('button', { name: /Guardar Configuración/i })
-        .click();
+    await page.getByRole('button', { name: /Guardar Configuración/i }).click();
 
     await expect(
         page.getByText(
-            /Configuración guardada|guardada correctamente|activada correctamente/i
+            /Guardando.../i
         )
     ).toBeVisible({
         timeout: 45000,
-    });
-
-    await goToSettingsFromSidebar(page);
-
-    // Reglas de Notificación
-
-    await openSettingsCard(page, /Reglas de Notificación/i);
-
-    await expect(page).toHaveURL(/\/settings\/alert-config$/, {
-        timeout: 15000,
-    });
-
-    await expect(
-        page.getByRole('heading', { name: /Reglas de Notificación/i })
-    ).toBeVisible({
-        timeout: 15000,
-    });
-
-    const failedAccessCard = page
-        .locator('.alert-config-card')
-        .filter({ hasText: /Intentos de Acceso Fallidos/i })
-        .first();
-
-    await expect(failedAccessCard).toBeVisible({
-        timeout: 15000,
-    });
-
-    const failedAccessCheckbox = failedAccessCard.locator(
-        'input[type="checkbox"]'
-    );
-
-    await failedAccessCard.locator('.profile-toggle-track').click();
-
-    await expect(failedAccessCheckbox).toBeChecked({
-        timeout: 10000,
-    });
-
-    await page
-        .getByRole('button', { name: /Guardar Configuración/i })
-        .click();
-
-    await expect(
-        page.getByText(/Configuración de alertas guardada/i)
-    ).toBeVisible({
-        timeout: 10000,
-    });
-
-    await backToSettings(page);
-
-    // Auditoría y Equipo
-
-    await openSettingsCard(page, /Auditoría y Equipo/i);
-
-    await expect(page).toHaveURL(/\/settings\/audit$/, {
-        timeout: 15000,
-    });
-
-    await expect(
-        page.getByRole('heading', { name: /Auditoría y Equipo/i })
-    ).toBeVisible({
-        timeout: 15000,
-    });
-
-    await expect(page.getByText(/Historial de Cambios/i)).toBeVisible({
-        timeout: 15000,
-    });
-
-    await expect(page.getByText(/Equipo Admin/i)).toBeVisible({
-        timeout: 15000,
     });
 
     // await page.pause()

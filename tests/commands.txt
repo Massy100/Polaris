@@ -9,8 +9,9 @@ Sign in:
 Teacher workflow from the teaching management system:
     npx playwright test tests/e2e/teachers/edit-teacher-and-open-detail.spec.ts --project=chromium --headed
 
-Workflow for creating a coordinator:
-    npx playwright test tests/e2e/coordinators/create-coordinators-pagination.spec.ts --project=chromium --headed
+Workflow Feedback Management:
+
+    npx playwright test tests/e2e/observations/basic-observation-flow.spec.ts --project=chromium --headed
 
 Institutional ranking flow:
     npx playwright test tests/e2e/ranking/ranking-navigation-pagination.spec.ts --project=chromium --headed

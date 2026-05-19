@@ -54,9 +54,11 @@ test('navega desde ranking institucional hacia detalle y valida paginación', as
 
     await goHome(page);
 
-    await page.locator('a[href="/institutional-ranking"]').click();
+    await page.getByRole('button', { name: /Ranking Institucional/i }).click();
 
-    await expect(page).toHaveURL(/\/institutional-ranking$/);
+    await expect(page).toHaveURL(/\/institutional-ranking$/, {
+        timeout: 15000,
+    });
 
     await expect(
         page.getByRole('heading', { name: /Ranking de Docentes/i })
@@ -66,13 +68,13 @@ test('navega desde ranking institucional hacia detalle y valida paginación', as
 
     const rankingRows = page.locator('tbody tr.ir-tr-clickable');
 
-    await expect(rankingRows.nth(5)).toBeVisible({
+    await expect(rankingRows.nth(4)).toBeVisible({
         timeout: 25000,
     });
 
-    await rankingRows.nth(5).click();
+    await rankingRows.nth(4).click();
 
-    await expect(page).toHaveURL(/\/individual-teacher-view\/17$/, {
+    await expect(page).toHaveURL(/\/individual-teacher-view\/21$/, {
         timeout: 25000,
     });
 
@@ -98,7 +100,7 @@ test('navega desde ranking institucional hacia detalle y valida paginación', as
 
     await rankingRows.nth(3).click();
 
-    await expect(page).toHaveURL(/\/individual-teacher-view\/19$/, {
+    await expect(page).toHaveURL(/\/individual-teacher-view\/24$/, {
         timeout: 25000,
     });
 

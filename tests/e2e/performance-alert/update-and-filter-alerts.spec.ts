@@ -34,9 +34,11 @@ test('actualiza estados de docentes y filtra por buen desempeño', async ({ page
 
     await goHome(page);
 
-    await page.locator('a[href="/performance-alert"]').click();
+    await page.getByRole('button', { name: /Alertas de Desempeño/i }).click();
 
-    await expect(page).toHaveURL(/\/performance-alert$/);
+    await expect(page).toHaveURL(/\/performance-alert$/, {
+        timeout: 15000,
+    });
 
     await expect(
         page.getByRole('heading', { name: /Alertas de Desempeño/i })
@@ -48,6 +50,16 @@ test('actualiza estados de docentes y filtra por buen desempeño', async ({ page
 
     await searchInput.fill('V');
 
+    const nextButton = page.getByRole('button', { name: /Siguiente/i });
+
+    await expect(nextButton).toBeVisible({
+        timeout: 15000,
+    });
+
+    if (await nextButton.isEnabled()) {
+        await nextButton.click();
+    }
+
     const linaCard = await getTeacherCard(
         page,
         'LINA VILLAGRÁN COMPARINI de BARILLAS'
@@ -58,9 +70,7 @@ test('actualiza estados de docentes y filtra por buen desempeño', async ({ page
         'VERÓNICA ELIZABETH COJULÚN LÓPEZ'
     );
 
-    await expect(linaCard.locator('.pa-status-badge')).toContainText(
-        /En Peligro/i
-    );
+    await expect(linaCard.locator('.pa-status-badge')).toContainText(/En Peligro/i);
 
     await linaCard.getByRole('button', { name: /^Bueno$/i }).click();
 
@@ -68,9 +78,7 @@ test('actualiza estados de docentes y filtra por buen desempeño', async ({ page
         /Buen Desempeño/i
     );
 
-    await expect(veroCard.locator('.pa-status-badge')).toContainText(
-        /En Peligro/i
-    );
+    await expect(veroCard.locator('.pa-status-badge')).toContainText(/En Peligro/i);
 
     await veroCard.getByRole('button', { name: /^Bueno$/i }).click();
 

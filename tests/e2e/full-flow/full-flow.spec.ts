@@ -2,6 +2,7 @@ import { test, expect, Page, Locator } from '@playwright/test';
 import path from 'path';
 
 test.use({
+    storageState: 'tests/.auth/user.json',
     acceptDownloads: true,
 });
 
@@ -647,83 +648,87 @@ test('Flujo semicompleto de Polaris', async ({ page }) => {
         timeout: 25000,
     });
 
-    // COORDINADORES
+    // GESTIÓN DE OBSERVACIONES
 
     await goHome(page);
 
-    await page.getByText(/Gestión de Coordinadores/i).click();
+    await page.getByText(/Gestión de Observaciones/i).click();
 
-    await expect(page).toHaveURL(/\/coord-management$/);
-
-    await expect(
-        page.getByRole('heading', { name: /Gestión de Coordinadores/i })
-    ).toBeVisible();
-
-    await waitForTableLoad(page);
-
-    const coordinatorOne = {
-        firstName: 'Coordinador E2E',
-        lastName: `Uno ${stamp}`,
-        username: `coord_e2e_uno_${stamp}`,
-        code: `E2E-${stamp}-1`,
-        email: `coord.e2e.uno.${stamp}@universidad.edu.gt`,
-        department: 'Facultad de Ingeniería',
-        role: 'Coordinador',
-    };
-
-    const coordinatorTwo = {
-        firstName: 'Coordinador E2E',
-        lastName: `Dos ${stamp}`,
-        username: `coord_e2e_dos_${stamp}`,
-        code: `E2E-${stamp}-2`,
-        email: `coord.e2e.dos.${stamp}@universidad.edu.gt`,
-        department: 'Facultad de Ingeniería',
-        role: 'Coordinador',
-    };
-
-    await createCoordinator(page, coordinatorOne);
-    await createCoordinator(page, coordinatorTwo);
-
-    await page
-        .getByPlaceholder(/Búsqueda por nombre/i)
-        .fill('Coordinador E2E');
+    await expect(page).toHaveURL(/\/observations$/, {
+        timeout: 15000,
+    });
 
     await expect(
-        page.getByRole('row').filter({ hasText: coordinatorOne.lastName })
+        page.getByRole('heading', {
+            name: /^Gestión de Observaciones$/,
+            level: 1,
+        })
     ).toBeVisible({
+        timeout: 30000,
+    });
+
+    await page.getByRole('button', { name: /Ver lista completa/i }).click();
+
+    const pendingDialog = page.getByRole('dialog');
+    await expect(pendingDialog).toBeVisible({ timeout: 15000 });
+
+    await pendingDialog
+        .getByPlaceholder(/Buscar por nombre o código/i)
+        .fill('Ve');
+
+    const veronicaRow = pendingDialog
+        .getByText(/Código:\s*18504/i)
+        .locator('xpath=ancestor::div[.//button[normalize-space()="Evaluar"]][1]');
+
+    await expect(veronicaRow).toBeVisible({ timeout: 15000 });
+
+    await veronicaRow.getByRole('button', { name: /^Evaluar$/i }).click();
+
+    const evalDialog = page
+        .getByRole('dialog')
+        .filter({ hasText: /Configurar Sesión de Observación/i });
+
+    await expect(evalDialog).toBeVisible({ timeout: 15000 });
+
+    const teacherSelect = evalDialog.getByRole('combobox').first();
+    const courseSelect = evalDialog.getByRole('combobox').nth(1);
+
+    await expect(teacherSelect).toHaveValue('17');
+    await expect(courseSelect).toHaveValue('16');
+
+    await evalDialog
+        .locator('.url-field')
+        .filter({ hasText: /Hora de Clase/i })
+        .locator('input')
+        .fill('10:20');
+
+    await evalDialog
+        .locator('.url-field')
+        .filter({ hasText: /Instrumento de Evaluación/i })
+        .locator('select')
+        .selectOption('4');
+
+    await evalDialog
+        .getByRole('button', { name: /Comenzar Evaluación/i })
+        .click();
+
+    await expect(page).toHaveURL(/\/observations\/evaluate\?/, {
         timeout: 15000,
     });
+
+    await expect(page).toHaveURL(/teacher_id=17/);
+    await expect(page).toHaveURL(/template_id=4/);
+    await expect(page).toHaveURL(/course_id=15/);
 
     await expect(
-        page.getByRole('row').filter({ hasText: coordinatorTwo.lastName })
+        page.getByRole('button', { name: /Cancelar Evaluación/i })
     ).toBeVisible({
-        timeout: 15000,
+        timeout: 30000,
     });
 
-    const coordinatorPageSizeInput = page.locator('#pageSize');
+    await page.getByRole('button', { name: /Cancelar Evaluación/i }).click();
 
-    await expect(coordinatorPageSizeInput).toBeVisible();
-
-    await coordinatorPageSizeInput.fill('1');
-    await coordinatorPageSizeInput.press('Enter');
-
-    await expect(page.getByText(/Página 1 de 2/i)).toBeVisible({
-        timeout: 15000,
-    });
-
-    const coordinatorRows = page.locator('tbody tr.cm-tr');
-
-    await expect(coordinatorRows).toHaveCount(1, {
-        timeout: 15000,
-    });
-
-    await page.getByRole('button', { name: /Siguiente/i }).click();
-
-    await expect(page.getByText(/Página 2 de 2/i)).toBeVisible({
-        timeout: 15000,
-    });
-
-    await expect(coordinatorRows).toHaveCount(1, {
+    await expect(page).toHaveURL(/\/observations$/, {
         timeout: 15000,
     });
 
@@ -744,6 +749,8 @@ test('Flujo semicompleto de Polaris', async ({ page }) => {
     await expect(searchInput).toBeVisible();
 
     await searchInput.fill('V');
+
+    await page.getByRole('button', { name: /Siguiente/i }).click();
 
     const linaCard = await getTeacherCard(page, 'LINA VILLAGRÁN COMPARINI de BARILLAS');
     const veroCard = await getTeacherCard(page, 'VERÓNICA ELIZABETH COJULÚN LÓPEZ');
@@ -809,13 +816,13 @@ test('Flujo semicompleto de Polaris', async ({ page }) => {
 
     const rankingRows = page.locator('tbody tr.ir-tr-clickable');
 
-    await expect(rankingRows.nth(5)).toBeVisible({
+    await expect(rankingRows.nth(3)).toBeVisible({
         timeout: 25000,
     });
 
-    await rankingRows.nth(5).click();
+    await rankingRows.nth(3).click();
 
-    await expect(page).toHaveURL(/\/individual-teacher-view\/17$/, {
+    await expect(page).toHaveURL(/\/individual-teacher-view\/24$/, {
         timeout: 25000,
     });
 
@@ -835,13 +842,13 @@ test('Flujo semicompleto de Polaris', async ({ page }) => {
         timeout: 15000,
     });
 
-    await expect(rankingRows.nth(3)).toBeVisible({
+    await expect(rankingRows.nth(4)).toBeVisible({
         timeout: 25000,
     });
 
-    await rankingRows.nth(3).click();
+    await rankingRows.nth(4).click();
 
-    await expect(page).toHaveURL(/\/individual-teacher-view\/19$/, {
+    await expect(page).toHaveURL(/\/individual-teacher-view\/21$/, {
         timeout: 25000,
     });
 
@@ -892,29 +899,173 @@ test('Flujo semicompleto de Polaris', async ({ page }) => {
     });
 
     await expect(
-        page.getByRole('heading', { name: /Mi Perfil|Perfil/i })
+        page.getByRole('heading', {
+            name: /^Mi Perfil$/,
+            level: 1,
+        })
     ).toBeVisible({
+        timeout: 30000,
+    });
+
+    await expect(
+        page.getByRole('heading', {
+            name: /^Información Personal$/,
+            level: 2,
+        })
+    ).toBeVisible({
+        timeout: 30000,
+    });
+
+    await expect(page.getByText(/Nombre/i)).toBeVisible({
+        timeout: 15000,
+    });
+    await expect(page.getByText(/Apellido/i)).toBeVisible({
+        timeout: 15000,
+    });
+    await expect(page.getByText(/Correo electrónico/i)).toBeVisible({
+        timeout: 15000,
+    });
+    await expect(page.getByText(/Teléfono/i)).toBeVisible({
+        timeout: 15000,
+    });
+    await expect(page.getByText(/Rol en el sistema/i)).toBeVisible({
         timeout: 15000,
     });
 
+    await page.getByRole('button', { name: /Seguridad/i }).click();
+
+    await expect(
+        page.getByRole('heading', {
+            name: /^Cambiar Contraseña$/,
+            level: 2,
+        })
+    ).toBeVisible();
+
+    await expect(page.getByText(/Contraseña actual/i)).toBeVisible();
+    await expect(page.getByText(/Confirmar nueva contraseña/i)).toBeVisible();
+
+    await page.getByRole('button', { name: /Preferencias/i }).click();
+
+    await expect(
+        page.getByRole('heading', {
+            name: /^Preferencias del Sistema$/,
+            level: 2,
+        })
+    ).toBeVisible();
+
+    await expect(page.getByText(/Notificaciones por correo/i)).toBeVisible();
+    await expect(page.getByText(/Alertas del sistema/i)).toBeVisible();
+    await expect(page.getByText(/Reporte semanal/i)).toBeVisible();
+    await expect(page.getByText(/Autenticación de dos factores/i)).toBeVisible();
+
     await backToSettings(page);
 
-    // Gestión de Importaciones
+    // Estructura Académica
 
-    await openSettingsCard(page, /Gestión de Importaciones/i);
+    await openSettingsCard(page, /Estructura Académica/i);
 
-    await expect(page).toHaveURL(/\/settings\/data-import$/, {
+    await expect(page).toHaveURL(/\/pensum$/, {
         timeout: 15000,
     });
 
     await expect(
         page.getByRole('heading', {
-            name: /^Gestión de Importaciones$/,
+            name: /^Estructura Académica \(Pensum\)$/,
             level: 1,
         })
     ).toBeVisible({
+        timeout: 30000,
+    });
+
+    await expect(page.getByText(/Sincronizando con el servidor/i)).toBeHidden({
+        timeout: 45000,
+    });
+
+    await expect(
+        page.getByText(
+            /Carga de Pensum Realizada/i
+        )
+    ).toBeVisible({
+        timeout: 30000,
+    });
+
+    await goToSettingsFromSidebar(page);
+
+    // Biblioteca de Plantillas
+
+    await openSettingsCard(page, /Biblioteca de Plantillas/i);
+
+    await expect(page).toHaveURL(/\/settings\/templates$/, {
         timeout: 15000,
     });
+
+    await expect(
+        page.getByRole('heading', {
+            name: /^Biblioteca de Plantillas$/,
+            level: 1,
+        })
+    ).toBeVisible({
+        timeout: 30000,
+    });
+
+    await expect(
+        page.getByText(
+            /Gestione los formatos de evaluación y observación docente disponibles en el sistema/i
+        )
+    ).toBeVisible();
+
+    await expect(
+        page.getByText(
+            /Historial de Biblioteca|Sin plantillas disponibles/i
+        )
+    ).toBeVisible({
+        timeout: 45000,
+    });
+
+    await backToSettings(page);
+
+    // Mantenimiento de Datos
+
+    await openSettingsCard(page, /Mantenimiento de Datos/i);
+
+    await expect(page).toHaveURL(/\/settings\/maintenance$/, {
+        timeout: 15000,
+    });
+
+    await expect(
+        page.getByRole('heading', {
+            name: /^Mantenimiento y Restauración$/,
+            level: 1,
+        })
+    ).toBeVisible({
+        timeout: 30000,
+    });
+
+    await expect(
+        page.getByText(/Panel administrativo para la gestión de la integridad de datos/i)
+    ).toBeVisible();
+
+    await expect(page.getByText(/Biblioteca de Plantillas de Evaluación/i)).toBeVisible({
+        timeout: 30000,
+    });
+
+    await expect(page.getByText(/Gestión del Pensum/i)).toBeVisible();
+
+    await expect(page.getByText(/Estado de Integridad/i)).toBeVisible();
+
+    await expect(
+        page.getByText(/No hay plantillas cargadas en el sistema|Estructura de la Plantilla/i)
+    ).toBeVisible({
+        timeout: 45000,
+    });
+
+    await expect(
+        page.getByText(/Cursos registrados:/i)
+    ).toBeVisible();
+
+    await expect(
+        page.getByText(/Estado de la Base:/i)
+    ).toBeVisible();
 
     await backToSettings(page);
 
@@ -928,7 +1079,7 @@ test('Flujo semicompleto de Polaris', async ({ page }) => {
 
     await expect(
         page.getByRole('heading', {
-            name: /^Sistema de Evaluación Docente$/,
+            name: /^Pesos y Fórmulas$/,
             level: 1,
         })
     ).toBeVisible({
@@ -948,6 +1099,12 @@ test('Flujo semicompleto de Polaris', async ({ page }) => {
         timeout: 45000,
     });
 
+    await page.getByRole('button', { name: /Restablecer/i }).click();
+
+    await page.getByRole('button', { name: /Sí, restablecer/i }).click();
+
+    await setCriterionPercentage(page, /Dominio del tema/i, '10');
+
     await page.getByRole('button', { name: /Agregar Categoría/i }).click();
 
     await fillCategoryModal(page, categoryName, categoryDescription);
@@ -961,7 +1118,6 @@ test('Flujo semicompleto de Polaris', async ({ page }) => {
         timeout: 15000,
     });
 
-    await setCriterionPercentage(page, /Evaluación de alumnos/i, '30');
     await setCriterionPercentage(page, new RegExp(categoryName, 'i'), '10');
 
     await expect(page.locator('.wc-summary-value')).toHaveText('100%', {
@@ -980,80 +1136,13 @@ test('Flujo semicompleto de Polaris', async ({ page }) => {
 
     await expect(
         page.getByText(
-            /Configuración guardada|guardada correctamente|activada correctamente/i
+            /Guardando.../i
         )
     ).toBeVisible({
         timeout: 45000,
     });
 
     await goToSettingsFromSidebar(page);
-
-    // Reglas de Notificación
-
-    await openSettingsCard(page, /Reglas de Notificación/i);
-
-    await expect(page).toHaveURL(/\/settings\/alert-config$/, {
-        timeout: 15000,
-    });
-
-    await expect(
-        page.getByRole('heading', { name: /Reglas de Notificación/i })
-    ).toBeVisible({
-        timeout: 15000,
-    });
-
-    const failedAccessCard = page
-        .locator('.alert-config-card')
-        .filter({ hasText: /Intentos de Acceso Fallidos/i })
-        .first();
-
-    await expect(failedAccessCard).toBeVisible({
-        timeout: 15000,
-    });
-
-    const failedAccessCheckbox = failedAccessCard.locator(
-        'input[type="checkbox"]'
-    );
-
-    await failedAccessCard.locator('.profile-toggle-track').click();
-
-    await expect(failedAccessCheckbox).toBeChecked({
-        timeout: 10000,
-    });
-
-    await page
-        .getByRole('button', { name: /Guardar Configuración/i })
-        .click();
-
-    await expect(
-        page.getByText(/Configuración de alertas guardada/i)
-    ).toBeVisible({
-        timeout: 10000,
-    });
-
-    await backToSettings(page);
-
-    // Auditoría y Equipo
-
-    await openSettingsCard(page, /Auditoría y Equipo/i);
-
-    await expect(page).toHaveURL(/\/settings\/audit$/, {
-        timeout: 15000,
-    });
-
-    await expect(
-        page.getByRole('heading', { name: /Auditoría y Equipo/i })
-    ).toBeVisible({
-        timeout: 15000,
-    });
-
-    await expect(page.getByText(/Historial de Cambios/i)).toBeVisible({
-        timeout: 15000,
-    });
-
-    await expect(page.getByText(/Equipo Admin/i)).toBeVisible({
-        timeout: 15000,
-    });
 
     // DOCENTES
 

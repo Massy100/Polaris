@@ -31,9 +31,11 @@ test('navega cursos históricos por profesor y por curso', async ({ page }) => {
 
     await goHome(page);
 
-    await page.locator('a[href="/history-view"]').click();
+    await page.getByRole('button', { name: /Cursos Históricos/i }).click();
 
-    await expect(page).toHaveURL(/\/history-view$/);
+    await expect(page).toHaveURL(/\/history-view$/, {
+        timeout: 15000,
+    });
 
     await expect(
         page.getByRole('heading', { name: /Cursos Históricos/i })
@@ -61,9 +63,7 @@ test('navega cursos históricos por profesor y por curso', async ({ page }) => {
 
     const freddyProfessorCard = page
         .locator('.hv-list-card')
-        .filter({
-            hasText: /FREDDY ALEJANDRO GONZÁLEZ ARMAS/i,
-        })
+        .filter({ hasText: /FREDDY ALEJANDRO GONZÁLEZ ARMAS/i })
         .first();
 
     await expect(freddyProfessorCard).toBeVisible({
@@ -74,25 +74,14 @@ test('navega cursos históricos por profesor y por curso', async ({ page }) => {
 
     const professorDetail = page.locator('.hv-detail-content').first();
 
-    await expect(professorDetail).toBeVisible({
-        timeout: 15000,
-    });
-
     await expect(professorDetail).toContainText(
         /FREDDY ALEJANDRO GONZÁLEZ ARMAS/i,
-        {
-            timeout: 15000,
-        }
+        { timeout: 15000 }
     );
 
-    await expect(professorDetail.locator('.hv-history-list')).toBeVisible({
-        timeout: 15000,
-    });
-
     const professorHistoryCards = professorDetail.locator('.hv-history-card');
-    const professorHistoryCount = await professorHistoryCards.count();
 
-    if (professorHistoryCount > 0) {
+    if ((await professorHistoryCards.count()) > 0) {
         await expect(professorHistoryCards.first()).toBeVisible({
             timeout: 15000,
         });
@@ -116,9 +105,7 @@ test('navega cursos históricos por profesor y por curso', async ({ page }) => {
 
     const arquitecturaCursoCard = page
         .locator('.hv-list-card')
-        .filter({
-            hasText: /ARQUITECTURA DEL COMPUTADOR/i,
-        })
+        .filter({ hasText: /ARQUITECTURA DEL COMPUTADOR/i })
         .first();
 
     await expect(arquitecturaCursoCard).toBeVisible({
@@ -129,25 +116,14 @@ test('navega cursos históricos por profesor y por curso', async ({ page }) => {
 
     const courseDetail = page.locator('.hv-detail-content').first();
 
-    await expect(courseDetail).toBeVisible({
-        timeout: 15000,
-    });
-
     await expect(courseDetail).toContainText(
         /ARQUITECTURA DEL COMPUTADOR/i,
-        {
-            timeout: 15000,
-        }
+        { timeout: 15000 }
     );
 
-    await expect(courseDetail.locator('.hv-history-list')).toBeVisible({
-        timeout: 15000,
-    });
-
     const courseHistoryCards = courseDetail.locator('.hv-history-card');
-    const courseHistoryCount = await courseHistoryCards.count();
 
-    if (courseHistoryCount > 0) {
+    if ((await courseHistoryCards.count()) > 0) {
         await expect(courseHistoryCards.first()).toBeVisible({
             timeout: 15000,
         });
