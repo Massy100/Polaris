@@ -1,4 +1,5 @@
-from django.db import migrations, models
+import django.utils.timezone
+from django.db import migrations, models, connection
 
 
 def add_fields_if_missing(apps, schema_editor):
