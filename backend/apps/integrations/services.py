@@ -46,6 +46,7 @@ _COURSE_CACHE: dict[str, Course] = {}
 _PERIOD_CACHE: dict[str, Period] = {}
 _SECTION_CACHE: dict[tuple[int, int, str, int | None], Section] = {}
 _TEACHER_COURSE_CACHE: set[tuple[int, int]] = set()
+_TEACHER_COURSE_BUFFER: list[TeacherCourse] = []
 _STUDENT_SURVEY_CACHE: dict[tuple[int, int | None, str, str, str, str], TeacherStudentSurvey] = {}
 _STUDENT_SURVEY_TEACHERS_LOADED: set[int] = set()
 _COMMENT_CACHE: set[tuple[int | None, str]] = set()
@@ -61,6 +62,7 @@ def _reset_request_caches() -> None:
     _PERIOD_CACHE.clear()
     _SECTION_CACHE.clear()
     _TEACHER_COURSE_CACHE.clear()
+    _TEACHER_COURSE_BUFFER.clear()
     _STUDENT_SURVEY_CACHE.clear()
     _STUDENT_SURVEY_TEACHERS_LOADED.clear()
     _COMMENT_CACHE.clear()
@@ -485,11 +487,16 @@ def _ensure_teacher_course(teacher: Teacher, course: Course) -> None:
     if cache_key in _TEACHER_COURSE_CACHE:
         return
 
-    TeacherCourse.objects.get_or_create(
-        teacher=teacher,
-        course=course,
-    )
     _TEACHER_COURSE_CACHE.add(cache_key)
+    _TEACHER_COURSE_BUFFER.append(TeacherCourse(teacher=teacher, course=course))
+
+
+def _flush_teacher_course_links() -> None:
+    if not _TEACHER_COURSE_BUFFER:
+        return
+
+    TeacherCourse.objects.bulk_create(_TEACHER_COURSE_BUFFER, ignore_conflicts=True)
+    _TEACHER_COURSE_BUFFER.clear()
 
 
 def _resolve_survey_course_and_section(row: dict) -> tuple[Course | None, str]:
@@ -624,7 +631,7 @@ def _get_or_create_workload_section(
         course.course_id,
         period.period_id,
         section_code or "",
-        teacher.teacher_id if teacher else None,
+        None,
     )
     cached_section = _SECTION_CACHE.get(section_key)
     if cached_section:
@@ -638,13 +645,10 @@ def _get_or_create_workload_section(
                 AND COALESCE(section_code, '') = %s
             """
             select_params = [course.course_id, period.period_id, section_code or ""]
-            if "teacher_id" in section_columns and teacher:
-                where_sql += " AND teacher_id = %s"
-                select_params.append(teacher.teacher_id)
 
             cursor.execute(
                 f"""
-                SELECT section_id
+                SELECT section_id, teacher_id
                 FROM section
                 WHERE {where_sql}
                 LIMIT 1
@@ -653,7 +657,19 @@ def _get_or_create_workload_section(
             )
             existing = cursor.fetchone()
             if existing:
-                section = Section.objects.get(section_id=existing[0])
+                if "teacher_id" in section_columns and teacher and existing[1] is None:
+                    cursor.execute(
+                        "UPDATE section SET teacher_id = %s WHERE section_id = %s",
+                        [teacher.teacher_id, existing[0]],
+                    )
+                section = Section(
+                    section_id=existing[0],
+                    course=course,
+                    period=period,
+                    teacher=teacher,
+                    section_code=section_code or "",
+                    status="active",
+                )
                 _SECTION_CACHE[section_key] = section
                 return section
 
@@ -697,7 +713,14 @@ def _get_or_create_workload_section(
                 insert_params,
             )
             section_id = cursor.fetchone()[0]
-        section = Section.objects.get(section_id=section_id)
+        section = Section(
+            section_id=section_id,
+            course=course,
+            period=period,
+            teacher=teacher,
+            section_code=section_code or "",
+            status="active",
+        )
         _SECTION_CACHE[section_key] = section
         return section
 
@@ -1125,9 +1148,12 @@ def _finalize_batch(
     errors: list[dict],
     teacher_ids: set[int],
 ):
+    _flush_teacher_course_links()
     _flush_batch_records(batch)
 
-    if invalid_rows > 0:
+    if valid_rows == 0:
+        batch.status = "failed"
+    elif invalid_rows > 0:
         batch.status = "processed_with_errors"
     batch.valid_rows = valid_rows
     batch.invalid_rows = invalid_rows
@@ -1196,9 +1222,13 @@ def _build_evaluation_context(descriptors: list[dict]) -> dict:
     }
 
 
-def _build_evaluation_context_from_db() -> dict:
+def _build_evaluation_context_from_db(codes: set[str] | None = None) -> dict:
     by_code_course_section = {}
     by_code = {}
+
+    clean_codes = {_clean_code(code) for code in (codes or set()) if _clean_code(code)}
+    if codes is not None and not clean_codes:
+        return {"by_code_course_section": {}, "by_code_average": {}}
 
     surveys = (
         TeacherStudentSurvey.objects.filter(
@@ -1207,6 +1237,8 @@ def _build_evaluation_context_from_db() -> dict:
         )
         .select_related("teacher", "course")
     )
+    if clean_codes:
+        surveys = surveys.filter(teacher__code__in=clean_codes)
 
     for survey in surveys:
         code = _clean_code(getattr(survey.teacher, "code", "") or "")
@@ -1248,6 +1280,21 @@ def _merge_evaluation_context(*contexts: dict) -> dict:
             if values
         },
     }
+
+
+def _extract_teacher_codes_from_descriptors(descriptors: list[dict]) -> set[str]:
+    codes = set()
+    for descriptor in descriptors:
+        for raw_row in descriptor["rows"]:
+            row = _normalize_row({key: value for key, value in raw_row.items() if key != "__source_row_number"})
+            code = _clean_code(row.get("codigo", "") or row.get("codigo_docente", ""))
+            teacher_label = row.get("catedratico", "")
+            if teacher_label:
+                label_code, _ = _extract_code_and_name_from_label(teacher_label)
+                code = code or label_code
+            if code:
+                codes.add(code)
+    return codes
 
 
 def _unsupported_group_result(file_obj, kind: str, message: str) -> dict:
@@ -1549,20 +1596,9 @@ def _process_comentarios_descriptor(descriptor: dict, evaluation_context: dict) 
             )
             existing_opinions = survey_scope_cache.get(survey_scope_key)
             if existing_opinions is None:
-                filters = {
-                    "teacher": teacher,
-                    "course": course,
-                    "section": section_code or None,
-                    "author": "Estudiante",
-                }
-                if opinion_date:
-                    filters["opinion_date"] = opinion_date
-                else:
-                    filters["opinion_date__isnull"] = True
-                existing_opinions = {
-                    opinion
-                    for opinion in TeacherStudentSurvey.objects.filter(**filters).values_list("opinion", flat=True)
-                }
+                # Existing rows are protected by the DB unique constraint. Avoid one
+                # round-trip to Neon per teacher/course block during large uploads.
+                existing_opinions = set()
                 survey_scope_cache[survey_scope_key] = existing_opinions
 
             survey_key = _survey_cache_key(teacher, course, section_code, "Estudiante", comment, opinion_date)
@@ -1627,7 +1663,7 @@ def _process_comentarios_descriptor(descriptor: dict, evaluation_context: dict) 
             _save_batch_record(batch, row_number, "invalid", row, {}, error_message)
 
     if survey_creates:
-        TeacherStudentSurvey.objects.bulk_create(survey_creates)
+        TeacherStudentSurvey.objects.bulk_create(survey_creates, ignore_conflicts=True)
     if survey_updates:
         TeacherStudentSurvey.objects.bulk_update(survey_updates, ["rating", "status", "updated_at"])
     if comment_creates:
@@ -1690,7 +1726,9 @@ def _process_file(category: str, file_obj) -> tuple[BulkUploadBatch, dict]:
     _flush_batch_records(batch)
     batch.valid_rows = valid_rows
     batch.invalid_rows = invalid_rows
-    if invalid_rows > 0:
+    if valid_rows == 0:
+        batch.status = "failed"
+    elif invalid_rows > 0:
         batch.status = "processed_with_errors"
     batch.summary = {
         "errors": errors[:50],
@@ -1796,12 +1834,50 @@ def _process_single_descriptor(category: str, descriptor: dict) -> dict:
         if category == "encuestas" and descriptor["kind"] == "comentarios":
             return _process_comentarios_descriptor(
                 descriptor,
-                _merge_evaluation_context(_build_evaluation_context_from_db(), {}),
+                _merge_evaluation_context(
+                    _build_evaluation_context_from_db(_extract_teacher_codes_from_descriptors([descriptor])),
+                    {},
+                ),
             )
         if category == "meritos" and descriptor["kind"] == "ceat":
             return _process_ceat_descriptor(descriptor)
         _, result = _process_file(category, descriptor["file"])
         return result
+
+
+def _build_upload_response(category: str, results: list[dict]) -> dict:
+    failed_files = [
+        result for result in results
+        if result.get("status") == "ignored"
+        or int(result.get("invalid_rows") or 0) > 0
+        or int(result.get("valid_rows") or 0) == 0
+    ]
+
+    if failed_files:
+        details = []
+        for result in failed_files:
+            filename = result.get("filename", "archivo")
+            if result.get("status") == "ignored":
+                details.append(f"{filename}: {result.get('message', 'formato no soportado')}")
+            elif int(result.get("valid_rows") or 0) == 0:
+                details.append(f"{filename}: no se cargaron registros validos")
+            else:
+                details.append(f"{filename}: {result.get('invalid_rows')} fila(s) con error")
+        return {
+            "ok": False,
+            "message": "Carga procesada con errores. " + " | ".join(details[:5]),
+            "category": category,
+            "total_files": len(results),
+            "results": results,
+        }
+
+    return {
+        "ok": True,
+        "message": "Carga masiva procesada correctamente.",
+        "category": category,
+        "total_files": len(results),
+        "results": results,
+    }
 
 
 def process_bulk_upload(category: str, files) -> dict:
@@ -1821,7 +1897,7 @@ def process_bulk_upload(category: str, files) -> dict:
 
     if category in GROUP_CATEGORIES:
         evaluation_context = _merge_evaluation_context(
-            _build_evaluation_context_from_db(),
+            _build_evaluation_context_from_db(_extract_teacher_codes_from_descriptors(descriptors)),
             _build_evaluation_context(
                 [descriptor for descriptor in descriptors if descriptor["kind"] == "evaluacion_docente"]
             ),
@@ -1843,10 +1919,4 @@ def process_bulk_upload(category: str, files) -> dict:
                     f"No se pudo procesar {descriptor['filename']}: {str(exc)}"
                 ) from exc
 
-    return {
-        "ok": True,
-        "message": "Carga masiva procesada.",
-        "category": category,
-        "total_files": len(results),
-        "results": results,
-    }
+    return _build_upload_response(category, results)
