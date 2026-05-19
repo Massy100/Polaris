@@ -29,7 +29,7 @@ const cards: { id: string; icon: IconType; iconColor: 'blue' | 'yellow'; title: 
     id: 'ranking',
     icon: 'ranking',
     iconColor: 'blue',
-    title: 'Ranking Institucional',
+    title: 'Ponderación de IA',
     description: 'Vista para directivos sobre los docentes mejor evaluados.',
     href: '/institutional-ranking',
   },
