@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ClerkProvider } from '@clerk/nextjs';
 import "./globals.css";
 import ConditionalPanel from "./components/conditional-panel";
-import NotificationWrapper from "./components/notification-wrapper";
+import GatekeeperGuard from "./components/gatekeeper-guard";
 
 export const metadata: Metadata = {
   title: "SGA • Polaris",
@@ -22,12 +22,14 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="es">
         <body className="antialiased">
-          <div className="flex relative">
-            <ConditionalPanel />
-            <main className="flex-1 overflow-auto relative">
-              {children}
-            </main>
-          </div>
+          <GatekeeperGuard>
+            <div className="flex relative">
+              <ConditionalPanel />
+              <main className="flex-1 overflow-auto relative">
+                {children}
+              </main>
+            </div>
+          </GatekeeperGuard>
         </body>
       </html>
     </ClerkProvider>

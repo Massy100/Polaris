@@ -694,3 +694,98 @@ img, svg { display: block; max-width: 100%; }
 @media (max-width: 480px) {
   body { font-size: 13px; }
 }
+
+.vault-notification-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(0, 45, 86, 0.05) 0%, rgba(0, 15, 30, 0.98) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(12px);
+  animation: url-fade-in 0.4s ease-out;
+}
+
+.vault-notification-card {
+  background: white;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 24px;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+  text-align: center;
+  animation: url-slide-up 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.vault-status-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+}
+
+.vault-status-indicator.waiting { background: #e8922a; }
+.vault-status-indicator.denied { background: #ac0b4c; }
+
+.vault-mini-logo {
+  width: 60px;
+  margin: 0 auto 24px;
+}
+
+.vault-content h3 {
+  color: #1c415c;
+  font-size: 22px;
+  margin-bottom: 12px;
+  font-weight: 800;
+}
+
+.vault-content p {
+  color: #567080;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.vault-btn-exit {
+  width: 100%;
+  background: #f0f4f7;
+  color: #1c415c;
+  border: 1px solid #d4e2eb;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.vault-btn-exit:hover {
+  background: #e4ecf2;
+  border-color: #1c415c;
+  transform: translateY(-1px);
+}
+
+.loading-vault-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f8faff;
+  gap: 20px;
+  color: #1c415c;
+  font-weight: 600;
+}
+
+.vault-loader {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f0f4f7;
+  border-top: 4px solid #1c415c;
+  border-radius: 50%;
+  animation: url-spin 1s linear infinite;
+}

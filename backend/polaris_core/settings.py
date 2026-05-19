@@ -36,17 +36,18 @@ INSTALLED_APPS = [
     'apps.academic_workload',
     'apps.assessment_360',
     'apps.integrations',
-    'apps.notifications',
     'apps.reporting',
     'apps.security_audit',
-    'apps.accounts',
     'rest_framework',
+    'django_extensions',
     'corsheaders', 
     'dj_database_url',
     'apps.pensum',
-    'apps.profile',
     'apps.templates',
+    'apps.access_vault',
 ]
+
+# AUTH_USER_MODEL eliminado para usar el por defecto
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  
@@ -88,6 +89,10 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'x-clerk-id',
+    'x-clerk-email',
+    'x-clerk-name',
+    'x-vault-id',
 ]
 
 ROOT_URLCONF = 'polaris_core.urls'

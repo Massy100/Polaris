@@ -61,12 +61,11 @@ interface AdminDashboardPanelProps {
 }
 
 const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
-  userName = 'Jorge Escalante',
   activePath: propActivePath,
   onNavigate,
   onLogout,
 }) => {
-  const { signOut } = useAuth();
+  const { signOut, user: clerkUser } = useAuth() as any;
   const router = useRouter();
   const pathname = usePathname();
 
@@ -75,12 +74,25 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [vaultData, setVaultData] = useState<any>(null);
 
   const isExpanded = isHovered || isPinned;
 
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    const fetchVaultIdentity = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/access-vault/identity/`, {
+          headers: { 'X-Clerk-ID': clerkUser?.id || '' }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setVaultData(data);
+        }
+      } catch (e) { console.error(e); }
+    };
+    if (clerkUser?.id) fetchVaultIdentity();
+  }, [clerkUser?.id]);
 
   const handleNavigation = (path: string) => {
     setIsHovered(false);
@@ -103,7 +115,10 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
 
   if (!isMounted) return null;
 
-  const initials = userName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  const displayName = vaultData?.identity?.full_identity_name || clerkUser?.fullName || 'Usuario';
+  const displayRole = vaultData?.identity?.access_level === 'GATEKEEPER_ADMIN' ? 'Administrador Maestro' : 'Coordinador de Staff';
+  const displayDept = vaultData?.profile?.org_unit || 'Facultad de Ingeniería';
+  const initials = displayName.split(' ').map((n: any) => n[0]).join('').substring(0, 2).toUpperCase();
 
   return (
     <>
@@ -130,9 +145,9 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
                   <span>{initials}</span>
                 </div>
                 <div className={`adp-user-details adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
-                  <span className="adp-user-name">{userName}</span>
-                  <span className="adp-user-role">Facultad de Ingeniería</span>
-                  <span className="adp-system-name">SGA Polaris</span>
+                  <span className="adp-user-name">{displayName}</span>
+                  <span className="adp-user-role">{displayRole}</span>
+                  <span className="adp-system-name">{displayDept}</span>
                 </div>
               </div>
 
