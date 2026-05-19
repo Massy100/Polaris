@@ -1,6 +1,5 @@
 # apps/academic_workload/services.py
 import os
-from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -55,6 +54,14 @@ def build_prompt(comments: list[str], criteria: list[dict]) -> str:
 
 
 def call_ai(prompt: str) -> str:
+    try:
+        from openai import OpenAI
+    except ImportError as exc:
+        raise RuntimeError(
+            "El paquete openai no esta instalado en el backend. "
+            "Instalalo para usar el analisis de IA."
+        ) from exc
+
     client = OpenAI(
         api_key=os.getenv("DASHSCOPE_API_KEY"),
         base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",

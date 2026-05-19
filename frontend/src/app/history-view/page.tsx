@@ -11,6 +11,9 @@ export interface HistoricalRecord {
   courseName?: string;
   courseCode?: string;
   professorName?: string;
+  score?: number | null;
+  commentsCount?: number;
+  assignedHours?: number | null;
 }
 
 export interface ProfessorData {
@@ -36,6 +39,13 @@ interface Course {
   name: string;
   credits?: number;
   status?: string;
+  section_id?: number | string;
+  section_code?: string;
+  period_name?: string;
+  term?: string;
+  final_score?: number | null;
+  comments_count?: number;
+  assigned_hours?: number | null;
 }
 
 interface Teacher {
@@ -55,6 +65,13 @@ interface TeacherBasic {
   full_name?: string;
   email?: string;
   status?: string;
+  section_id?: number | string;
+  section_code?: string;
+  period_name?: string;
+  term?: string;
+  final_score?: number | null;
+  comments_count?: number;
+  assigned_hours?: number | null;
 }
 
 interface CourseWithTeachers {
@@ -70,16 +87,6 @@ interface PaginatedResponse<T> {
   next?: string | null;
   previous?: string | null;
   results?: T[];
-}
-
-
-interface EditFormData {
-  term: string;
-  studentsTotal: string;
-  studentsPassed: string;
-  studentsFailed: string;
-  hours: string;
-  approvalRate: string;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
@@ -109,11 +116,26 @@ function mapTeachersToProfessorData(teachers: Teacher[]): ProfessorData[] {
       department: "Docente",
       email: teacher.email || "Sin correo",
       courseCount: courses.length,
-      history: courses.map((course) => ({
-        id: `teacher-${teacher.teacher_id}-course-${course.course_id}`,
-        term: "Histórico",
+      history: courses.map((course, index) => ({
+        id: [
+          "teacher",
+          teacher.teacher_id,
+          "course",
+          course.course_id,
+          "section",
+          course.section_id ?? course.section_code ?? "direct",
+          "period",
+          course.period_name ?? "none",
+          index,
+        ].join("-"),
+        term: course.term || course.period_name || "Histórico",
         courseName: course.name,
-        courseCode: `ID-${course.course_id}`,
+        courseCode: course.section_code
+          ? `Curso ${course.course_id} / Sección ${course.section_code}`
+          : `ID-${course.course_id}`,
+        score: course.final_score,
+        commentsCount: course.comments_count ?? 0,
+        assignedHours: course.assigned_hours,
       })),
     };
   });
@@ -129,16 +151,30 @@ function mapCoursesToCourseData(courses: CourseWithTeachers[]): CourseData[] {
       code: `ID-${course.course_id}`,
       description: `Curso con ${course.credits ?? 0} créditos`,
       professorCount: teachers.length,
-      history: teachers.map((teacher) => {
+      history: teachers.map((teacher, index) => {
         const teacherName =
           teacher.full_name?.trim() ||
           `${teacher.first_name || ""} ${teacher.last_name || ""}`.trim() ||
           "Docente sin nombre";
 
         return {
-          id: `course-${course.course_id}-teacher-${teacher.teacher_id}`,
-          term: "Histórico",
+          id: [
+            "course",
+            course.course_id,
+            "teacher",
+            teacher.teacher_id,
+            "section",
+            teacher.section_id ?? teacher.section_code ?? "direct",
+            "period",
+            teacher.period_name ?? "none",
+            index,
+          ].join("-"),
+          term: teacher.term || teacher.period_name || "Histórico",
           professorName: teacherName,
+          courseCode: teacher.section_code ? `Sección ${teacher.section_code}` : undefined,
+          score: teacher.final_score,
+          commentsCount: teacher.comments_count ?? 0,
+          assignedHours: teacher.assigned_hours,
         };
       }),
     };
@@ -483,10 +519,18 @@ export default function HistoryView() {
                       <div className="hv-hc-header">
                         <div className="hv-hc-title">
                           <h3>{record.courseName}</h3>
+                          {record.courseCode && <span>{record.courseCode}</span>}
                           <span>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
                             {record.term}
                           </span>
+                          <span>Comentarios: {record.commentsCount ?? 0}</span>
+                          {record.assignedHours !== undefined && record.assignedHours !== null && (
+                            <span>Horas: {record.assignedHours}</span>
+                          )}
+                          {record.score !== undefined && record.score !== null && (
+                            <span>Score: {record.score}</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -520,10 +564,18 @@ export default function HistoryView() {
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9333ea" strokeWidth="2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z" /><circle cx="12" cy="10" r="3" /></svg>
                             <h3>{record.professorName}</h3>
                           </div>
+                          {record.courseCode && <span>{record.courseCode}</span>}
                           <span>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
                             {record.term}
                           </span>
+                          <span>Comentarios: {record.commentsCount ?? 0}</span>
+                          {record.assignedHours !== undefined && record.assignedHours !== null && (
+                            <span>Horas: {record.assignedHours}</span>
+                          )}
+                          {record.score !== undefined && record.score !== null && (
+                            <span>Score: {record.score}</span>
+                          )}
                         </div>
                       </div>
                     </div>
