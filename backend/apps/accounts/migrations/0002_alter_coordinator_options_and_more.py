@@ -28,51 +28,6 @@ class Migration(migrations.Migration):
             name='user',
             options={'verbose_name': 'Usuario', 'verbose_name_plural': 'Usuarios'},
         ),
-        migrations.AddField(
-            model_name='coordinator',
-            name='code',
-            field=models.CharField(blank=True, max_length=50, null=True),
-        ),
-        migrations.AddField(
-            model_name='coordinator',
-            name='created_at',
-            field=models.DateTimeField(auto_now_add=True, null=True),
-        ),
-        migrations.AddField(
-            model_name='coordinator',
-            name='department',
-            field=models.CharField(blank=True, max_length=200, null=True),
-        ),
-        migrations.AddField(
-            model_name='coordinator',
-            name='phone',
-            field=models.CharField(blank=True, max_length=20, null=True),
-        ),
-        migrations.AddField(
-            model_name='coordinator',
-            name='role',
-            field=models.CharField(blank=True, max_length=100, null=True),
-        ),
-        migrations.AddField(
-            model_name='coordinator',
-            name='since',
-            field=models.DateField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name='coordinator',
-            name='updated_at',
-            field=models.DateTimeField(auto_now=True, null=True),
-        ),
-        migrations.AddField(
-            model_name='user',
-            name='email',
-            field=models.EmailField(blank=True, max_length=255, null=True),
-        ),
-        migrations.AddField(
-            model_name='user',
-            name='updated_at',
-            field=models.DateTimeField(auto_now=True, null=True),
-        ),
         migrations.AlterField(
             model_name='coordinator',
             name='status',

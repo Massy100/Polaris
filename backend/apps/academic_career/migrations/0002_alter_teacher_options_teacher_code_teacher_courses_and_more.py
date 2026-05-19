@@ -1,39 +1,10 @@
-import django.utils.timezone
-from django.db import migrations, models, connection
+from django.db import migrations, models
 
 
 def add_fields_if_missing(apps, schema_editor):
-    with connection.cursor() as cursor:
-        # Verificar columnas existentes
-        cursor.execute("""
-            SELECT column_name FROM information_schema.columns
-            WHERE table_name = 'teacher'
-        """)
-        existing_columns = {row[0] for row in cursor.fetchall()}
-
-        # Verificar tablas existentes
-        cursor.execute("""
-            SELECT table_name FROM information_schema.tables
-            WHERE table_name = 'teacher_courses'
-        """)
-        existing_tables = {row[0] for row in cursor.fetchall()}
-
-    Teacher = apps.get_model('academic_career', 'Teacher')
-
-    if 'code' not in existing_columns:
-        schema_editor.add_field(Teacher, Teacher._meta.get_field('code'))
-
-    if 'created_at' not in existing_columns:
-        schema_editor.add_field(Teacher, Teacher._meta.get_field('created_at'))
-
-    if 'email' not in existing_columns:
-        schema_editor.add_field(Teacher, Teacher._meta.get_field('email'))
-
-    if 'updated_at' not in existing_columns:
-        schema_editor.add_field(Teacher, Teacher._meta.get_field('updated_at'))
-
-    if 'teacher_courses' not in existing_tables:
-        schema_editor.add_field(Teacher, Teacher._meta.get_field('courses'))
+    # These fields are added declaratively in later migrations. Keeping this
+    # operation as a no-op makes clean test database creation deterministic.
+    return None
 
 
 class Migration(migrations.Migration):
