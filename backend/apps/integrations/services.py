@@ -37,6 +37,36 @@ ALLOWED_CATEGORIES = {"titulos", "meritos", "opiniones", "encuestas"}
 GROUP_CATEGORIES = {"credenciales", "evaluaciones"}
 ALLOWED_EXTENSIONS = {".csv", ".xlsx", ".xls"}
 MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024
+_TABLE_COLUMNS_CACHE: dict[str, set[str]] = {}
+_TEACHER_CACHE: dict[tuple[str, str, str, str], Teacher] = {}
+_TEACHER_BY_CODE_CACHE: dict[str, Teacher] = {}
+_FACULTY_CACHE: dict[str, Faculty] = {}
+_CAREER_CACHE: dict[tuple[int, str], Career] = {}
+_COURSE_CACHE: dict[str, Course] = {}
+_PERIOD_CACHE: dict[str, Period] = {}
+_SECTION_CACHE: dict[tuple[int, int, str, int | None], Section] = {}
+_TEACHER_COURSE_CACHE: set[tuple[int, int]] = set()
+_STUDENT_SURVEY_CACHE: dict[tuple[int, int | None, str, str, str, str], TeacherStudentSurvey] = {}
+_STUDENT_SURVEY_TEACHERS_LOADED: set[int] = set()
+_COMMENT_CACHE: set[tuple[int | None, str]] = set()
+_COMMENT_SECTIONS_LOADED: set[int | None] = set()
+
+
+def _reset_request_caches() -> None:
+    _TEACHER_CACHE.clear()
+    _TEACHER_BY_CODE_CACHE.clear()
+    _FACULTY_CACHE.clear()
+    _CAREER_CACHE.clear()
+    _COURSE_CACHE.clear()
+    _PERIOD_CACHE.clear()
+    _SECTION_CACHE.clear()
+    _TEACHER_COURSE_CACHE.clear()
+    _STUDENT_SURVEY_CACHE.clear()
+    _STUDENT_SURVEY_TEACHERS_LOADED.clear()
+    _COMMENT_CACHE.clear()
+    _COMMENT_SECTIONS_LOADED.clear()
+
+
 REQUIRED_FIELDS_BY_CATEGORY = {
     "titulos": {
         "nombre_profesor",
@@ -128,7 +158,9 @@ def _extract_section(value: str) -> str:
         return ""
     match = re.search(r"secci[oó]n:\s*([0-9A-Za-z]+)", text, flags=re.IGNORECASE)
     if match:
-        return match.group(1).strip()
+        text = match.group(1).strip()
+    if text.isdigit():
+        return text.zfill(2)
     return text.strip()
 
 
@@ -206,10 +238,127 @@ def _split_full_name(full_name: str) -> tuple[str, str]:
     return parts[0], " ".join(parts[1:])
 
 
+def _remember_teacher(teacher: Teacher, cache_key: tuple[str, str, str, str] | None = None) -> Teacher:
+    if cache_key:
+        _TEACHER_CACHE[cache_key] = teacher
+    if teacher.code:
+        _TEACHER_BY_CODE_CACHE[_clean_code(teacher.code).lower()] = teacher
+    return teacher
+
+
+def _preload_teachers_by_code(codes: set[str]) -> None:
+    missing_codes = {
+        _clean_code(code).lower()
+        for code in codes
+        if _clean_code(code) and _clean_code(code).lower() not in _TEACHER_BY_CODE_CACHE
+    }
+    if not missing_codes:
+        return
+
+    for teacher in Teacher.objects.filter(code__in=missing_codes):
+        _remember_teacher(teacher)
+
+
+def _preload_courses_by_name(course_names: set[str]) -> None:
+    missing_names = {
+        _normalize_match_text(name)
+        for name in course_names
+        if _normalize_match_text(name) and _normalize_match_text(name) not in _COURSE_CACHE
+    }
+    if not missing_names:
+        return
+
+    for course in Course.objects.all().only("course_id", "career_id", "name", "credits", "status"):
+        course_key = _normalize_match_text(course.name or "")
+        if course_key in missing_names:
+            _COURSE_CACHE[course_key] = course
+
+
+def _preload_teacher_course_links(descriptors: list[dict]) -> None:
+    teacher_ids = set()
+    course_ids = set()
+
+    for descriptor in descriptors:
+        for raw_row in descriptor["rows"]:
+            row = _normalize_row({key: value for key, value in raw_row.items() if key != "__source_row_number"})
+            code = _clean_code(row.get("codigo", "") or row.get("codigo_docente", ""))
+            teacher_label = row.get("catedratico", "")
+            if teacher_label:
+                label_code, _ = _extract_code_and_name_from_label(teacher_label)
+                code = code or label_code
+            teacher = _TEACHER_BY_CODE_CACHE.get(code.lower()) if code else None
+
+            course_name = _extract_course_name(row.get("curso", ""))
+            course = _COURSE_CACHE.get(_normalize_match_text(course_name)) if course_name else None
+
+            if teacher and course:
+                teacher_ids.add(teacher.teacher_id)
+                course_ids.add(course.course_id)
+
+    if not teacher_ids or not course_ids:
+        return
+
+    for link in TeacherCourse.objects.filter(teacher_id__in=teacher_ids, course_id__in=course_ids):
+        _TEACHER_COURSE_CACHE.add((link.teacher_id, link.course_id))
+
+
+def _preload_descriptor_lookups(descriptors: list[dict]) -> None:
+    codes = set()
+    course_names = set()
+
+    for descriptor in descriptors:
+        for raw_row in descriptor["rows"]:
+            row = _normalize_row({key: value for key, value in raw_row.items() if key != "__source_row_number"})
+            code = _clean_code(row.get("codigo", "") or row.get("codigo_docente", ""))
+            teacher_label = row.get("catedratico", "")
+            if teacher_label:
+                label_code, _ = _extract_code_and_name_from_label(teacher_label)
+                code = code or label_code
+            if code:
+                codes.add(code)
+
+            course_name = _extract_course_name(row.get("curso", ""))
+            if course_name:
+                course_names.add(course_name)
+
+    _preload_teachers_by_code(codes)
+    _preload_courses_by_name(course_names)
+    _preload_teacher_course_links(descriptors)
+
+
 def _get_or_create_teacher(row: dict) -> Teacher:
     email = row.get("email", "").strip().lower()
     code = _clean_code(row.get("codigo_docente", "") or row.get("code", ""))
     first_name, last_name = _split_full_name(row.get("nombre_profesor", ""))
+    cache_key = (
+        code.lower(),
+        email,
+        _normalize_match_text(first_name),
+        _normalize_match_text(last_name),
+    )
+    cached_teacher = _TEACHER_CACHE.get(cache_key)
+    if cached_teacher:
+        return cached_teacher
+
+    if code:
+        cached_by_code = _TEACHER_BY_CODE_CACHE.get(code.lower())
+        if cached_by_code:
+            updated_fields = []
+            if first_name and not cached_by_code.first_name:
+                cached_by_code.first_name = first_name
+                updated_fields.append("first_name")
+            if last_name and not cached_by_code.last_name:
+                cached_by_code.last_name = last_name
+                updated_fields.append("last_name")
+            if email and not cached_by_code.email:
+                cached_by_code.email = email
+                updated_fields.append("email")
+            if updated_fields:
+                cached_by_code.updated_at = timezone.now()
+                updated_fields.append("updated_at")
+                cached_by_code.save(update_fields=updated_fields)
+            return _remember_teacher(cached_by_code, cache_key)
+
     now = timezone.now()
 
     defaults = {
@@ -239,7 +388,7 @@ def _get_or_create_teacher(row: dict) -> Teacher:
             teacher.updated_at = now
             updated_fields.append("updated_at")
             teacher.save(update_fields=updated_fields)
-        return teacher
+        return _remember_teacher(teacher, cache_key)
 
     if email:
         teacher, created = Teacher.objects.get_or_create(
@@ -257,13 +406,13 @@ def _get_or_create_teacher(row: dict) -> Teacher:
             teacher.updated_at = now
             updated_fields.append("updated_at")
             teacher.save(update_fields=updated_fields)
-        return teacher
+        return _remember_teacher(teacher, cache_key)
 
     teacher = Teacher.objects.filter(first_name__iexact=first_name, last_name__iexact=last_name).first()
     if teacher:
-        return teacher
+        return _remember_teacher(teacher, cache_key)
 
-    return Teacher.objects.create(
+    teacher = Teacher.objects.create(
         first_name=first_name,
         last_name=last_name,
         status="ACTIVE",
@@ -271,6 +420,7 @@ def _get_or_create_teacher(row: dict) -> Teacher:
         created_at=now,
         updated_at=now,
     )
+    return _remember_teacher(teacher, cache_key)
 
 
 def _get_or_create_course(row: dict) -> Course | None:
@@ -278,21 +428,36 @@ def _get_or_create_course(row: dict) -> Course | None:
     if not course_name:
         return None
 
+    course_key = _normalize_match_text(course_name)
+    cached_course = _COURSE_CACHE.get(course_key)
+    if cached_course:
+        return cached_course
+
     faculty_name = _normalize_value(row.get("facultad", "")) or "Carga masiva"
     career_name = _normalize_value(row.get("carrera", "")) or "General"
 
-    faculty, _ = Faculty.objects.get_or_create(
-        name=faculty_name,
-        defaults={"status": "active"},
-    )
-    career, _ = Career.objects.get_or_create(
-        faculty=faculty,
-        name=career_name,
-        defaults={"status": "active"},
-    )
+    faculty_key = _normalize_match_text(faculty_name)
+    faculty = _FACULTY_CACHE.get(faculty_key)
+    if not faculty:
+        faculty, _ = Faculty.objects.get_or_create(
+            name=faculty_name,
+            defaults={"status": "active"},
+        )
+        _FACULTY_CACHE[faculty_key] = faculty
+
+    career_key = (faculty.faculty_id, _normalize_match_text(career_name))
+    career = _CAREER_CACHE.get(career_key)
+    if not career:
+        career, _ = Career.objects.get_or_create(
+            faculty=faculty,
+            name=career_name,
+            defaults={"status": "active"},
+        )
+        _CAREER_CACHE[career_key] = career
 
     course = Course.objects.filter(name__iexact=course_name).order_by("course_id").first()
     if course:
+        _COURSE_CACHE[course_key] = course
         return course
 
     course, _ = Course.objects.get_or_create(
@@ -303,6 +468,7 @@ def _get_or_create_course(row: dict) -> Course | None:
             "status": "active",
         },
     )
+    _COURSE_CACHE[course_key] = course
     return course
 
 
@@ -311,15 +477,24 @@ def _link_teacher_course(teacher: Teacher, row: dict) -> None:
     if not course:
         return
 
+    _ensure_teacher_course(teacher, course)
+
+
+def _ensure_teacher_course(teacher: Teacher, course: Course) -> None:
+    cache_key = (teacher.teacher_id, course.course_id)
+    if cache_key in _TEACHER_COURSE_CACHE:
+        return
+
     TeacherCourse.objects.get_or_create(
         teacher=teacher,
         course=course,
     )
+    _TEACHER_COURSE_CACHE.add(cache_key)
 
 
 def _resolve_survey_course_and_section(row: dict) -> tuple[Course | None, str]:
     course = _get_or_create_course(row)
-    section = _normalize_value(row.get("seccion", ""))
+    section = _extract_section(row.get("seccion", ""))
     return course, section
 
 
@@ -343,10 +518,84 @@ def _sync_pending_comment_ratings(teacher: Teacher, course: Course | None, secti
     pending_comments.update(rating=rating, updated_at=timezone.now())
 
 
+def _bulk_sync_pending_comment_ratings(sync_items: list[tuple[int, int, str, int]]) -> None:
+    if not sync_items:
+        return
+
+    deduped = list(dict.fromkeys(sync_items))
+    values_sql = ", ".join(["(%s, %s, %s, %s)"] * len(deduped))
+    params = []
+    for teacher_id, course_id, section, rating in deduped:
+        params.extend([teacher_id, course_id, section or "", rating])
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f"""
+            UPDATE teacher_student_survey AS survey
+            SET rating = incoming.rating,
+                updated_at = %s
+            FROM (VALUES {values_sql}) AS incoming(teacher_id, course_id, section, rating)
+            WHERE survey.author = 'Estudiante'
+              AND survey.status = 'active'
+              AND survey.rating IS NULL
+              AND survey.teacher_id = incoming.teacher_id
+              AND survey.course_id = incoming.course_id
+              AND COALESCE(survey.section, '') = incoming.section
+            """,
+            [timezone.now()] + params,
+        )
+
+
+def _survey_date_key(value) -> str:
+    return value.isoformat() if value else ""
+
+
+def _survey_cache_key(
+    teacher: Teacher,
+    course: Course | None,
+    section: str | None,
+    author: str,
+    opinion: str,
+    opinion_date,
+) -> tuple[int, int | None, str, str, str, str]:
+    return (
+        teacher.teacher_id,
+        course.course_id if course else None,
+        section or "",
+        author,
+        opinion,
+        _survey_date_key(opinion_date),
+    )
+
+
+def _preload_teacher_surveys(teacher: Teacher) -> None:
+    if teacher.teacher_id in _STUDENT_SURVEY_TEACHERS_LOADED:
+        return
+
+    for survey in TeacherStudentSurvey.objects.filter(teacher=teacher).select_related("course"):
+        _STUDENT_SURVEY_CACHE[
+            _survey_cache_key(
+                survey.teacher,
+                survey.course,
+                survey.section,
+                survey.author,
+                survey.opinion,
+                survey.opinion_date,
+            )
+        ] = survey
+    _STUDENT_SURVEY_TEACHERS_LOADED.add(teacher.teacher_id)
+
+
 def _get_table_columns(table_name: str) -> set[str]:
+    cached_columns = _TABLE_COLUMNS_CACHE.get(table_name)
+    if cached_columns is not None:
+        return cached_columns
+
     with connection.cursor() as cursor:
         description = connection.introspection.get_table_description(cursor, table_name)
-    return {column.name for column in description}
+    columns = {column.name for column in description}
+    _TABLE_COLUMNS_CACHE[table_name] = columns
+    return columns
 
 
 def _get_comment_table_columns() -> set[str]:
@@ -361,12 +610,26 @@ def _get_or_create_workload_section(
     if not course:
         return None
 
-    period, _ = Period.objects.get_or_create(
-        name="Carga masiva",
-        defaults={"status": "active"},
-    )
+    period_name = "Carga masiva"
+    period = _PERIOD_CACHE.get(period_name)
+    if not period:
+        period, _ = Period.objects.get_or_create(
+            name=period_name,
+            defaults={"status": "active"},
+        )
+        _PERIOD_CACHE[period_name] = period
 
     section_columns = _get_table_columns("section")
+    section_key = (
+        course.course_id,
+        period.period_id,
+        section_code or "",
+        teacher.teacher_id if teacher else None,
+    )
+    cached_section = _SECTION_CACHE.get(section_key)
+    if cached_section:
+        return cached_section
+
     if "name" in section_columns:
         with connection.cursor() as cursor:
             where_sql = """
@@ -390,7 +653,9 @@ def _get_or_create_workload_section(
             )
             existing = cursor.fetchone()
             if existing:
-                return Section.objects.get(section_id=existing[0])
+                section = Section.objects.get(section_id=existing[0])
+                _SECTION_CACHE[section_key] = section
+                return section
 
             insert_columns = ["course_id", "period_id", "section_code", "status", "name"]
             insert_values = ["%s", "%s", "%s", "%s", "%s"]
@@ -432,7 +697,9 @@ def _get_or_create_workload_section(
                 insert_params,
             )
             section_id = cursor.fetchone()[0]
-        return Section.objects.get(section_id=section_id)
+        section = Section.objects.get(section_id=section_id)
+        _SECTION_CACHE[section_key] = section
+        return section
 
     section, _ = Section.objects.get_or_create(
         course=course,
@@ -443,6 +710,7 @@ def _get_or_create_workload_section(
             "status": "active",
         },
     )
+    _SECTION_CACHE[section_key] = section
     return section
 
 
@@ -467,20 +735,25 @@ def _insert_comment_text(section: Section | None, text: str) -> None:
     if "text" not in columns:
         return
 
-    where = ['"text" = %s']
-    params = [text]
-    if "section_id" in columns and section:
-        where.append('"section_id" = %s')
-        params.append(section.section_id)
+    section_id = section.section_id if section and "section_id" in columns else None
+    if section_id not in _COMMENT_SECTIONS_LOADED:
+        with connection.cursor() as cursor:
+            if "section_id" in columns:
+                if section_id is None:
+                    cursor.execute('SELECT "text" FROM "comment" WHERE "section_id" IS NULL')
+                else:
+                    cursor.execute('SELECT "text" FROM "comment" WHERE "section_id" = %s', [section_id])
+            else:
+                cursor.execute('SELECT "text" FROM "comment"')
+            for (existing_text,) in cursor.fetchall():
+                _COMMENT_CACHE.add((section_id, existing_text))
+        _COMMENT_SECTIONS_LOADED.add(section_id)
+
+    comment_key = (section_id, text)
+    if comment_key in _COMMENT_CACHE:
+        return
 
     with connection.cursor() as cursor:
-        cursor.execute(
-            f'SELECT 1 FROM "comment" WHERE {" AND ".join(where)} LIMIT 1',
-            params,
-        )
-        if cursor.fetchone():
-            return
-
         insert_columns = ['"text"']
         insert_values = ["%s"]
         insert_params = [text]
@@ -506,6 +779,7 @@ def _insert_comment_text(section: Section | None, text: str) -> None:
             f'INSERT INTO "comment" ({", ".join(insert_columns)}) VALUES ({", ".join(insert_values)})',
             insert_params,
         )
+    _COMMENT_CACHE.add(comment_key)
 
 
 def _persist_student_comment(teacher: Teacher, row: dict) -> None:
@@ -575,23 +849,58 @@ def _persist_domain_row(category: str, row: dict) -> Teacher:
         )
     elif category == "encuestas":
         course, section = _resolve_survey_course_and_section(row)
-        survey, _ = TeacherStudentSurvey.objects.update_or_create(
-            teacher=teacher,
-            course=course,
-            section=section or None,
-            author=row["autor"],
-            opinion=row["opinion"],
-            opinion_date=row.get("fecha_opinion") or None,
-            defaults={
-                "rating": row["calificacion"],
-                "status": "active",
-            },
+        opinion_date = row.get("fecha_opinion") or None
+        survey_key = _survey_cache_key(
+            teacher,
+            course,
+            section,
+            row["autor"],
+            row["opinion"],
+            opinion_date,
         )
+        survey = _STUDENT_SURVEY_CACHE.get(survey_key)
+        if not survey:
+            filters = {
+                "teacher": teacher,
+                "course": course,
+                "section": section or None,
+                "author": row["autor"],
+                "opinion": row["opinion"],
+            }
+            if opinion_date:
+                filters["opinion_date"] = opinion_date
+            else:
+                filters["opinion_date__isnull"] = True
+
+            survey = TeacherStudentSurvey.objects.filter(**filters).first()
+            if not survey:
+                survey = TeacherStudentSurvey.objects.create(
+                    teacher=teacher,
+                    course=course,
+                    section=section or None,
+                    author=row["autor"],
+                    opinion=row["opinion"],
+                    rating=row["calificacion"],
+                    opinion_date=opinion_date,
+                    status="active",
+                )
+            _STUDENT_SURVEY_CACHE[survey_key] = survey
+
+        if survey:
+            updated_fields = []
+            if survey.rating != row["calificacion"]:
+                survey.rating = row["calificacion"]
+                updated_fields.append("rating")
+            if survey.status != "active":
+                survey.status = "active"
+                updated_fields.append("status")
+            if updated_fields:
+                survey.updated_at = timezone.now()
+                updated_fields.append("updated_at")
+                survey.save(update_fields=updated_fields)
+
         if course:
-            TeacherCourse.objects.get_or_create(
-                teacher=teacher,
-                course=course,
-            )
+            _ensure_teacher_course(teacher, course)
         if row["autor"] == "Sistema de evaluación estudiantil":
             _sync_pending_comment_ratings(teacher, course, section or None, survey.rating)
         elif row["autor"] == "Estudiante":
@@ -767,7 +1076,7 @@ def _validate_row(category: str, row: dict) -> tuple[bool, str, dict]:
 
 
 def _create_batch(category: str, filename: str, extension: str, total_rows: int) -> BulkUploadBatch:
-    return BulkUploadBatch.objects.create(
+    batch = BulkUploadBatch.objects.create(
         category=category,
         source_filename=filename,
         source_extension=extension,
@@ -775,6 +1084,8 @@ def _create_batch(category: str, filename: str, extension: str, total_rows: int)
         total_rows=total_rows,
         summary={},
     )
+    batch._record_buffer = []
+    return batch
 
 
 def _save_batch_record(
@@ -785,7 +1096,7 @@ def _save_batch_record(
     normalized_data: dict | None = None,
     error_message: str = "",
 ):
-    BulkUploadRecord.objects.create(
+    record = BulkUploadRecord(
         batch=batch,
         row_number=row_number,
         status=status,
@@ -793,6 +1104,18 @@ def _save_batch_record(
         normalized_data=normalized_data or {},
         error_message=error_message,
     )
+    record_buffer = getattr(batch, "_record_buffer", None)
+    if record_buffer is None:
+        record.save()
+    else:
+        record_buffer.append(record)
+
+
+def _flush_batch_records(batch: BulkUploadBatch) -> None:
+    record_buffer = getattr(batch, "_record_buffer", None)
+    if record_buffer:
+        BulkUploadRecord.objects.bulk_create(record_buffer)
+        batch._record_buffer = []
 
 
 def _finalize_batch(
@@ -802,6 +1125,8 @@ def _finalize_batch(
     errors: list[dict],
     teacher_ids: set[int],
 ):
+    _flush_batch_records(batch)
+
     if invalid_rows > 0:
         batch.status = "processed_with_errors"
     batch.valid_rows = valid_rows
@@ -1023,6 +1348,9 @@ def _process_evaluacion_docente_descriptor(descriptor: dict) -> dict:
     invalid_rows = 0
     errors = []
     teacher_ids = set()
+    survey_creates = []
+    survey_updates = []
+    pending_rating_syncs = []
 
     for fallback_row_number, raw_row in enumerate(rows, start=2):
         row_number = raw_row.get("__source_row_number", fallback_row_number)
@@ -1057,7 +1385,64 @@ def _process_evaluacion_docente_descriptor(descriptor: dict) -> dict:
         }
 
         try:
-            teacher = _persist_domain_row("encuestas", survey_row)
+            teacher = _get_or_create_teacher(survey_row)
+            course, section_code = _resolve_survey_course_and_section(survey_row)
+            if course:
+                _ensure_teacher_course(teacher, course)
+
+            opinion_date = survey_row.get("fecha_opinion") or None
+            survey_key = _survey_cache_key(
+                teacher,
+                course,
+                section_code,
+                "Sistema de evaluación estudiantil",
+                survey_row["opinion"],
+                opinion_date,
+            )
+            survey = _STUDENT_SURVEY_CACHE.get(survey_key)
+            if not survey:
+                filters = {
+                    "teacher": teacher,
+                    "course": course,
+                    "section": section_code or None,
+                    "author": "Sistema de evaluación estudiantil",
+                    "opinion": survey_row["opinion"],
+                }
+                if opinion_date:
+                    filters["opinion_date"] = opinion_date
+                else:
+                    filters["opinion_date__isnull"] = True
+                survey = TeacherStudentSurvey.objects.filter(**filters).first()
+
+            if survey:
+                updated_fields = False
+                if survey.rating != rating:
+                    survey.rating = rating
+                    updated_fields = True
+                if survey.status != "active":
+                    survey.status = "active"
+                    updated_fields = True
+                if updated_fields:
+                    survey.updated_at = timezone.now()
+                    survey_updates.append(survey)
+                _STUDENT_SURVEY_CACHE[survey_key] = survey
+            else:
+                survey = TeacherStudentSurvey(
+                    teacher=teacher,
+                    course=course,
+                    section=section_code or None,
+                    author="Sistema de evaluación estudiantil",
+                    opinion=survey_row["opinion"],
+                    rating=rating,
+                    opinion_date=opinion_date,
+                    status="active",
+                )
+                survey_creates.append(survey)
+                _STUDENT_SURVEY_CACHE[survey_key] = survey
+
+            if course and rating is not None:
+                pending_rating_syncs.append((teacher.teacher_id, course.course_id, section_code or "", rating))
+
             teacher_ids.add(teacher.teacher_id)
             valid_rows += 1
             _save_batch_record(batch, row_number, "valid", row, survey_row, "")
@@ -1066,6 +1451,12 @@ def _process_evaluacion_docente_descriptor(descriptor: dict) -> dict:
             error_message = f"No se pudo persistir en tablas de dominio: {str(exc)}"
             errors.append({"row_number": row_number, "error": error_message})
             _save_batch_record(batch, row_number, "invalid", row, {}, error_message)
+
+    if survey_creates:
+        TeacherStudentSurvey.objects.bulk_create(survey_creates)
+    if survey_updates:
+        TeacherStudentSurvey.objects.bulk_update(survey_updates, ["rating", "status", "updated_at"])
+    _bulk_sync_pending_comment_ratings(pending_rating_syncs)
 
     _finalize_batch(batch, valid_rows, invalid_rows, errors, teacher_ids)
     return {
@@ -1090,6 +1481,11 @@ def _process_comentarios_descriptor(descriptor: dict, evaluation_context: dict) 
     errors = []
     teacher_ids = set()
     current_block = None
+    survey_creates = []
+    comment_creates = []
+    survey_updates = []
+    survey_scope_cache = {}
+    now = timezone.now()
 
     for fallback_row_number, raw_row in enumerate(rows, start=2):
         row_number = raw_row.get("__source_row_number", fallback_row_number)
@@ -1137,7 +1533,83 @@ def _process_comentarios_descriptor(descriptor: dict, evaluation_context: dict) 
         }
 
         try:
-            teacher = _persist_domain_row("encuestas", survey_row)
+            teacher = _get_or_create_teacher(survey_row)
+            course, section_code = _resolve_survey_course_and_section(survey_row)
+            section = _get_or_create_workload_section(course, section_code, teacher)
+            if course:
+                _ensure_teacher_course(teacher, course)
+
+            opinion_date = survey_row.get("fecha_opinion") or None
+            survey_scope_key = (
+                teacher.teacher_id,
+                course.course_id if course else None,
+                section_code or "",
+                "Estudiante",
+                opinion_date or "",
+            )
+            existing_opinions = survey_scope_cache.get(survey_scope_key)
+            if existing_opinions is None:
+                filters = {
+                    "teacher": teacher,
+                    "course": course,
+                    "section": section_code or None,
+                    "author": "Estudiante",
+                }
+                if opinion_date:
+                    filters["opinion_date"] = opinion_date
+                else:
+                    filters["opinion_date__isnull"] = True
+                existing_opinions = {
+                    opinion
+                    for opinion in TeacherStudentSurvey.objects.filter(**filters).values_list("opinion", flat=True)
+                }
+                survey_scope_cache[survey_scope_key] = existing_opinions
+
+            survey_key = _survey_cache_key(teacher, course, section_code, "Estudiante", comment, opinion_date)
+            existing_survey = _STUDENT_SURVEY_CACHE.get(survey_key)
+            if existing_survey and existing_survey.rating != rating:
+                existing_survey.rating = rating
+                existing_survey.status = "active"
+                existing_survey.updated_at = now
+                survey_updates.append(existing_survey)
+            elif comment not in existing_opinions:
+                survey = TeacherStudentSurvey(
+                    teacher=teacher,
+                    course=course,
+                    section=section_code or None,
+                    author="Estudiante",
+                    opinion=comment,
+                    rating=rating,
+                    opinion_date=opinion_date,
+                    status="active",
+                )
+                survey_creates.append(survey)
+                _STUDENT_SURVEY_CACHE[survey_key] = survey
+                existing_opinions.add(comment)
+
+            columns = _get_comment_table_columns()
+            if "text" in columns and section:
+                section_id = section.section_id
+                if section_id not in _COMMENT_SECTIONS_LOADED:
+                    with connection.cursor() as cursor:
+                        cursor.execute('SELECT "text" FROM "comment" WHERE "section_id" = %s', [section_id])
+                        for (existing_text,) in cursor.fetchall():
+                            _COMMENT_CACHE.add((section_id, existing_text))
+                    _COMMENT_SECTIONS_LOADED.add(section_id)
+
+                comment_key = (section_id, comment)
+                if comment_key not in _COMMENT_CACHE:
+                    comment_creates.append(
+                        Comment(
+                            section=section,
+                            text=comment,
+                            sentiment_type="pending_analysis",
+                            is_true_sentiment=False,
+                            created_at=now,
+                        )
+                    )
+                    _COMMENT_CACHE.add(comment_key)
+
             teacher_ids.add(teacher.teacher_id)
             valid_rows += 1
             _save_batch_record(
@@ -1153,6 +1625,13 @@ def _process_comentarios_descriptor(descriptor: dict, evaluation_context: dict) 
             error_message = f"No se pudo persistir en tablas de dominio: {str(exc)}"
             errors.append({"row_number": row_number, "error": error_message})
             _save_batch_record(batch, row_number, "invalid", row, {}, error_message)
+
+    if survey_creates:
+        TeacherStudentSurvey.objects.bulk_create(survey_creates)
+    if survey_updates:
+        TeacherStudentSurvey.objects.bulk_update(survey_updates, ["rating", "status", "updated_at"])
+    if comment_creates:
+        Comment.objects.bulk_create(comment_creates)
 
     _finalize_batch(batch, valid_rows, invalid_rows, errors, teacher_ids)
     return {
@@ -1171,14 +1650,7 @@ def _process_file(category: str, file_obj) -> tuple[BulkUploadBatch, dict]:
     extension = f".{filename.split('.')[-1].lower()}" if "." in filename else ""
     raw_rows = _parse_file_rows(file_obj, extension)
 
-    batch = BulkUploadBatch.objects.create(
-        category=category,
-        source_filename=filename,
-        source_extension=extension,
-        status="processed",
-        total_rows=len(raw_rows),
-        summary={},
-    )
+    batch = _create_batch(category, filename, extension, len(raw_rows))
 
     valid_rows = 0
     invalid_rows = 0
@@ -1213,15 +1685,9 @@ def _process_file(category: str, file_obj) -> tuple[BulkUploadBatch, dict]:
             error_to_save = error_message
             errors.append({"row_number": row_number, "error": error_message})
 
-        BulkUploadRecord.objects.create(
-            batch=batch,
-            row_number=row_number,
-            status=status,
-            raw_data=normalized_row,
-            normalized_data=normalized_data,
-            error_message=error_to_save,
-        )
+        _save_batch_record(batch, row_number, status, normalized_row, normalized_data, error_to_save)
 
+    _flush_batch_records(batch)
     batch.valid_rows = valid_rows
     batch.invalid_rows = invalid_rows
     if invalid_rows > 0:
@@ -1339,6 +1805,8 @@ def _process_single_descriptor(category: str, descriptor: dict) -> dict:
 
 
 def process_bulk_upload(category: str, files) -> dict:
+    _reset_request_caches()
+
     if category not in ALLOWED_CATEGORIES and category not in GROUP_CATEGORIES:
         raise BulkUploadServiceError(
             "Categoria invalida. Usa: titulos, meritos, opiniones, encuestas, credenciales o evaluaciones."
@@ -1348,6 +1816,7 @@ def process_bulk_upload(category: str, files) -> dict:
         raise BulkUploadServiceError("No se recibieron archivos.")
 
     descriptors = [_build_file_descriptor(file_obj) for file_obj in files]
+    _preload_descriptor_lookups(descriptors)
     results = []
 
     if category in GROUP_CATEGORIES:
