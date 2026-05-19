@@ -147,14 +147,18 @@
   white-space: nowrap;
 }
 
-.adp-user-role, .adp-system-name {
+.adp-user-role, .adp-faculty-tag {
   color: rgba(255, 255, 255, 0.5);
   font-size: 10px;
   line-height: 1.2;
 }
 
-.adp-system-name {
-  margin-top: 1px;
+.adp-faculty-tag {
+  margin-top: 3px;
+  color: var(--url-gold-pale);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .adp-profile-actions {

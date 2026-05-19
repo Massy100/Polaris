@@ -24,6 +24,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('pending');
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
+  const [pendingRoles, setPendingRoles] = useState<Record<number, string>>({});
   
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -303,11 +304,29 @@ export default function ProfilePage() {
                           <tr key={req.vault_id}>
                             <td>{req.full_identity_name}</td>
                             <td>{req.email}</td>
-                            <td>{ROLE_LABELS[req.access_level] || req.access_level}</td>
+                            <td>
+                              {activeTab === 'pending' ? (
+                                <select 
+                                  className="url-input-sm"
+                                  value={pendingRoles[req.vault_id] || 'STAFF_COORDINATOR'}
+                                  onChange={(e) => setPendingRoles({...pendingRoles, [req.vault_id]: e.target.value})}
+                                >
+                                  <option value="STAFF_COORDINATOR">Coordinador</option>
+                                  <option value="GATEKEEPER_ADMIN">Administrador</option>
+                                </select>
+                              ) : (
+                                ROLE_LABELS[req.access_level] || req.access_level
+                              )}
+                            </td>
                             <td>
                               {activeTab === 'pending' && (
                                 <div className="action-btns">
-                                  <button className="url-btn-sm url-btn-primary" onClick={() => handleAction(req.vault_id, 'grant-entry', 'STAFF_COORDINATOR')}>Aceptar</button>
+                                  <button 
+                                    className="url-btn-sm url-btn-primary" 
+                                    onClick={() => handleAction(req.vault_id, 'grant-entry', pendingRoles[req.vault_id] || 'STAFF_COORDINATOR')}
+                                  >
+                                    Aceptar
+                                  </button>
                                   <button className="url-btn-sm url-btn-danger" onClick={() => handleAction(req.vault_id, 'deny-entry')}>Rechazar</button>
                                 </div>
                               )}

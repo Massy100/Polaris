@@ -431,6 +431,27 @@
   animation: url-toast-in 0.24s var(--url-ease);
 }
 
+.url-input-sm {
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: var(--url-radius-sm);
+  border: 1px solid var(--url-border-soft);
+  background: var(--url-surface);
+  color: var(--url-navy);
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--url-transition);
+}
+
+.url-input-sm:hover {
+  border-color: var(--url-navy-light);
+}
+
+.url-input-sm:focus {
+  border-color: var(--url-navy);
+}
+
 .profile-selector {
   background: var(--url-white);
   border: 1px solid var(--url-border-soft);

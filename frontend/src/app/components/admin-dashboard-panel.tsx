@@ -2,7 +2,7 @@
 
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth, useUser } from '@clerk/nextjs';
 import '../styles/admin-dashboard-panel.css';
 
 type IconProps = React.SVGProps<SVGSVGElement>;
@@ -65,7 +65,8 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
   onNavigate,
   onLogout,
 }) => {
-  const { signOut, user: clerkUser } = useAuth() as any;
+  const { signOut } = useAuth();
+  const { user: clerkUser } = useUser();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -81,18 +82,32 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
   useEffect(() => {
     setIsMounted(true);
     const fetchVaultIdentity = async () => {
+      if (!clerkUser) return;
+      
+      const email = clerkUser.emailAddresses[0]?.email_address || '';
+      const fullName = clerkUser.fullName || '';
+
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/access-vault/identity/`, {
-          headers: { 'X-Clerk-ID': clerkUser?.id || '' }
+          headers: { 
+            'X-Clerk-ID': clerkUser.id,
+            'X-Clerk-Email': email,
+            'X-Clerk-Name': fullName
+          }
         });
         if (res.ok) {
           const data = await res.json();
           setVaultData(data);
         }
-      } catch (e) { console.error(e); }
+      } catch (e) { 
+        console.error("Error fetching vault identity:", e); 
+      }
     };
-    if (clerkUser?.id) fetchVaultIdentity();
-  }, [clerkUser?.id]);
+    
+    if (clerkUser) {
+      fetchVaultIdentity();
+    }
+  }, [clerkUser]);
 
   const handleNavigation = (path: string) => {
     setIsHovered(false);
@@ -105,8 +120,9 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
 
   const handleLogout = async (): Promise<void> => {
     try {
-      await signOut({ redirectUrl: '/sign-in' });
+      await signOut();
       onLogout?.();
+      router.push('/sign-in');
     } catch (error) {
       console.error("Error cerrando sesión:", error);
       router.push('/sign-in');
@@ -116,9 +132,13 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
   if (!isMounted) return null;
 
   const displayName = vaultData?.identity?.full_identity_name || clerkUser?.fullName || 'Usuario';
-  const displayRole = vaultData?.identity?.access_level === 'GATEKEEPER_ADMIN' ? 'Administrador Maestro' : 'Coordinador de Staff';
-  const displayDept = vaultData?.profile?.org_unit || 'Facultad de Ingeniería';
-  const initials = displayName.split(' ').map((n: any) => n[0]).join('').substring(0, 2).toUpperCase();
+  const roleMap: Record<string, string> = {
+    'GATEKEEPER_ADMIN': 'Administrador',
+    'STAFF_COORDINATOR': 'Coordinador'
+  };
+  const displayRole = roleMap[vaultData?.identity?.access_level] || 'Cargando rol...';
+  const displayFaculty = vaultData?.profile?.org_unit || 'Facultad no asignada';
+  const initials = displayName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase();
 
   return (
     <>
@@ -147,7 +167,7 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
                 <div className={`adp-user-details adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
                   <span className="adp-user-name">{displayName}</span>
                   <span className="adp-user-role">{displayRole}</span>
-                  <span className="adp-system-name">{displayDept}</span>
+                  <span className="adp-faculty-tag">{displayFaculty}</span>
                 </div>
               </div>
 
