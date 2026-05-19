@@ -2,7 +2,6 @@ import { test, expect, Page, Locator } from '@playwright/test';
 import path from 'path';
 
 test.use({
-    storageState: 'tests/.auth/user.json',
     acceptDownloads: true,
 });
 
