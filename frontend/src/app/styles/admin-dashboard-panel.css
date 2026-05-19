@@ -4,21 +4,17 @@
   height: 100vh;
 }
 
-.adp-spacer--pinned {
-  width: 280px;
-}
-
-.adp-spacer--collapsed {
-  width: 88px;
+.adp-spacer--fixed {
+  width: 300px;
 }
 
 .adp-pill-container {
   position: fixed;
   top: 50%;
-  left: 16px;
+  left: 20px;
   transform: translateY(-50%);
   background: linear-gradient(135deg, var(--url-navy) 0%, var(--url-navy-dark) 100%);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--url-shadow-lg);
   display: flex;
   flex-direction: column;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -28,54 +24,59 @@
   overflow: hidden;
 }
 
-.adp-pill--collapsed {
-  width: 72px;
-  border-radius: 36px;
-  padding: 16px 12px;
-  max-height: 96vh;
-  align-items: center;
-  height: fit-content;
-}
-
-.adp-pill--expanded {
+.adp-pill--fixed {
   width: 260px;
-  border-radius: 20px;
-  padding: 0 0 16px 0;
-  max-height: 96vh;
+  border-radius: 24px;
+  padding: 0;
+  max-height: 94vh;
   align-items: stretch;
   height: fit-content;
 }
 
+.adp-sidebar-scroll-area {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 94vh;
+  overflow-y: auto;
+  padding-bottom: 20px;
+}
+
+/* Estilos de la barra de desplazamiento para el sidebar */
+.adp-sidebar-scroll-area::-webkit-scrollbar {
+  width: 4px;
+}
+.adp-sidebar-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+.adp-sidebar-scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
 .adp-header {
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .adp-logo-wrapper {
   width: 100%;
-  padding: 20px 16px 16px 16px;
+  padding: 32px 20px 24px 20px;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 100%);
   box-sizing: border-box;
-  text-align: center;
-}
-
-.adp-pill--collapsed .adp-logo-wrapper {
-  display: none !important;
 }
 
 .adp-institutional-logo {
   object-fit: contain;
   width: auto;
   height: auto;
-  max-width: 100%;
-  max-height: 100px;
-  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
+  max-width: 160px;
+  max-height: 80px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
   transition: transform 0.3s ease;
   display: block;
-  margin: 0 auto;
 }
 
 .adp-brand-card {
@@ -84,54 +85,39 @@
   width: calc(100% - 32px);
   margin: 0 auto;
   border-radius: 16px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 14px 12px;
-}
-
-.adp-pill--collapsed .adp-brand-card {
-  width: 100%;
-  background: transparent;
-  border: none;
-  padding: 0;
+  padding: 16px;
 }
 
 .adp-profile-area {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-
-.adp-pill--expanded .adp-profile-area {
   justify-content: space-between;
+  width: 100%;
 }
 
 .adp-user-profile {
   display: flex;
   align-items: center;
-  gap: 0;
-}
-
-.adp-pill--expanded .adp-user-profile {
-  gap: 10px;
+  gap: 12px;
   justify-content: flex-start;
   flex: 1;
 }
 
 .adp-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
   background: linear-gradient(45deg, var(--url-gold), var(--url-gold-light));
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--url-navy-dark);
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
   flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
 .adp-user-details {
@@ -143,89 +129,61 @@
 .adp-user-name {
   color: var(--url-white);
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   white-space: nowrap;
 }
 
 .adp-user-role, .adp-system-name {
   color: rgba(255, 255, 255, 0.5);
-  font-size: 10px;
-  line-height: 1.2;
+  font-size: 11px;
+  line-height: 1.3;
 }
 
 .adp-system-name {
-  margin-top: 1px;
-}
-
-.adp-profile-actions {
-  display: flex;
-  align-items: center;
-  margin-left: 8px;
-}
-
-.adp-pin-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.6);
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-
-.adp-pin-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-}
-
-.adp-pin-btn--active {
-  background: var(--url-gold) !important;
-  color: var(--url-navy) !important;
+  margin-top: 2px;
+  font-weight: 700;
+  color: var(--url-gold-light);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .adp-nav-list {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  margin: 10px 0 12px 0;
-  flex: 1;
-  padding: 0 12px;
-}
-
-.adp-pill--expanded .adp-nav-list {
   align-items: stretch;
+  gap: 8px;
+  margin: 16px 0;
+  flex: 1;
+  padding: 0 16px;
 }
 
 .adp-item {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   background: transparent;
   border: none;
   border-radius: 12px;
-  width: 44px;
-  height: 44px;
-  color: rgba(255, 255, 255, 0.9);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.adp-pill--expanded .adp-item {
   width: 100%;
-  justify-content: flex-start;
-  padding: 0 12px;
+  height: 48px;
+  padding: 0 14px;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
 .adp-item:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
+  transform: translateX(4px);
 }
 
 .adp-item--active {
-  background: rgba(255, 255, 255, 0.15);
-  color: var(--url-gold-pale);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--url-gold-light);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .adp-item--active::before {
@@ -234,7 +192,7 @@
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  height: 20px;
+  height: 24px;
   width: 4px;
   background: var(--url-gold);
   border-radius: 0 4px 4px 0;
@@ -249,150 +207,115 @@
 }
 
 .adp-text {
-  opacity: 0;
-  max-width: 0;
   overflow: hidden;
   white-space: nowrap;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--url-white);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.adp-pill--expanded .adp-text {
-  opacity: 1;
-  max-width: 200px;
-}
-
-.adp-pill--expanded .adp-item .adp-text {
-  margin-left: 12px;
-}
-
-.adp-item .adp-text {
-  color: #ffffff;
-}
-
-.adp-item--active .adp-text {
-  color: var(--url-gold-pale);
+  font-size: 14.5px;
+  font-weight: 500;
+  color: inherit;
+  margin-left: 14px;
 }
 
 .adp-actions-bottom {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  margin: 0 12px;
-  padding: 8px 0;
-  flex-shrink: 0;
-}
-
-.adp-pill--expanded .adp-actions-bottom {
-  padding: 10px 4px;
   align-items: stretch;
-}
-
-.adp-actions-bottom .adp-item {
-  color: rgba(255, 255, 255, 0.45);
-}
-
-.adp-actions-bottom .adp-item .adp-text {
-  color: rgba(255, 255, 255, 0.45);
-}
-
-.adp-actions-bottom .adp-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
-}
-
-.adp-actions-bottom .adp-item:hover .adp-text {
-  color: #ffffff;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: auto;
+  padding: 16px;
 }
 
 .adp-divider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.08);
-  margin: 6px 8px;
-  width: auto;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 8px 0;
+  width: 100%;
 }
 
-.adp-item-logout,
-.adp-item-logout .adp-text {
-  color: rgba(255, 107, 107, 0.6) !important;
-  font-weight: 600;
+.adp-item-logout {
+  color: #ff8787 !important;
+  opacity: 0.8;
 }
 
 .adp-item-logout:hover {
-  background: rgba(255, 107, 107, 0.15) !important;
-  color: #ff8787 !important;
+  background: rgba(255, 135, 135, 0.1) !important;
+  opacity: 1;
 }
 
-.adp-item-logout:hover .adp-text {
-  color: #ff8787 !important;
+/* Mobile Hamburger and Drawer */
+.adp-mobile-hamburger {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1100;
+  background: var(--url-navy);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--url-shadow-md);
+  transition: all 0.2s ease;
 }
 
-@media (max-width: 768px) {
+.adp-mobile-hamburger:active {
+  transform: scale(0.95);
+}
+
+.adp-mobile-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  animation: url-fade-in 0.3s ease;
+}
+
+@media (max-width: 1100px) {
+  .adp-spacer--fixed {
+    width: 0 !important;
+  }
+  
   .adp-layout-spacer {
     display: none !important;
   }
-  
-  .adp-pill-container,
-  .adp-pill--expanded,
-  .adp-pill--collapsed {
-    top: auto !important;
-    bottom: 16px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    flex-direction: row !important;
-    width: 94% !important;
-    max-width: 450px !important;
-    height: 64px !important;
-    border-radius: 32px !important;
-    padding: 0 16px !important;
-    align-items: center !important;
+
+  .adp-mobile-hamburger {
+    display: flex;
   }
 
-  .adp-header, 
-  .adp-logo-wrapper, 
-  .adp-text, 
-  .adp-divider,
-  .adp-hide-mobile {
-    display: none !important;
+  .adp-pill-container {
+    left: -320px;
+    top: 0;
+    bottom: 0;
+    transform: none;
+    border-radius: 0 24px 24px 0;
+    height: 100vh;
+    max-height: 100vh;
+    width: 280px;
+    border-left: none;
   }
 
-  .adp-actions-bottom {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    flex-direction: row !important;
-    width: auto !important;
+  .adp-pill--mobile-open {
+    left: 0;
+    box-shadow: 20px 0 50px rgba(0,0,0,0.5);
   }
 
-  .adp-nav-list {
-    flex-direction: row !important;
-    justify-content: space-around !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
+  .adp-mobile-overlay {
+    display: block;
   }
 
-  .adp-item {
-    width: auto !important;
-    padding: 10px !important;
-    justify-content: center !important;
-  }
-
-  .adp-item--active::before {
-    left: 50% !important;
-    top: auto !important;
-    bottom: -6px !important;
-    transform: translateX(-50%) !important;
-    height: 4px !important;
-    width: 20px !important;
-    border-radius: 4px 4px 0 0 !important;
+  .adp-sidebar-scroll-area {
+    max-height: 100vh;
+    padding-top: 80px;
   }
 }

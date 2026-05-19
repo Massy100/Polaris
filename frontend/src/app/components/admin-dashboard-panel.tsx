@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import Image from 'next/image';
 import '../styles/admin-dashboard-panel.css';
 
 type IconProps = React.SVGProps<SVGSVGElement>;
@@ -41,6 +42,12 @@ const Icons = {
   Eye: (props: IconProps) => (
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
   ),
+  Menu: (props: IconProps) => (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  ),
+  X: (props: IconProps) => (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  ),
 };
 
 const navItems = [
@@ -50,7 +57,7 @@ const navItems = [
   { id: 4, label: 'Observaciones',         icon: 'Eye',           path: '/observations' },
   { id: 5, label: 'Alertas de Desempeño',  icon: 'AlertTriangle', path: '/performance-alert' },
   { id: 6, label: 'Cursos Históricos',     icon: 'History',       path: '/history-view' },
-  { id: 7, label: 'Carga Masiva',          icon: 'Upload',        path: '/pensum' },
+  { id: 7, label: 'Carga Masiva',          icon: 'Upload',        path: '/bulk-upload' },
 ];
 
 interface AdminDashboardPanelProps {
@@ -72,18 +79,15 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
 
   const activePath = propActivePath || pathname;
 
-  const [isHovered, setIsHovered] = useState(false);
-  const [isPinned, setIsPinned] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-
-  const isExpanded = isHovered || isPinned;
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
   const handleNavigation = (path: string) => {
-    setIsHovered(false);
+    setIsMobileMenuOpen(false);
     if (onNavigate) {
       onNavigate(path);
     } else {
@@ -107,79 +111,88 @@ const AdminDashboardPanel: React.FC<AdminDashboardPanelProps> = ({
 
   return (
     <>
-      <div className={`adp-layout-spacer ${isPinned ? 'adp-spacer--pinned' : 'adp-spacer--collapsed'}`} />
+      <button 
+        className="adp-mobile-hamburger"
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+      >
+        {isMobileMenuOpen ? <Icons.X /> : <Icons.Menu />}
+      </button>
+
+      {isMobileMenuOpen && (
+        <div 
+          className="adp-mobile-overlay"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      <div className="adp-layout-spacer adp-spacer--fixed" />
 
       <nav
-        className={`adp-pill-container ${isExpanded ? 'adp-pill--expanded' : 'adp-pill--collapsed'}`}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        className={`adp-pill-container adp-pill--fixed ${isMobileMenuOpen ? 'adp-pill--mobile-open' : ''}`}
       >
-        <div className="adp-header">
-          <div className={`adp-logo-wrapper adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
-            <img
-              src="/icon.png"
-              alt="Logo Landívar"
-              className="adp-institutional-logo"
-            />
-          </div>
+        <div className="adp-sidebar-scroll-area">
+          <div className="adp-header">
+            <div className="adp-logo-wrapper adp-text--visible">
+              <Image
+                src="/login-logo.png"
+                alt="Logo Polaris"
+                width={160}
+                height={80}
+                priority
+                className="adp-institutional-logo"
+                style={{ height: 'auto', width: 'auto' }}
+              />
+            </div>
 
-          <div className="adp-brand-card">
-            <div className="adp-profile-area">
-              <div className="adp-user-profile">
-                <div className="adp-avatar">
-                  <span>{initials}</span>
+            <div className="adp-brand-card">
+              <div className="adp-profile-area">
+                <div className="adp-user-profile">
+                  <div className="adp-avatar">
+                    <span>{initials}</span>
+                  </div>
+                  <div className="adp-user-details adp-text--visible">
+                    <span className="adp-user-name">{userName}</span>
+                    <span className="adp-user-role">Facultad de Ingeniería</span>
+                    <span className="adp-system-name">SGA Polaris</span>
+                  </div>
                 </div>
-                <div className={`adp-user-details adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
-                  <span className="adp-user-name">{userName}</span>
-                  <span className="adp-user-role">Facultad de Ingeniería</span>
-                  <span className="adp-system-name">SGA Polaris</span>
-                </div>
-              </div>
-
-              <div className={`adp-profile-actions adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>
-                <button
-                  className={`adp-pin-btn ${isPinned ? 'adp-pin-btn--active' : ''}`}
-                  onClick={() => setIsPinned(!isPinned)}
-                >
-                  <Icons.Pin />
-                </button>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="adp-nav-list">
-          {navItems.map((item) => {
-            const Icon = Icons[item.icon as keyof typeof Icons];
-            const isActive = activePath === item.path;
-            return (
-              <button
-                key={item.id}
-                className={`adp-item ${isActive ? 'adp-item--active' : ''}`}
-                onClick={() => handleNavigation(item.path)}
-              >
-                <span className="adp-item-icon"><Icon /></span>
-                <span className={`adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
+          <div className="adp-nav-list">
+            {navItems.map((item) => {
+              const Icon = Icons[item.icon as keyof typeof Icons];
+              const isActive = activePath === item.path;
+              return (
+                <button
+                  key={item.id}
+                  className={`adp-item ${isActive ? 'adp-item--active' : ''}`}
+                  onClick={() => handleNavigation(item.path)}
+                >
+                  <span className="adp-item-icon"><Icon /></span>
+                  <span className="adp-text adp-text--visible">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
 
-        <div className="adp-actions-bottom">
-          <button
-            className={`adp-item adp-hide-mobile ${activePath === '/settings' ? 'adp-item--active' : ''}`}
-            onClick={() => handleNavigation('/settings')}
-          >
-            <span className="adp-item-icon"><Icons.Settings /></span>
-            <span className={`adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>Configuración</span>
-          </button>
+          <div className="adp-actions-bottom">
+            <button
+              className={`adp-item ${activePath === '/settings' ? 'adp-item--active' : ''}`}
+              onClick={() => handleNavigation('/settings')}
+            >
+              <span className="adp-item-icon"><Icons.Settings /></span>
+              <span className="adp-text adp-text--visible">Configuración</span>
+            </button>
 
-          <div className="adp-divider adp-hide-mobile" />
+            <div className="adp-divider" />
 
-          <button className="adp-item adp-item-logout adp-hide-mobile" onClick={handleLogout}>
-            <span className="adp-item-icon"><Icons.LogOut /></span>
-            <span className={`adp-text ${isExpanded ? 'adp-text--visible' : ''}`}>Cerrar Sesión</span>
-          </button>
+            <button className="adp-item adp-item-logout" onClick={handleLogout}>
+              <span className="adp-item-icon"><Icons.LogOut /></span>
+              <span className="adp-text adp-text--visible">Cerrar Sesión</span>
+            </button>
+          </div>
         </div>
       </nav>
     </>
