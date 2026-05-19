@@ -372,8 +372,13 @@ export default function BulkUploadPage() {
         throw new Error(data.message || 'No se pudo guardar la carga masiva.');
       }
 
-      showToast(`${upload.length} archivo(s) guardado(s) correctamente`, true);
-      setUploads((previous) => ({ ...previous, [activeTab]: [] }));
+      const hasProcessingErrors = Number(data.invalid_rows || 0) > 0 || Number(data.ignored_files || 0) > 0;
+      const successMessage = data.message || `${upload.length} archivo(s) guardado(s) correctamente`;
+
+      showToast(successMessage, !hasProcessingErrors);
+      if (!hasProcessingErrors) {
+        setUploads((previous) => ({ ...previous, [activeTab]: [] }));
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No se pudo guardar la carga masiva.';
       showToast(message, false);
